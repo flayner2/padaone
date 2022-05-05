@@ -1,7 +1,7 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
-import { Box, SimpleGrid } from '@chakra-ui/react';
+import { Box, SimpleGrid, Text } from '@chakra-ui/react';
 
 const Home: NextPage = () => {
   return (
@@ -13,13 +13,20 @@ const Home: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
-        <Box borderWidth="1px" overflow="hidden" height="100vh" width="100%">
+        <Box borderWidth="1px" overflow="hidden" height="100%" width="60%">
+          <Box width="100%" bgGradient="linear(to-b, #1e6ea6 0%, #94c5e3 100%)">
+            <Text textTransform="uppercase" color="#fff" fontWeight="bold">
+              Start your search here
+            </Text>
+          </Box>
+
           <SimpleGrid columns={2} spacing={10}>
-            <Box bg="tomato" height="80px"></Box>
-            <Box bg="tomato" height="80px"></Box>
-            <Box bg="tomato" height="80px"></Box>
-            <Box bg="tomato" height="80px"></Box>
-            <Box bg="tomato" height="80px"></Box>
+            <Box bg="tomato" height="15vh"></Box>
+            <Box bg="tomato" height="15vh"></Box>
+            <Box bg="tomato" height="15vh"></Box>
+            <Box bg="tomato" height="15vh"></Box>
+            <Box bg="tomato" height="15vh"></Box>
+            <Box bg="tomato" height="15vh"></Box>
           </SimpleGrid>
         </Box>
       </main>
