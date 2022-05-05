@@ -1,8 +1,7 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
-import { SimpleGrid } from '@chakra-ui/react';
-import WithSubnavigation from '../components/navbar';
+import { Box, SimpleGrid } from '@chakra-ui/react';
 
 const Home: NextPage = () => {
   return (
@@ -13,9 +12,17 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={styles.main}></main>
-
-      <footer className={styles.footer}></footer>
+      <main className={styles.main}>
+        <Box borderWidth="1px" overflow="hidden" height="100vh" width="100%">
+          <SimpleGrid columns={2} spacing={10}>
+            <Box bg="tomato" height="80px"></Box>
+            <Box bg="tomato" height="80px"></Box>
+            <Box bg="tomato" height="80px"></Box>
+            <Box bg="tomato" height="80px"></Box>
+            <Box bg="tomato" height="80px"></Box>
+          </SimpleGrid>
+        </Box>
+      </main>
     </div>
   );
 };
