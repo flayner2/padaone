@@ -73,7 +73,6 @@ export default function WithSubnavigation() {
           spacing={6}
         >
           <LinkButton
-            as={'a'}
             fontSize={'sm'}
             fontWeight={400}
             variant={'link'}
