@@ -44,26 +44,11 @@ const Home: NextPage = () => {
             spacing={10}
           >
             <FilterBox title="Epitope"></FilterBox>
-            <Box
-              bg="tomato"
-              height="15vh"
-            ></Box>
-            <Box
-              bg="tomato"
-              height="15vh"
-            ></Box>
-            <Box
-              bg="tomato"
-              height="15vh"
-            ></Box>
-            <Box
-              bg="tomato"
-              height="15vh"
-            ></Box>
-            <Box
-              bg="tomato"
-              height="15vh"
-            ></Box>
+            <FilterBox title="Assay"></FilterBox>
+            <FilterBox title="Epitope Source"></FilterBox>
+            <FilterBox title="MHC Restriction"></FilterBox>
+            <FilterBox title="Host"></FilterBox>
+            <FilterBox title="Disease"></FilterBox>
           </SimpleGrid>
         </Box>
       </main>
