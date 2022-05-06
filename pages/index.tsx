@@ -43,9 +43,7 @@ const Home: NextPage = () => {
             columns={2}
             spacing={10}
           >
-            <FilterBox>
-              <Text color="#fff">Hi!</Text>
-            </FilterBox>
+            <FilterBox title="Epitope"></FilterBox>
             <Box
               bg="tomato"
               height="15vh"
