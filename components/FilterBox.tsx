@@ -9,7 +9,13 @@ function FilterBox({ title, children, ...props }: Props) {
       bg="tomato"
       {...props}
     >
-      <Text>{title}</Text>
+      <Text
+        fontSize="14px"
+        lineHeight="16px"
+        color="#1e6ea6"
+      >
+        {title}
+      </Text>
       {children}
     </Box>
   );
