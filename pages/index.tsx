@@ -2,6 +2,7 @@ import type { NextPage } from 'next';
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
 import { Box, SimpleGrid, Text } from '@chakra-ui/react';
+import FilterBox from '../components/FilterBox';
 
 const Home: NextPage = () => {
   return (
@@ -42,10 +43,9 @@ const Home: NextPage = () => {
             columns={2}
             spacing={10}
           >
-            <Box
-              bg="tomato"
-              height="15vh"
-            ></Box>
+            <FilterBox>
+              <Text color="#fff">Hi!</Text>
+            </FilterBox>
             <Box
               bg="tomato"
               height="15vh"
