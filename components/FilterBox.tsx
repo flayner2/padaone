@@ -1,14 +1,15 @@
-import { Box, BoxProps } from '@chakra-ui/react';
-import styles from '../styles/FilterBox.module.css';
+import { Box, Text, BoxProps } from '@chakra-ui/react';
 
 type Props = BoxProps;
 
-function FilterBox({ children, ...props }: Props) {
+function FilterBox({ title, children, ...props }: Props) {
   return (
     <Box
-      className={styles.filterbox}
+      height="15vh"
+      bg="tomato"
       {...props}
     >
+      <Text>{title}</Text>
       {children}
     </Box>
   );
