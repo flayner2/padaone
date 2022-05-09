@@ -1,25 +1,46 @@
-import { Box, Text, BoxProps } from '@chakra-ui/react';
+import { Text, Image, Flex, FlexProps } from '@chakra-ui/react';
 
-type Props = BoxProps;
+interface Props {
+  boxTitle?: string;
+  sideImage?: string;
+  imageAlt?: string;
+  children?: any;
+  props?: FlexProps;
+}
 
-function FilterBox({ title, children, ...props }: Props) {
+function FilterBox({
+  boxTitle,
+  sideImage,
+  imageAlt,
+  children,
+  ...props
+}: Props) {
   return (
-    <Box
-      height="15vh"
-      bg="tomato"
+    <Flex
+      height="20vh"
+      bg="#f0f4f7"
+      border="1px solid #92a2bc"
+      borderRadius="8px"
+      justifyContent="space-between"
       {...props}
     >
       <Text
-        fontSize="14px"
+        fontSize="sm"
         lineHeight="16px"
         color="#1e6ea6"
+        fontWeight="bold"
+        padding="8px"
       >
-        {title}
+        {boxTitle}
       </Text>
+      <Image
+        src={sideImage}
+        alt={imageAlt}
+        height="55%"
+      ></Image>
       {children}
-    </Box>
+    </Flex>
   );
 }
 
 export default FilterBox;
-
