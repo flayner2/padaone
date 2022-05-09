@@ -7,6 +7,7 @@ function FilterRadio({ children, ...props }: RadioProps) {
       borderWidth="1px"
       borderColor="black"
       background="white"
+      colorScheme="green"
       {...props}
     >
       {children}
