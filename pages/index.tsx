@@ -1,8 +1,18 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
-import { Box, SimpleGrid, Text } from '@chakra-ui/react';
+import {
+  Box,
+  SimpleGrid,
+  Text,
+  HStack,
+  VStack,
+  Select,
+  RadioGroup,
+  Input,
+} from '@chakra-ui/react';
 import FilterBox from '../components/FilterBox';
+import FilterRadio from '../components/FilterRadio';
 
 const Home: NextPage = () => {
   return (
@@ -54,7 +64,43 @@ const Home: NextPage = () => {
             <FilterBox
               boxTitle="Epitope"
               sideImage="/epitope_big.png"
-            ></FilterBox>
+            >
+              <RadioGroup
+                w="100%"
+                defaultValue="any"
+              >
+                <VStack
+                  w="100%"
+                  align="stretch"
+                  paddingLeft="10px"
+                  spacing="1px"
+                >
+                  <FilterRadio value="any">Any</FilterRadio>
+                  <FilterRadio value="linear">Linear peptide</FilterRadio>
+                  <HStack>
+                    <Select
+                      size="xs"
+                      width="35%"
+                      background="-moz-initial"
+                      borderColor="gray"
+                      borderRadius="4px"
+                    >
+                      <option value="exact">Exact Matches</option>
+                    </Select>
+                    <Input
+                      size="xs"
+                      placeholder="Ex: SIINFEKL"
+                      width="45%"
+                      background="white"
+                      borderColor="gray"
+                      _placeholder={{ opacity: 1, color: 'gray.500' }}
+                    ></Input>
+                  </HStack>
+                  <FilterRadio value="discontinuous">Discontinuous</FilterRadio>
+                  <FilterRadio value="nonpeptidic">Non-peptidic</FilterRadio>
+                </VStack>
+              </RadioGroup>
+            </FilterBox>
             <FilterBox boxTitle="Assay"></FilterBox>
             <FilterBox boxTitle="Epitope Source"></FilterBox>
             <FilterBox boxTitle="MHC Restriction"></FilterBox>
