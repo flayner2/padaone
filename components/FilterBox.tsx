@@ -1,6 +1,6 @@
 import { Text, Image, VStack, HStack, StackProps } from '@chakra-ui/react';
 
-interface Props {
+interface FilterBoxProps {
   boxTitle?: string;
   sideImage?: string;
   imageAlt?: string;
@@ -14,7 +14,7 @@ function FilterBox({
   imageAlt,
   children,
   ...props
-}: Props) {
+}: FilterBoxProps) {
   return (
     <VStack
       height="10.3rem"
