@@ -22,7 +22,7 @@ import {
 import LinkButton from './LinkButton';
 import { PopoverTrigger } from './PopoverTrigger';
 
-export default function WithSubnavigation() {
+function WithSubnavigation() {
   const { isOpen, onToggle } = useDisclosure();
 
   return (
@@ -342,3 +342,5 @@ const NAV_ITEMS: Array<NavItem> = [
     href: '#',
   },
 ];
+
+export default WithSubnavigation;
