@@ -66,11 +66,11 @@ const Home: NextPage = () => {
               sideImage="/epitope_big.png"
             >
               <RadioGroup
-                w="100%"
+                width="100%"
                 defaultValue="any"
               >
                 <VStack
-                  w="100%"
+                  width="100%"
                   align="stretch"
                   paddingLeft="10px"
                   spacing="1px"
