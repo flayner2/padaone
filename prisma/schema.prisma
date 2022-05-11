@@ -1,11 +1,95 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+model Classification2ndLay {
+  pmid                   Int                    @unique(map: "idx_classification_2ndLay_PMID")
+  score                  Decimal                @db.Decimal(8, 7)
+  probability            Decimal                @db.Decimal(8, 7)
+  other__                Int
+  otherTerms             String?                @db.VarChar(2000)
+  known__                Int
+  knownTerms             String?                @db.VarChar(2000)
+  coverage               String                 @db.VarChar(10)
+  classification1stLay   Classification1stLay   @relation(fields: [pmid], references: [pmid], onDelete: NoAction, onUpdate: NoAction, map: "classification_2ndLay_ibfk_1")
+
+  @@index([probability], map: "idx_classification_2ndLay_probability")
+  @@map("classification_2ndLay")
+}
+
+model Classification1stLay {
+  pmid                  Int                    @id
+  score                 Decimal                @db.Decimal(8, 7)
+  probability           Decimal                @db.Decimal(8, 7)
+  other__               Int
+  otherTerms            String?                @db.VarChar(2000)
+  known__               Int
+  knownTerms            String?                @db.VarChar(2000)
+  coverage              String                 @db.VarChar(10)
+  classification2ndLay  Classification2ndLay?
+  geneIDToPMID          GeneIDToPMID[]         
+  metadataPub           MetadataPub[]          
+
+  @@index([probability], map: "idx_classifications_1stLay_probability")
+  @@map("classifications_1stLay")
+}
+
+model GeneIDToPMID {
+  id                     Int                    @id @default(autoincrement())
+  pmid                   Int
+  geneID                 Int
+  classification1stLay   Classification1stLay   @relation(fields: [pmid], references: [pmid], onDelete: NoAction, onUpdate: NoAction, map: "geneIDs_PMIDs_ibfk_1")
+  taxIDAccNumb           TaxIDToAccNumb          @relation(fields: [geneID], references: [geneID], onDelete: NoAction, onUpdate: NoAction, map: "geneIDs_PMIDs_ibfk_2")
+
+  @@index([geneID], map: "geneIDs")
+  @@index([pmid, geneID], map: "idx_geneIDs_PMIDs_PMID_geneIDs")
+  @@map("geneIDs_PMIDs")
+}
+
+model MetadataPub {
+  pmid                   Int                    @unique
+  title                  String                 @db.VarChar(2000)
+  abstract               String?                @db.VarChar(10000)
+  pubDate                String?                @db.VarChar(15)
+  yearPub                Int?
+  lastAuthor             String?                @db.VarChar(30)
+  lournalAbbrev          String?                @db.VarChar(70)
+  journal                String?                @db.VarChar(100)
+  volume                 String?                @db.VarChar(30)
+  issue                  String?                @db.VarChar(30)
+  pages                  String?                @db.VarChar(30)
+  languagePub            String?                @db.VarChar(30)
+  citations              Int?
+  classification1stLay   Classification1stLay   @relation(fields: [pmid], references: [pmid], onDelete: NoAction, onUpdate: NoAction, map: "metadataPub_ibfk_1")
+
+  @@index([pmid], map: "PMID")
+  @@index([yearPub, lastAuthor, citations], map: "idx_metadataPub_YearPub_LastAuthor_Citations")
+  @@map("metadataPub")
+}
+
+model TaxIDToAccNumb {
+  geneID        Int             @id
+  orgTaxName    String?         @db.VarChar(200)
+  taxID         Int?
+  accNumb       String?         @db.VarChar(2000)
+  taxPath       TaxPath?        @relation(fields: [taxID], references: [taxID], onDelete: NoAction, onUpdate: NoAction, map: "taxIDsAccNumb_ibfk_1")
+  geneIDToPMID  GeneIDToPMID[] @ignore
+
+  @@index([taxID], map: "TaxID")
+  @@index([orgTaxName], map: "idx_taxIDsAccNumb_OrgTaxName")
+  @@map("taxIDsAccNumb")
+}
+
+model TaxPath {
+  taxID          Int             @id
+  orgLineage     String?         @db.VarChar(3000)
+  lineagePath    String?         @db.VarChar(3000)
+  taxIDToAccNumb TaxIDToAccNumb[]
+
+  @@map("taxPath")
 }
