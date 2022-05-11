@@ -78,7 +78,7 @@ model TaxIDToAccNumb {
   taxID         Int?
   accNumb       String?         @db.VarChar(2000)
   taxPath       TaxPath?        @relation(fields: [taxID], references: [taxID], onDelete: NoAction, onUpdate: NoAction, map: "taxIDsAccNumb_ibfk_1")
-  geneIDToPMID  GeneIDToPMID[] @ignore
+  geneIDToPMID  GeneIDToPMID[] 
 
   @@index([taxID], map: "TaxID")
   @@index([orgTaxName], map: "idx_taxIDsAccNumb_OrgTaxName")
