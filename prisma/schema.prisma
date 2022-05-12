@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Classification2ndLay {
-  pmid                   Int                    @unique(map: "idx_classification_2ndLay_PMID")
+  PMID                   Int                    @unique(map: "idx_classification_2ndLay_PMID")
   score                  Decimal                @db.Decimal(8, 7)
   probability            Decimal                @db.Decimal(8, 7)
   other__                Int
@@ -16,14 +16,14 @@ model Classification2ndLay {
   known__                Int
   knownTerms             String?                @db.VarChar(2000)
   coverage               String                 @db.VarChar(10)
-  classification1stLay   Classification1stLay   @relation(fields: [pmid], references: [pmid], onDelete: NoAction, onUpdate: NoAction, map: "classification_2ndLay_ibfk_1")
+  classifications_1stLay Classification1stLay @relation(fields: [PMID], references: [PMID], onDelete: NoAction, onUpdate: NoAction, map: "classification_2ndLay_ibfk_1")
 
   @@index([probability], map: "idx_classification_2ndLay_probability")
   @@map("classification_2ndLay")
 }
 
 model Classification1stLay {
-  pmid                  Int                    @id
+  PMID                  Int                    @id
   score                 Decimal                @db.Decimal(8, 7)
   probability           Decimal                @db.Decimal(8, 7)
   other__               Int
@@ -31,65 +31,67 @@ model Classification1stLay {
   known__               Int
   knownTerms            String?                @db.VarChar(2000)
   coverage              String                 @db.VarChar(10)
-  classification2ndLay  Classification2ndLay?
-  geneIDToPMID          GeneIDToPMID[]         
-  metadataPub           MetadataPub[]          
+  classification_2ndLay Classification2ndLay?
+  geneIDs_PMIDs         GeneIDToPMID[]        
+  metadataPub           MetadataPub[]          @ignore
 
   @@index([probability], map: "idx_classifications_1stLay_probability")
   @@map("classifications_1stLay")
 }
 
 model GeneIDToPMID {
-  id                     Int                    @id @default(autoincrement())
-  pmid                   Int
-  geneID                 Int
-  classification1stLay   Classification1stLay   @relation(fields: [pmid], references: [pmid], onDelete: NoAction, onUpdate: NoAction, map: "geneIDs_PMIDs_ibfk_1")
-  taxIDAccNumb           TaxIDToAccNumb          @relation(fields: [geneID], references: [geneID], onDelete: NoAction, onUpdate: NoAction, map: "geneIDs_PMIDs_ibfk_2")
+  PMID                   Int                  
+  geneIDs                Int
+  classifications_1stLay Classification1stLay @relation(fields: [PMID], references: [PMID], onDelete: NoAction, onUpdate: NoAction, map: "geneIDs_PMIDs_ibfk_1")
+  taxIDsAccNumb          TaxIDToAccNumb          @relation(fields: [geneIDs], references: [geneIDs], onDelete: NoAction, onUpdate: NoAction, map: "geneIDs_PMIDs_ibfk_2")
 
-  @@index([geneID], map: "geneIDs")
-  @@index([pmid, geneID], map: "idx_geneIDs_PMIDs_PMID_geneIDs")
+  @@index([geneIDs], map: "geneIDs")
+  @@index([PMID, geneIDs], map: "idx_geneIDs_PMIDs_PMID_geneIDs")
+  @@id([PMID, geneIDs])
   @@map("geneIDs_PMIDs")
 }
 
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
 model MetadataPub {
-  pmid                   Int                    @unique
-  title                  String                 @db.VarChar(2000)
-  abstract               String?                @db.VarChar(10000)
-  pubDate                String?                @db.VarChar(15)
-  yearPub                Int?
-  lastAuthor             String?                @db.VarChar(30)
-  lournalAbbrev          String?                @db.VarChar(70)
-  journal                String?                @db.VarChar(100)
-  volume                 String?                @db.VarChar(30)
-  issue                  String?                @db.VarChar(30)
-  pages                  String?                @db.VarChar(30)
-  languagePub            String?                @db.VarChar(30)
-  citations              Int?
-  classification1stLay   Classification1stLay   @relation(fields: [pmid], references: [pmid], onDelete: NoAction, onUpdate: NoAction, map: "metadataPub_ibfk_1")
+  PMID                   Int
+  Titles                 String                 @db.VarChar(2000)
+  Abstract               String?                @db.VarChar(10000)
+  PubDate                String?                @db.VarChar(15)
+  YearPub                Int?
+  LastAuthor             String?                @db.VarChar(30)
+  Journal_Abbrev         String?                @db.VarChar(70)
+  Journal                String?                @db.VarChar(100)
+  Volume                 String?                @db.VarChar(30)
+  Issue                  String?                @db.VarChar(30)
+  Pages                  String?                @db.VarChar(30)
+  LanguagePub            String?                @db.VarChar(30)
+  Citations              Int?
+  classifications_1stLay Classification1stLay @relation(fields: [PMID], references: [PMID], onDelete: NoAction, onUpdate: NoAction, map: "metadataPub_ibfk_1")
 
-  @@index([pmid], map: "PMID")
-  @@index([yearPub, lastAuthor, citations], map: "idx_metadataPub_YearPub_LastAuthor_Citations")
+  @@index([PMID], map: "PMID")
+  @@index([YearPub, LastAuthor, Citations], map: "idx_metadataPub_YearPub_LastAuthor_Citations")
+  @@ignore
   @@map("metadataPub")
 }
 
 model TaxIDToAccNumb {
-  geneID        Int             @id
-  orgTaxName    String?         @db.VarChar(200)
-  taxID         Int?
-  accNumb       String?         @db.VarChar(2000)
-  taxPath       TaxPath?        @relation(fields: [taxID], references: [taxID], onDelete: NoAction, onUpdate: NoAction, map: "taxIDsAccNumb_ibfk_1")
-  geneIDToPMID  GeneIDToPMID[] 
+  geneIDs       Int             @id
+  OrgTaxName    String?         @db.VarChar(200)
+  TaxID         Int?
+  AccNumb       String?         @db.VarChar(2000)
+  taxPath       TaxPath?        @relation(fields: [TaxID], references: [TaxID], onDelete: NoAction, onUpdate: NoAction, map: "taxIDsAccNumb_ibfk_1")
+  geneIDs_PMIDs GeneIDToPMID[] 
 
-  @@index([taxID], map: "TaxID")
-  @@index([orgTaxName], map: "idx_taxIDsAccNumb_OrgTaxName")
+  @@index([TaxID], map: "TaxID")
+  @@index([OrgTaxName], map: "idx_taxIDsAccNumb_OrgTaxName")
   @@map("taxIDsAccNumb")
 }
 
 model TaxPath {
-  taxID          Int             @id
-  orgLineage     String?         @db.VarChar(3000)
-  lineagePath    String?         @db.VarChar(3000)
-  taxIDToAccNumb TaxIDToAccNumb[]
+  TaxID         Int             @id
+  OrgLineage    String?         @db.VarChar(3000)
+  LineagePath   String?         @db.VarChar(3000)
+  taxIDsAccNumb TaxIDToAccNumb[]
 
   @@map("taxPath")
 }
