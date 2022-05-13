@@ -9,7 +9,7 @@ CREATE TABLE `classification_2ndLay` (
     `knownTerms` VARCHAR(2000) NULL,
     `coverage` VARCHAR(10) NOT NULL,
 
-    UNIQUE INDEX `idx_classification_2ndLay_PMID`(`PMID`),
+    UNIQUE INDEX `PMID`(`PMID`),
     INDEX `idx_classification_2ndLay_probability`(`probability`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -24,8 +24,8 @@ CREATE TABLE `classifications_1stLay` (
     `knownTerms` VARCHAR(2000) NULL,
     `coverage` VARCHAR(10) NOT NULL,
 
-    INDEX `idx_classifications_1stLay_probability`(`probability`),
-    PRIMARY KEY (`PMID`)
+    UNIQUE INDEX `PMID`(`PMID`),
+    INDEX `idx_classifications_1stLay_probability`(`probability`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -34,7 +34,8 @@ CREATE TABLE `geneIDs_PMIDs` (
     `geneIDs` INTEGER NOT NULL,
 
     INDEX `geneIDs`(`geneIDs`),
-    INDEX `idx_geneIDs_PMIDs_PMID_geneIDs`(`PMID`, `geneIDs`)
+    INDEX `idx_geneIDs_PMIDs_PMID_geneIDs`(`PMID`, `geneIDs`),
+    PRIMARY KEY (`PMID`, `geneIDs`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -54,7 +55,8 @@ CREATE TABLE `metadataPub` (
     `Citations` INTEGER NULL,
 
     INDEX `PMID`(`PMID`),
-    INDEX `idx_metadataPub_YearPub_LastAuthor_Citations`(`YearPub`, `LastAuthor`, `Citations`)
+    INDEX `idx_metadataPub_YearPub_LastAuthor_Citations`(`YearPub`, `LastAuthor`, `Citations`),
+    PRIMARY KEY (`PMID`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -79,16 +81,16 @@ CREATE TABLE `taxPath` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
-ALTER TABLE `classification_2ndLay` ADD CONSTRAINT `classification_2ndLay_ibfk_1` FOREIGN KEY (`PMID`) REFERENCES `classifications_1stLay`(`PMID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE `classification_2ndLay` ADD CONSTRAINT `fkMetadataPubPMID2ndLay` FOREIGN KEY (`PMID`) REFERENCES `metadataPub`(`PMID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `geneIDs_PMIDs` ADD CONSTRAINT `geneIDs_PMIDs_ibfk_1` FOREIGN KEY (`PMID`) REFERENCES `classifications_1stLay`(`PMID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE `classifications_1stLay` ADD CONSTRAINT `fkMetadataPubPMID1stLay` FOREIGN KEY (`PMID`) REFERENCES `metadataPub`(`PMID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- AddForeignKey
+ALTER TABLE `geneIDs_PMIDs` ADD CONSTRAINT `fkMetadataPubPMIDgeneIDs` FOREIGN KEY (`PMID`) REFERENCES `metadataPub`(`PMID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE `geneIDs_PMIDs` ADD CONSTRAINT `geneIDs_PMIDs_ibfk_2` FOREIGN KEY (`geneIDs`) REFERENCES `taxIDsAccNumb`(`geneIDs`) ON DELETE NO ACTION ON UPDATE NO ACTION;
-
--- AddForeignKey
-ALTER TABLE `metadataPub` ADD CONSTRAINT `metadataPub_ibfk_1` FOREIGN KEY (`PMID`) REFERENCES `classifications_1stLay`(`PMID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE `taxIDsAccNumb` ADD CONSTRAINT `taxIDsAccNumb_ibfk_1` FOREIGN KEY (`TaxID`) REFERENCES `taxPath`(`TaxID`) ON DELETE NO ACTION ON UPDATE NO ACTION;
