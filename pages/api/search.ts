@@ -14,7 +14,7 @@ export async function getData(query: string) {
 }
 
 async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
-  const title = req.body.paperTitle;
+  const title = req.query.paperTitle;
   const data = await getData(title);
 
   res.status(200).send(data);
