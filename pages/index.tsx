@@ -1,18 +1,6 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
-import {
-  Box,
-  SimpleGrid,
-  Text,
-  HStack,
-  VStack,
-  Select,
-  RadioGroup,
-  Input,
-} from '@chakra-ui/react';
-import FilterBox from '../components/FilterBox';
-import FilterRadio from '../components/FilterRadio';
 
 const Home: NextPage = () => {
   return (
@@ -29,86 +17,7 @@ const Home: NextPage = () => {
         />
       </Head>
 
-      <main className={styles.main}>
-        <Box
-          height="100%"
-          width="40%"
-          bgGradient="linear(to-b, #c8d6e3 0%, #fcfcfc 100%)"
-          border="1px solid #1e6ea6"
-          borderWidth="1px"
-          borderRadius="8px"
-          overflow="hidden"
-        >
-          <Box
-            width="100%"
-            height="6%"
-            bgGradient="linear(to-b, #1e6ea6 0%, #94c5e3 100%)"
-            borderBottom="1px solid #1e6ea6"
-          >
-            <Text
-              textTransform="uppercase"
-              color="#fff"
-              fontWeight="bold"
-              padding="4px 0 0 4px"
-              fontSize="md"
-            >
-              Start your search here
-            </Text>
-          </Box>
-
-          <SimpleGrid
-            columns={2}
-            spacing={5}
-            padding="10px"
-          >
-            <FilterBox
-              boxTitle="Epitope"
-              sideImage="/epitope_big.png"
-            >
-              <RadioGroup
-                width="100%"
-                defaultValue="any"
-              >
-                <VStack
-                  width="100%"
-                  align="stretch"
-                  paddingLeft="10px"
-                  spacing="1px"
-                >
-                  <FilterRadio value="any">Any</FilterRadio>
-                  <FilterRadio value="linear">Linear peptide</FilterRadio>
-                  <HStack>
-                    <Select
-                      size="xs"
-                      width="35%"
-                      background="-moz-initial"
-                      borderColor="gray"
-                      borderRadius="4px"
-                    >
-                      <option value="exact">Exact Matches</option>
-                    </Select>
-                    <Input
-                      size="xs"
-                      placeholder="Ex: SIINFEKL"
-                      width="45%"
-                      background="white"
-                      borderColor="gray"
-                      _placeholder={{ opacity: 1, color: 'gray.500' }}
-                    ></Input>
-                  </HStack>
-                  <FilterRadio value="discontinuous">Discontinuous</FilterRadio>
-                  <FilterRadio value="nonpeptidic">Non-peptidic</FilterRadio>
-                </VStack>
-              </RadioGroup>
-            </FilterBox>
-            <FilterBox boxTitle="Assay"></FilterBox>
-            <FilterBox boxTitle="Epitope Source"></FilterBox>
-            <FilterBox boxTitle="MHC Restriction"></FilterBox>
-            <FilterBox boxTitle="Host"></FilterBox>
-            <FilterBox boxTitle="Disease"></FilterBox>
-          </SimpleGrid>
-        </Box>
-      </main>
+      <main className={styles.main}></main>
     </div>
   );
 };
