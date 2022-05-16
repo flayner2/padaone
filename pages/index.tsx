@@ -1,8 +1,46 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
+import {
+  AutoComplete,
+  AutoCompleteInput,
+  AutoCompleteItem,
+  AutoCompleteList,
+} from '@choc-ui/chakra-autocomplete';
+import { FormControl, FormLabel } from '@chakra-ui/react';
+import axios from 'axios';
+import debounce from '../lib/debounce';
+import { useState, ChangeEvent } from 'react';
 
-const Home: NextPage = () => {
+function Home(): React.ReactElement {
+  //const [search, setSearch] = useState('');
+  const [papers, setPapers] = useState([]);
+
+  function handleChange(event: ChangeEvent<HTMLInputElement>) {
+    setPapers([]);
+
+    const search = event.target.value;
+    //setSearch(event.target.value);
+
+    if (search) {
+      setTimeout(async () => {
+        const response = await axios.get('/api/search', {
+          params: { paperTitle: search },
+        });
+        const papers = response.data;
+
+        setPapers(papers);
+      }, 500);
+    } else {
+      setPapers([]);
+      return;
+    }
+  }
+
+  const processChange = debounce((event: ChangeEvent<HTMLInputElement>) =>
+    handleChange(event)
+  );
+
   return (
     <div className={styles.container}>
       <Head>
@@ -17,9 +55,33 @@ const Home: NextPage = () => {
         />
       </Head>
 
-      <main className={styles.main}></main>
+      <main className={styles.main}>
+        <FormControl width="80%">
+          <FormLabel>Search</FormLabel>
+          <AutoComplete
+            openOnFocus
+            maxSuggestions={20}
+          >
+            <AutoCompleteInput
+              variant="outline"
+              onChange={handleChange}
+            />
+            <AutoCompleteList>
+              {papers.map((paper) => (
+                <AutoCompleteItem
+                  key={paper.pmid}
+                  value={paper.pmid.toString()}
+                  textTransform="capitalize"
+                >
+                  {paper.title}
+                </AutoCompleteItem>
+              ))}
+            </AutoCompleteList>
+          </AutoComplete>
+        </FormControl>
+      </main>
     </div>
   );
-};
+}
 
 export default Home;
