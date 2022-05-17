@@ -1,4 +1,3 @@
-import type { NextPage } from 'next';
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
 import {
@@ -7,39 +6,55 @@ import {
   AutoCompleteItem,
   AutoCompleteList,
 } from '@choc-ui/chakra-autocomplete';
-import { FormControl, FormLabel } from '@chakra-ui/react';
+import { FormControl, FormLabel, Box, Spinner } from '@chakra-ui/react';
 import axios from 'axios';
+import { useState, useRef, ChangeEvent } from 'react';
 import debounce from '../lib/debounce';
-import { useState, ChangeEvent } from 'react';
 
 function Home(): React.ReactElement {
-  //const [search, setSearch] = useState('');
+  const [search, setSearch] = useState('');
   const [papers, setPapers] = useState([]);
+  const lastQuery = useRef('');
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  function handleChange(event: ChangeEvent<HTMLInputElement>) {
+  async function handleChange(event: ChangeEvent<HTMLInputElement>) {
     setPapers([]);
 
-    const search = event.target.value;
-    //setSearch(event.target.value);
+    const query = event.target.value;
 
-    if (search) {
-      setTimeout(async () => {
-        const response = await axios.get('/api/search', {
-          params: { paperTitle: search },
-        });
-        const papers = response.data;
+    if (query) {
+      const searchUrl = `/api/search?paperTitle=${query}`;
 
-        setPapers(papers);
-      }, 500);
+      lastQuery.current = searchUrl;
+
+      setSearch(query);
+
+      const debouncedRequest = debounce(async () => {
+        const response = await axios.get(searchUrl);
+
+        if (searchUrl === lastQuery.current) {
+          const papers = response.data;
+          setPapers(papers);
+          console.log(papers);
+        }
+      });
+
+      debouncedRequest();
+
+      //setTimeout(async () => {
+      //const response = await axios.get(searchUrl);
+
+      //if (searchUrl === lastQuery.current) {
+      //const papers = response.data;
+      //setPapers(papers);
+      //}
+      //}, 500);
     } else {
+      setSearch('');
       setPapers([]);
       return;
     }
   }
-
-  const processChange = debounce((event: ChangeEvent<HTMLInputElement>) =>
-    handleChange(event)
-  );
 
   return (
     <div className={styles.container}>
@@ -61,20 +76,30 @@ function Home(): React.ReactElement {
           <AutoComplete
             openOnFocus
             maxSuggestions={20}
+            defaultValues={papers}
+            suggestWhenEmpty={true}
+            emptyState={
+              <Box textAlign="center">
+                {inputRef?.current?.value ? (
+                  <Spinner />
+                ) : (
+                  <Box>Start typing your address for suggestions</Box>
+                )}
+              </Box>
+            }
           >
             <AutoCompleteInput
               variant="outline"
+              value={search}
               onChange={handleChange}
+              ref={inputRef}
             />
             <AutoCompleteList>
               {papers.map((paper) => (
                 <AutoCompleteItem
                   key={paper.pmid}
-                  value={paper.pmid.toString()}
-                  textTransform="capitalize"
-                >
-                  {paper.title}
-                </AutoCompleteItem>
+                  value={paper.title}
+                />
               ))}
             </AutoCompleteList>
           </AutoComplete>
