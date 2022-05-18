@@ -8,6 +8,7 @@ import {prisma} from '../../lib/prisma';
 export async function getData(query: string) {
   const data = await prisma.metadataPub.findMany({
     where: {title: {contains: query}},
+    take: 20,
   });
 
   return data;
