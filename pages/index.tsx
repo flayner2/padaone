@@ -64,7 +64,6 @@ function Home(): React.ReactElement {
           <FormLabel>Search</FormLabel>
           <AutoComplete
             openOnFocus
-            maxSuggestions={20}
             defaultValues={papers}
             emptyState={
               <Box textAlign="center">
