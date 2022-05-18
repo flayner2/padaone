@@ -1,58 +1,47 @@
-import Head from 'next/head';
-import styles from '../styles/Home.module.css';
+import { Box, FormControl, FormLabel, Spinner } from '@chakra-ui/react';
 import {
   AutoComplete,
   AutoCompleteInput,
   AutoCompleteItem,
   AutoCompleteList,
 } from '@choc-ui/chakra-autocomplete';
-import { FormControl, FormLabel, Box, Spinner } from '@chakra-ui/react';
+import type { MetadataPub } from '@prisma/client';
 import axios from 'axios';
-import { useState, useRef, ChangeEvent } from 'react';
+import Head from 'next/head';
+import { ChangeEvent, useRef, useState } from 'react';
 import debounce from '../lib/debounce';
+import styles from '../styles/Home.module.css';
 
 function Home(): React.ReactElement {
   const [search, setSearch] = useState('');
-  const [papers, setPapers] = useState([]);
+  const [papers, setPapers] = useState<MetadataPub[]>([]);
   const lastQuery = useRef('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   async function handleChange(event: ChangeEvent<HTMLInputElement>) {
     setPapers([]);
-
     const query = event.target.value;
 
     if (query) {
       const searchUrl = `/api/search?paperTitle=${query}`;
-
       lastQuery.current = searchUrl;
-
       setSearch(query);
 
-      const debouncedRequest = debounce(async () => {
-        const response = await axios.get(searchUrl);
-
-        if (searchUrl === lastQuery.current) {
-          const papers = response.data;
-          setPapers(papers);
-          console.log(papers);
-        }
-      });
-
+      const debouncedRequest = debounce(async () => handleRequest(searchUrl));
       debouncedRequest();
-
-      //setTimeout(async () => {
-      //const response = await axios.get(searchUrl);
-
-      //if (searchUrl === lastQuery.current) {
-      //const papers = response.data;
-      //setPapers(papers);
-      //}
-      //}, 500);
     } else {
       setSearch('');
       setPapers([]);
-      return;
+    }
+  }
+
+  async function handleRequest(url: string) {
+    const response = await axios.get(url);
+
+    if (url === lastQuery.current) {
+      const papers = response.data;
+      setPapers(papers);
+      console.log(papers);
     }
   }
 
@@ -77,13 +66,12 @@ function Home(): React.ReactElement {
             openOnFocus
             maxSuggestions={20}
             defaultValues={papers}
-            suggestWhenEmpty={true}
             emptyState={
               <Box textAlign="center">
                 {inputRef?.current?.value ? (
                   <Spinner />
                 ) : (
-                  <Box>Start typing your address for suggestions</Box>
+                  <Box>Start typing for suggestions</Box>
                 )}
               </Box>
             }
