@@ -1,12 +1,21 @@
-function debounce(func: Function, timeout = 300) {
-  let timer: NodeJS.Timeout;
+import {DebouncedFunction, DebounceReturn, FunctionWithArguments,} from './types';
 
-  return (...args: any[]) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      func.apply(this, args);
-    }, timeout);
-  };
+export function debounce<F extends FunctionWithArguments>(
+    fn: F, ms: number): DebounceReturn<F> {
+  let timer: ReturnType<typeof setTimeout>;
+
+  const debouncedFunc: DebouncedFunction<F> = (...args) =>
+      new Promise((resolve) => {
+        if (timer) {
+          clearTimeout(timer);
+        }
+
+        timer = setTimeout(() => {
+          resolve(fn(...(args as unknown[])));
+        }, ms);
+      });
+
+  const teardown = () => clearTimeout(timer);
+
+  return [debouncedFunc, teardown];
 }
-
-export default debounce;
