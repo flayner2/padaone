@@ -9,7 +9,6 @@ import type { MetadataPub } from '@prisma/client';
 import axios from 'axios';
 import Head from 'next/head';
 import { ChangeEvent, useRef, useState } from 'react';
-import { useDebounce } from '../lib/useDebounce';
 import { debounce } from '../lib/debounce';
 import styles from '../styles/Home.module.css';
 
