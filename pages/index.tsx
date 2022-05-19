@@ -8,7 +8,7 @@ import {
 import type { MetadataPub } from '@prisma/client';
 import axios from 'axios';
 import Head from 'next/head';
-import { ChangeEvent, useRef, useState } from 'react';
+import { ChangeEvent, useRef, useState, useEffect } from 'react';
 import { debounce } from '../lib/debounce';
 import styles from '../styles/Home.module.css';
 
@@ -17,6 +17,18 @@ function Home(): JSX.Element {
   const [papers, setPapers] = useState<MetadataPub[]>([]);
   const lastQuery = useRef('');
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const intersectionObserver = new IntersectionObserver(() => console.log("observando..."));
+    
+    const ward = document.querySelector("#ward");
+
+    if (ward) {
+      intersectionObserver.observe(ward);
+    }
+        
+    return () => intersectionObserver.disconnect();
+  }, []);
 
   async function handleChange(event: ChangeEvent<HTMLInputElement>) {
     setPapers([]);
@@ -66,17 +78,18 @@ function Home(): JSX.Element {
         <FormControl width="80%">
           <FormLabel>Search</FormLabel>
           <AutoComplete
+            style={{ position: 'relative' }}
             openOnFocus
             defaultValues={papers}
-            emptyState={
-              <Box textAlign="center">
-                {inputRef?.current?.value ? (
-                  <Spinner />
-                ) : (
-                  <Box>Start typing for suggestions</Box>
-                )}
-              </Box>
-            }
+            // emptyState={
+            //   <Box textAlign="center">
+            //     {inputRef?.current?.value ? (
+            //       <Spinner />
+            //     ) : (
+            //       <Box>Start typing for suggestions</Box>
+            //     )}
+            //   </Box>
+            // }
           >
             <AutoCompleteInput
               variant="outline"
@@ -89,8 +102,11 @@ function Home(): JSX.Element {
                 <AutoCompleteItem
                   key={paper.pmid}
                   value={paper.title}
-                />
+                >
+                  {paper.title}
+                </AutoCompleteItem>
               ))}
+             {/* { papers.length >= 20 && <Box value="" id="ward" bgColor="red" p="4" pos="absolute" bottom="0" left="0" />  }          */}
             </AutoCompleteList>
           </AutoComplete>
         </FormControl>
