@@ -9,10 +9,11 @@ import type { MetadataPub } from '@prisma/client';
 import axios from 'axios';
 import Head from 'next/head';
 import { ChangeEvent, useRef, useState } from 'react';
-import debounce from '../lib/debounce';
+import { useDebounce } from '../lib/useDebounce';
+import { debounce } from '../lib/debounce';
 import styles from '../styles/Home.module.css';
 
-function Home(): React.ReactElement {
+function Home(): JSX.Element {
   const [search, setSearch] = useState('');
   const [papers, setPapers] = useState<MetadataPub[]>([]);
   const lastQuery = useRef('');
@@ -27,7 +28,10 @@ function Home(): React.ReactElement {
       lastQuery.current = searchUrl;
       setSearch(query);
 
-      const debouncedRequest = debounce(async () => handleRequest(searchUrl));
+      const [debouncedRequest] = debounce(
+        async () => handleRequest(searchUrl),
+        500
+      );
       debouncedRequest();
     } else {
       setSearch('');
