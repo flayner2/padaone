@@ -11,10 +11,11 @@
   "dependencies": {
     "@chakra-ui/icons": "^1.1.7",
     "@chakra-ui/react": "^1.8.8",
-    "@choc-ui/chakra-autocomplete": "^4.22.0",
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
     "@prisma/client": "^3.14.0",
+    "@react-aria/combobox": "^3.2.6",
+    "@react-aria/i18n": "^3.3.9",
     "axios": "^0.27.2",
     "framer-motion": "^6.3.3",
     "next": "12.1.6",
