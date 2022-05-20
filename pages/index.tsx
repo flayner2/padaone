@@ -1,10 +1,4 @@
 import { Box, FormControl, FormLabel, Spinner } from '@chakra-ui/react';
-import {
-  AutoComplete,
-  AutoCompleteInput,
-  AutoCompleteItem,
-  AutoCompleteList,
-} from '@choc-ui/chakra-autocomplete';
 import type { MetadataPub } from '@prisma/client';
 import axios from 'axios';
 import Head from 'next/head';
@@ -19,14 +13,16 @@ function Home(): JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const intersectionObserver = new IntersectionObserver(() => console.log("observando..."));
-    
-    const ward = document.querySelector("#ward");
+    const intersectionObserver = new IntersectionObserver(() =>
+      console.log('observando...')
+    );
+
+    const ward = document.querySelector('#ward');
 
     if (ward) {
       intersectionObserver.observe(ward);
     }
-        
+
     return () => intersectionObserver.disconnect();
   }, []);
 
@@ -74,43 +70,7 @@ function Home(): JSX.Element {
         />
       </Head>
 
-      <main className={styles.main}>
-        <FormControl width="80%">
-          <FormLabel>Search</FormLabel>
-          <AutoComplete
-            style={{ position: 'relative' }}
-            openOnFocus
-            defaultValues={papers}
-            // emptyState={
-            //   <Box textAlign="center">
-            //     {inputRef?.current?.value ? (
-            //       <Spinner />
-            //     ) : (
-            //       <Box>Start typing for suggestions</Box>
-            //     )}
-            //   </Box>
-            // }
-          >
-            <AutoCompleteInput
-              variant="outline"
-              value={search}
-              onChange={handleChange}
-              ref={inputRef}
-            />
-            <AutoCompleteList>
-              {papers.map((paper) => (
-                <AutoCompleteItem
-                  key={paper.pmid}
-                  value={paper.title}
-                >
-                  {paper.title}
-                </AutoCompleteItem>
-              ))}
-             {/* { papers.length >= 20 && <Box value="" id="ward" bgColor="red" p="4" pos="absolute" bottom="0" left="0" />  }          */}
-            </AutoCompleteList>
-          </AutoComplete>
-        </FormControl>
-      </main>
+      <main className={styles.main}></main>
     </div>
   );
 }
