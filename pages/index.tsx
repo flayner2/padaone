@@ -2,59 +2,42 @@ import { Box, FormControl, FormLabel, Spinner } from '@chakra-ui/react';
 import type { MetadataPub } from '@prisma/client';
 import axios from 'axios';
 import Head from 'next/head';
-import { ChangeEvent, useRef, useState, useEffect } from 'react';
 import { debounce } from '../lib/debounce';
 import styles from '../styles/Home.module.css';
+import { Autocomplete, Item } from '../components/Autocomplete';
+import { useAsyncList } from 'react-stately';
+import { useState } from 'react';
+import { Search2Icon } from '@chakra-ui/icons';
+
+const OFFSET_VALUE: number = 20;
 
 function Home(): JSX.Element {
-  const [search, setSearch] = useState('');
-  const [papers, setPapers] = useState<MetadataPub[]>([]);
-  const lastQuery = useRef('');
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [offset, setOffset] = useState(0);
 
-  useEffect(() => {
-    const intersectionObserver = new IntersectionObserver(() =>
-      console.log('observando...')
-    );
-
-    const ward = document.querySelector('#ward');
-
-    if (ward) {
-      intersectionObserver.observe(ward);
-    }
-
-    return () => intersectionObserver.disconnect();
-  }, []);
-
-  async function handleChange(event: ChangeEvent<HTMLInputElement>) {
-    setPapers([]);
-    const query = event.target.value;
-
-    if (query) {
-      const searchUrl = `/api/search?paperTitle=${query}`;
-      lastQuery.current = searchUrl;
-      setSearch(query);
-
+  let list = useAsyncList<MetadataPub>({
+    async load({ signal, cursor, filterText }) {
       const [debouncedRequest] = debounce(
-        async () => handleRequest(searchUrl),
+        async (signal, cursor, filterText) => {
+          let res = await axios.get(
+            cursor || `/api/search?paperTitle=${filterText}`,
+            { signal }
+          );
+
+          return res.data;
+        },
         500
       );
-      debouncedRequest();
-    } else {
-      setSearch('');
-      setPapers([]);
-    }
-  }
 
-  async function handleRequest(url: string) {
-    const response = await axios.get(url);
+      let data = await debouncedRequest(signal, cursor, filterText);
 
-    if (url === lastQuery.current) {
-      const papers = response.data;
-      setPapers(papers);
-      console.log(papers);
-    }
-  }
+      setOffset(offset + OFFSET_VALUE);
+
+      return {
+        items: data,
+        cursor: `/api/search?paperTitle=${filterText}&offset=${offset}`,
+      };
+    },
+  });
 
   return (
     <div className={styles.container}>
@@ -70,7 +53,19 @@ function Home(): JSX.Element {
         />
       </Head>
 
-      <main className={styles.main}></main>
+      <main className={styles.main}>
+        <Autocomplete
+          label="Star Wars Character Search"
+          items={list.items}
+          inputValue={list.filterText}
+          onInputChange={list.setFilterText}
+          loadingState={list.loadingState}
+          onLoadMore={list.loadMore}
+          icon={<Search2Icon color="red" />}
+        >
+          {(item) => <Item key={item.pmid}>{item.title}</Item>}
+        </Autocomplete>
+      </main>
     </div>
   );
 }
