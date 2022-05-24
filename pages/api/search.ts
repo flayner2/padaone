@@ -12,7 +12,8 @@ export async function getData(query: string, offset: number = 0) {
   return data;
 }
 
-async function handler(req: NextApiRequest, res: NextApiResponse<MetadataPub>) {
+async function handler(
+    req: NextApiRequest, res: NextApiResponse<MetadataPub[]>) {
   const title = Array.isArray(req.query.paperTitle) ? req.query.paperTitle[0] :
                                                       req.query.paperTitle;
   const offset = parseInt(
