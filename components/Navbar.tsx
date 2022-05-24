@@ -19,7 +19,6 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
 } from '@chakra-ui/icons';
-import LinkButton from './LinkButton';
 import { PopoverTrigger } from './PopoverTrigger';
 
 function WithSubnavigation() {
@@ -28,15 +27,15 @@ function WithSubnavigation() {
   return (
     <Box>
       <Flex
-        bg={useColorModeValue('white', 'gray.800')}
-        color={useColorModeValue('gray.600', 'white')}
-        minH={'60px'}
+        background="white"
+        color="protBlue.900"
+        minH="60px"
         py={{ base: 2 }}
         px={{ base: 4 }}
         borderBottom={1}
-        borderStyle={'solid'}
-        borderColor={useColorModeValue('gray.200', 'gray.900')}
-        align={'center'}
+        borderStyle="solid"
+        borderColor="protGray.300"
+        align="center"
       >
         <Flex
           flex={{ base: 1, md: 'auto' }}
@@ -66,13 +65,15 @@ function WithSubnavigation() {
           flex={{ base: 1 }}
           justify={{ base: 'center', md: 'start' }}
         >
-          <Text
+          <Link
             textAlign={useBreakpointValue({ base: 'center', md: 'left' })}
             fontFamily={'heading'}
-            color={useColorModeValue('gray.800', 'white')}
+            color="protBlack.100"
+            href="/"
+            _hover={{ textDecoration: 'none' }}
           >
             Prot-DB
-          </Text>
+          </Link>
 
           <Flex
             display={{ base: 'none', md: 'flex' }}
@@ -88,27 +89,32 @@ function WithSubnavigation() {
           direction={'row'}
           spacing={6}
         >
-          <LinkButton
+          <Link
+            p={2}
+            href={'/contact'}
             fontSize={'sm'}
-            fontWeight={400}
-            variant={'link'}
-            href={'#'}
-          >
-            Sign In
-          </LinkButton>
-          <LinkButton
-            display={{ base: 'none', md: 'inline-flex' }}
-            fontSize={'sm'}
-            fontWeight={600}
-            color={'white'}
-            bg={'pink.400'}
-            href={'#'}
+            fontWeight={500}
+            color="protBlue.900"
             _hover={{
-              bg: 'pink.300',
+              textDecoration: 'none',
+              color: 'protBlue.darkHover',
             }}
           >
-            Sign Up
-          </LinkButton>
+            Contact
+          </Link>
+          <Link
+            p={2}
+            href={'/about'}
+            fontSize={'sm'}
+            fontWeight={500}
+            color="protBlue.900"
+            _hover={{
+              textDecoration: 'none',
+              color: 'protBlue.darkHover',
+            }}
+          >
+            About
+          </Link>
         </Stack>
       </Flex>
 
@@ -123,10 +129,6 @@ function WithSubnavigation() {
 }
 
 const DesktopNav = () => {
-  const linkColor = useColorModeValue('gray.600', 'gray.200');
-  const linkHoverColor = useColorModeValue('gray.800', 'white');
-  const popoverContentBgColor = useColorModeValue('white', 'gray.800');
-
   return (
     <Stack
       direction={'row'}
@@ -144,10 +146,10 @@ const DesktopNav = () => {
                 href={navItem.href ?? '#'}
                 fontSize={'sm'}
                 fontWeight={500}
-                color={linkColor}
+                color="protBlue.900"
                 _hover={{
                   textDecoration: 'none',
-                  color: linkHoverColor,
+                  color: 'protBlue.darkHover',
                 }}
               >
                 {navItem.label}
@@ -158,7 +160,7 @@ const DesktopNav = () => {
               <PopoverContent
                 border={0}
                 boxShadow={'xl'}
-                bg={popoverContentBgColor}
+                bg="white"
                 p={4}
                 rounded={'xl'}
                 minW={'sm'}
@@ -260,12 +262,7 @@ const MobileNavItem = ({ label, children, href }: NavItem) => {
           textDecoration: 'none',
         }}
       >
-        <Text
-          fontWeight={600}
-          color={useColorModeValue('gray.600', 'gray.200')}
-        >
-          {label}
-        </Text>
+        <Text color="protBlue.900">{label}</Text>
         {children && (
           <Icon
             as={ChevronDownIcon}
@@ -315,31 +312,16 @@ interface NavItem {
 
 const NAV_ITEMS: Array<NavItem> = [
   {
-    label: 'Home',
+    label: 'Search',
     href: '/',
   },
   {
-    label: 'Find Work',
-    children: [
-      {
-        label: 'Job Board',
-        subLabel: 'Find your dream design job',
-        href: '#',
-      },
-      {
-        label: 'Freelance Projects',
-        subLabel: 'An exclusive list for contract work',
-        href: '#',
-      },
-    ],
+    label: 'Browse',
+    href: '/browse',
   },
   {
-    label: 'Learn Design',
-    href: '#',
-  },
-  {
-    label: 'Hire Designers',
-    href: '#',
+    label: 'API',
+    href: '/api-info',
   },
 ];
 
