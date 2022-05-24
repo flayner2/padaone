@@ -2,7 +2,10 @@ import type {NextApiRequest, NextApiResponse} from 'next';
 import {prisma} from '../../lib/prisma';
 import type {MetadataPub} from '@prisma/client';
 
-export async function getData(query: string, offset: number = 0) {
+type LanguagePub = string|null;
+
+export async function getData(
+    query: string, offset: number = 0): Promise<MetadataPub[]> {
   const data = await prisma.metadataPub.findMany({
     where: {title: {contains: query}},
     take: 20,
@@ -11,6 +14,22 @@ export async function getData(query: string, offset: number = 0) {
 
   return data;
 }
+
+export async function getUniqueLanguages(): Promise<LanguagePub[]> {
+  const data = await prisma.metadataPub.findMany({
+    distinct: ['languagePub'],
+    select: {languagePub: true},
+    where: {
+      NOT: [{languagePub: null}],
+    },
+  });
+
+  const languages = data.map((languagePub) => languagePub.languagePub);
+
+  return languages;
+}
+
+export async function getJournals() {}
 
 async function handler(
     req: NextApiRequest, res: NextApiResponse<MetadataPub[]>) {
