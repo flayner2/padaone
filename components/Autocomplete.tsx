@@ -7,6 +7,12 @@ import {
   List,
   Spinner,
 } from '@chakra-ui/react';
+import type {
+  CSSObject,
+  FormLabelProps,
+  BoxProps,
+  InputProps,
+} from '@chakra-ui/react';
 import type { ComboBoxProps } from '@react-types/combobox';
 import type { LoadingState } from '@react-types/shared';
 import * as React from 'react';
@@ -21,6 +27,10 @@ interface AutocompleteProps<T> extends ComboBoxProps<T> {
   loadingState?: LoadingState;
   onLoadMore?: () => void;
   button?: React.ReactNode;
+  placeholderProps?: CSSObject;
+  labelProps?: FormLabelProps;
+  boxProps?: BoxProps;
+  inputProps?: InputProps;
 }
 
 export function Autocomplete<T extends object>(props: AutocompleteProps<T>) {
@@ -47,14 +57,22 @@ export function Autocomplete<T extends object>(props: AutocompleteProps<T>) {
     <Box
       display="inline-block"
       position="relative"
+      {...props.boxProps}
     >
-      <FormLabel {...labelProps}>{props.label}</FormLabel>
+      <FormLabel
+        {...labelProps}
+        {...props.labelProps}
+      >
+        {props.label}
+      </FormLabel>
       <InputGroup>
         {button && <InputRightElement>{button}</InputRightElement>}
         <Input
           {...inputProps}
+          {...props.inputProps}
           ref={inputRef}
           size="md"
+          _placeholder={props.placeholderProps}
         />
       </InputGroup>
       {state.isOpen && (
