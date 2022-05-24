@@ -2,13 +2,17 @@ import {
   Box,
   FormControl,
   FormLabel,
-  Spinner,
   Button,
   Text,
   Flex,
   Heading,
   Link,
   Input,
+  InputGroup,
+  InputRightElement,
+  SimpleGrid,
+  GridItem,
+  Select,
 } from '@chakra-ui/react';
 import type { MetadataPub } from '@prisma/client';
 import axios from 'axios';
@@ -17,7 +21,7 @@ import { debounce } from '../lib/debounce';
 import { Autocomplete, Item } from '../components/Autocomplete';
 import { useAsyncList } from 'react-stately';
 import { useState } from 'react';
-import { Search2Icon } from '@chakra-ui/icons';
+import { Search2Icon, TriangleDownIcon } from '@chakra-ui/icons';
 
 const OFFSET_VALUE: number = 20;
 
@@ -69,24 +73,25 @@ function Home(): JSX.Element {
       <Flex
         minHeight="100vh"
         width="100vw"
-        padding="3.5rem 4.5rem"
+        padding="3rem 6rem"
         flex={1}
         flexDirection="column"
         justifyContent="space-betwen"
       >
         <Box>
+          {/* Top text */}
           <Heading
             as="h1"
             size="lg"
             color="protBlack.100"
             fontWeight="semibold"
-            paddingBottom="1rem"
+            marginBottom="1rem"
           >
             Prot-DB
           </Heading>
 
           <Text
-            paddingBottom="1rem"
+            marginBottom="1rem"
             textAlign="justify"
             color="protBlack.100"
           >
@@ -132,11 +137,17 @@ function Home(): JSX.Element {
             according to a set of filters.
           </Text>
         </Box>
+
+        {/* Container for both forms, just for the scroll */}
         <Box id="search-form">
-          <Flex flexDirection="column">
+          {/* Top search form */}
+          <Flex
+            flexDirection="column"
+            marginBottom="2rem"
+          >
             <Text
               fontSize="xl"
-              padding="0.5rem 0 1rem"
+              padding="1rem 0 1rem"
               color="protBlack.100"
             >
               Find a specific paper by title or PMID:
@@ -150,19 +161,219 @@ function Home(): JSX.Element {
                 loadingState={list.loadingState}
                 onLoadMore={list.loadMore}
                 button={
-                  <Button background="protBlue.300">
+                  <Button
+                    background="protBlue.300"
+                    _hover={{
+                      background: 'protBlue.veryLightHover',
+                    }}
+                  >
                     <Search2Icon color="protBlack.100" />
                   </Button>
                 }
-                placeholder="test"
+                placeholder="Start typing to get suggestions..."
+                placeholderProps={{
+                  color: 'protBlue.900',
+                  fontSize: 'sm',
+                }}
+                labelProps={{ color: 'protBlack.100', fontSize: 'md' }}
+                boxProps={{ width: '85%', marginRight: '1rem' }}
+                inputProps={{
+                  background: 'protGray.500',
+                  color: 'protBlack.100',
+                  borderRadius: '8px',
+                }}
               >
                 {(item) => <Item key={item.pmid}>{item.title}</Item>}
               </Autocomplete>
-              <FormControl>
-                <FormLabel>PMID</FormLabel>
-                <Input></Input>
+
+              <FormControl width="40%">
+                <FormLabel
+                  fontSize="md"
+                  color="protBlack.100"
+                >
+                  PMID
+                </FormLabel>
+                <InputGroup>
+                  <InputRightElement>
+                    <Button
+                      background="protBlue.300"
+                      _hover={{
+                        background: 'protBlue.veryLightHover',
+                      }}
+                    >
+                      <Search2Icon color="protBlack.100" />
+                    </Button>
+                  </InputRightElement>
+                  <Input
+                    placeholder="E.g.: 123"
+                    _placeholder={{
+                      color: 'protBlue.900',
+                      fontSize: 'sm',
+                    }}
+                    background="protGray.500"
+                    color="protBlack.100"
+                    borderRadius="8px"
+                  />
+                </InputGroup>
               </FormControl>
             </Flex>
+          </Flex>
+
+          {/* Bottom search form */}
+          <Flex
+            flexDirection="column"
+            justifyContent="space-between"
+          >
+            <Text
+              fontSize="xl"
+              padding="1rem 0 1rem"
+              color="protBlack.100"
+            >
+              Or use the filters below to find a set of papers that match:
+            </Text>
+
+            <form>
+              <Flex
+                background="protGray.500"
+                borderRadius="20px"
+                height="100vh"
+                flexDirection="column"
+                justifyContent="space-between"
+                padding="2.25rem 1rem"
+              >
+                <SimpleGrid
+                  columns={2}
+                  spacing="1rem 1.75rem"
+                  width="100%"
+                  height="90%"
+                >
+                  <GridItem
+                    background="protGray.100"
+                    rowSpan={2}
+                    borderRadius="8px"
+                    display="flex"
+                    flexDirection="column"
+                    padding="1rem 0.5rem"
+                  >
+                    <Text
+                      fontSize="lg"
+                      color="protBlack.100"
+                      alignSelf="center"
+                      marginBottom="2rem"
+                    >
+                      Paper metadata
+                    </Text>
+
+                    <FormControl marginBottom="1.5rem">
+                      <FormLabel
+                        fontSize="md"
+                        color="protBlack.100"
+                      >
+                        Terms
+                      </FormLabel>
+                      <Input
+                        placeholder="E.g.: gene, insulin"
+                        _placeholder={{
+                          color: 'protBlue.900',
+                          fontSize: 'sm',
+                        }}
+                        background="protGray.500"
+                        color="protBlack.100"
+                        borderRadius="8px"
+                      />
+                    </FormControl>
+
+                    <Flex
+                      marginBottom="1rem"
+                      justifyContent="space-between"
+                    >
+                      <FormControl marginRight="1rem">
+                        <FormLabel
+                          fontSize="md"
+                          color="protBlack.100"
+                        >
+                          Last author
+                        </FormLabel>
+                        <Input
+                          placeholder="E.g.: Doe, J."
+                          _placeholder={{
+                            color: 'protBlue.900',
+                            fontSize: 'sm',
+                          }}
+                          background="protGray.500"
+                          color="protBlack.100"
+                          borderRadius="8px"
+                        />
+                      </FormControl>
+                      <FormControl width="60%">
+                        <FormLabel
+                          fontSize="md"
+                          htmlFor="language"
+                          color="protBlack.100"
+                        >
+                          Language
+                        </FormLabel>
+                        <Select
+                          id="language"
+                          placeholder="Choose language"
+                          color="protBlack.100"
+                          fontSize="sm"
+                          background="protGray.500"
+                          borderRadius="8px"
+                          icon={<TriangleDownIcon />}
+                          iconColor="protBlue.900"
+                          iconSize="md"
+                        >
+                          <option value="english">English</option>
+                          <option value="spanish">Spanish</option>
+                          <option value="portuguese">Portuguese</option>
+                        </Select>
+                      </FormControl>
+                    </Flex>
+
+                    <Autocomplete
+                      label="Journal"
+                      items={list.items}
+                      inputValue={list.filterText}
+                      onInputChange={list.setFilterText}
+                      loadingState={list.loadingState}
+                      onLoadMore={list.loadMore}
+                      placeholder="Start typing to get suggestions..."
+                      placeholderProps={{
+                        color: 'protBlue.900',
+                        fontSize: 'sm',
+                      }}
+                      labelProps={{ color: 'protBlack.100', fontSize: 'md' }}
+                      inputProps={{
+                        background: 'protGray.500',
+                        color: 'protBlack.100',
+                        borderRadius: '8px',
+                      }}
+                    >
+                      {(item) => <Item key={item.pmid}>{item.title}</Item>}
+                    </Autocomplete>
+                  </GridItem>
+
+                  <GridItem background="protGray.100"></GridItem>
+                  <GridItem background="protGray.100"></GridItem>
+                </SimpleGrid>
+
+                <Button
+                  type="submit"
+                  width="10%"
+                  alignSelf="center"
+                  color="protBlack.100"
+                  borderRadius="8px"
+                  fontWeight="regular"
+                  background="protBlue.300"
+                  _hover={{
+                    background: 'protBlue.veryLightHover',
+                  }}
+                >
+                  Search
+                </Button>
+              </Flex>
+            </form>
           </Flex>
         </Box>
       </Flex>
