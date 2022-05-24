@@ -1,13 +1,11 @@
-//import type {ThemingProps} from '@chakra-ui/react';
 import {
   Box,
   FormLabel,
   Input,
   InputGroup,
-  InputLeftElement,
   InputRightElement,
+  List,
   Spinner,
-  Text,
 } from '@chakra-ui/react';
 import type { ComboBoxProps } from '@react-types/combobox';
 import type { LoadingState } from '@react-types/shared';
@@ -23,8 +21,6 @@ interface AutocompleteProps<T> extends ComboBoxProps<T> {
   loadingState?: LoadingState;
   onLoadMore?: () => void;
   button?: React.ReactNode;
-  placeholder?: string;
-  //inputSize?: ThemingProps<"Input">
 }
 
 export function Autocomplete<T extends object>(props: AutocompleteProps<T>) {
@@ -59,7 +55,6 @@ export function Autocomplete<T extends object>(props: AutocompleteProps<T>) {
           {...inputProps}
           ref={inputRef}
           size="md"
-          placeholder={props.placeholder}
         />
       </InputGroup>
       {state.isOpen && (
@@ -70,11 +65,26 @@ export function Autocomplete<T extends object>(props: AutocompleteProps<T>) {
         >
           {props.loadingState === 'loading' ||
           props.loadingState === 'filtering' ? (
-            <Spinner
-              color="blue.400"
-              size="sm"
-            />
-          ) : state.collection.size ? (
+            <List
+              overflow="auto"
+              maxHeight="300"
+              my="1"
+              display="flex"
+              flexDirection="column"
+            >
+              <Box
+                pt="4"
+                pb="2"
+                display="flex"
+                justifyContent="center"
+              >
+                <Spinner
+                  color="blue.400"
+                  size="sm"
+                />
+              </Box>
+            </List>
+          ) : (
             <ListBox
               {...listBoxProps}
               listBoxRef={listBoxRef}
@@ -82,8 +92,6 @@ export function Autocomplete<T extends object>(props: AutocompleteProps<T>) {
               loadingState={props.loadingState}
               onLoadMore={props.onLoadMore}
             />
-          ) : (
-            <Text>Term not found</Text>
           )}
         </Popover>
       )}
