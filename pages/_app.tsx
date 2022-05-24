@@ -8,10 +8,11 @@ const theme = extendTheme({
   colors: {
     protBlue: {
       100: '#87b7fe',
-      300: '#0b57ee',
-      400: '#a2c5fa',
+      300: '#a2c5fa',
+      400: '#0b57ee',
       900: '#4a5568',
       darkHover: '#222833',
+      lightHover: '#2f72f9',
     },
     protBlack: {
       100: '#1a202c',
