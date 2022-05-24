@@ -1,4 +1,12 @@
-import { Box, FormControl, FormLabel, Spinner, Button } from '@chakra-ui/react';
+import {
+  Box,
+  FormControl,
+  FormLabel,
+  Spinner,
+  Button,
+  Text,
+  Flex,
+} from '@chakra-ui/react';
 import type { MetadataPub } from '@prisma/client';
 import axios from 'axios';
 import Head from 'next/head';
@@ -40,7 +48,10 @@ function Home(): JSX.Element {
   });
 
   return (
-    <div className={styles.container}>
+    <Flex
+      display="flex"
+      justifyContent="center"
+    >
       <Head>
         <title>Prot DB</title>
         <meta
@@ -53,7 +64,15 @@ function Home(): JSX.Element {
         />
       </Head>
 
-      <main className={styles.main}>
+      <Flex
+        minHeight="100vh"
+        width="100vw"
+        padding="1rem"
+        flex={1}
+        flexDirection="column"
+        justifyContent="top"
+        alignItems="center"
+      >
         <Autocomplete
           label="Star Wars Character Search"
           items={list.items}
@@ -70,8 +89,8 @@ function Home(): JSX.Element {
         >
           {(item) => <Item key={item.pmid}>{item.title}</Item>}
         </Autocomplete>
-      </main>
-    </div>
+      </Flex>
+    </Flex>
   );
 }
 
