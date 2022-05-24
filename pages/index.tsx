@@ -1,4 +1,4 @@
-import { Box, FormControl, FormLabel, Spinner } from '@chakra-ui/react';
+import { Box, FormControl, FormLabel, Spinner, Button } from '@chakra-ui/react';
 import type { MetadataPub } from '@prisma/client';
 import axios from 'axios';
 import Head from 'next/head';
@@ -61,7 +61,12 @@ function Home(): JSX.Element {
           onInputChange={list.setFilterText}
           loadingState={list.loadingState}
           onLoadMore={list.loadMore}
-          icon={<Search2Icon color="red" />}
+          button={
+            <Button background="protBlue.400">
+              <Search2Icon color="protBlack.100" />
+            </Button>
+          }
+          placeholder="test"
         >
           {(item) => <Item key={item.pmid}>{item.title}</Item>}
         </Autocomplete>
