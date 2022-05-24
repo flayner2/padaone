@@ -1,15 +1,1 @@
-.container {
-  display: flex;
-  justify-content: center;
-}
 
-.main {
-  min-height: 100vh;
-  width: 100vw;
-  padding: 1rem;
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  justify-content: top;
-  align-items: center;
-}
