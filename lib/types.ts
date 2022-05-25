@@ -11,3 +11,5 @@ export interface DebounceReturn<F extends FunctionWithArguments> extends
   0: (...args: Parameters<F>) => Promise<ReturnType<F>>;
   1: () => void;
 }
+
+export type LanguagePub = string|null;
