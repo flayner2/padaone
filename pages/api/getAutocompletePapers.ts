@@ -1,20 +1,24 @@
-import type {MetadataPub} from '@prisma/client';
 import type {NextApiRequest, NextApiResponse} from 'next';
 import {prisma} from '../../lib/prisma';
+import type {PaperTitlePMID} from '../../lib/types';
 
 export async function getPapersByTitle(
-    query: string, offset: number = 0): Promise<MetadataPub[]> {
+    query: string, offset: number = 0): Promise<PaperTitlePMID[]> {
   const data = await prisma.metadataPub.findMany({
     where: {title: {contains: query}},
     take: 20,
     skip: offset,
+    select: {
+      title: true,
+      pmid: true,
+    },
   });
 
   return data;
 }
 
 async function handler(
-    req: NextApiRequest, res: NextApiResponse<MetadataPub[]>) {
+    req: NextApiRequest, res: NextApiResponse<PaperTitlePMID[]>) {
   const title = Array.isArray(req.query.paperTitle) ? req.query.paperTitle[0] :
                                                       req.query.paperTitle;
   const offset = parseInt(
