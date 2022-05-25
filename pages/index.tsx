@@ -24,10 +24,10 @@ import { Autocomplete, Item } from '../components/Autocomplete';
 import { debounce } from '../lib/debounce';
 import { prisma } from '../lib/prisma';
 import type {
+  AsyncListDataDebouncedReturn,
   Journal,
   LanguagePub,
   PaperTitlePMID,
-  AsyncListDataDebouncedReturn,
 } from '../lib/types';
 
 const OFFSET_VALUE: number = 20;
