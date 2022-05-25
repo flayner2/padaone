@@ -2,7 +2,7 @@ import type {NextApiRequest, NextApiResponse} from 'next';
 import {prisma} from '../../lib/prisma';
 import type {Journal} from '../../lib/types';
 
-export async function getJournalByName(
+export async function getJournalsByName(
     query: string, offset: number = 0): Promise<Journal[]> {
   const data = await prisma.metadataPub.findMany({
     where: {
@@ -31,7 +31,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<Journal[]>) {
   const offset = parseInt(
       Array.isArray(req.query.offset) ? req.query.offset[0] : req.query.offset);
 
-  const data = await getJournalByName(journal, offset ? offset : 0);
+  const data = await getJournalsByName(journal, offset ? offset : 0);
 
   res.status(200).send(data);
 }
