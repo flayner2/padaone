@@ -22,3 +22,8 @@ export interface PaperTitlePMID {
   title: string;
   pmid: number;
 }
+
+export interface AsyncListDataDebouncedReturn<T> {
+  items: T[];
+  cursor: string;
+}
