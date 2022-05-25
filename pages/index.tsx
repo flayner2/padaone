@@ -23,7 +23,7 @@ import { useAsyncList } from 'react-stately';
 import { Autocomplete, Item } from '../components/Autocomplete';
 import { debounce } from '../lib/debounce';
 import { prisma } from '../lib/prisma';
-import type { LanguagePub, PaperTitlePMID } from '../lib/types';
+import type { Journal, LanguagePub, PaperTitlePMID } from '../lib/types';
 
 const OFFSET_VALUE: number = 20;
 
@@ -32,12 +32,12 @@ function Home({
 }: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
   const [offset, setOffset] = useState(0);
 
-  let list = useAsyncList<PaperTitlePMID>({
+  let paperList = useAsyncList<PaperTitlePMID>({
     async load({ signal, cursor, filterText }) {
       const [debouncedRequest] = debounce(
         async (signal, cursor, filterText) => {
           let res = await axios.get(
-            cursor || `/api/search?paperTitle=${filterText}`,
+            cursor || `/api/getAutocompletePapers?paperTitle=${filterText}`,
             { signal }
           );
 
@@ -52,7 +52,32 @@ function Home({
 
       return {
         items: data,
-        cursor: `/api/search?paperTitle=${filterText}&offset=${offset}`,
+        cursor: `/api/getAutocompletePapers?paperTitle=${filterText}&offset=${offset}`,
+      };
+    },
+  });
+
+  let journalList = useAsyncList<Journal>({
+    async load({ signal, cursor, filterText }) {
+      const [debouncedRequest] = debounce(
+        async (signal, cursor, filterText) => {
+          let res = await axios.get(
+            cursor || `/api/getAutocompleteJournals?journalName=${filterText}`,
+            { signal }
+          );
+
+          return res.data;
+        },
+        500
+      );
+
+      let data = await debouncedRequest(signal, cursor, filterText);
+
+      setOffset(offset + OFFSET_VALUE);
+
+      return {
+        items: data,
+        cursor: `/api/getAutocompleteJournals?journalName=${filterText}&offset=${offset}`,
       };
     },
   });
@@ -159,11 +184,11 @@ function Home({
             <Flex justifyContent="space-between">
               <Autocomplete
                 label="Title"
-                items={list.items}
-                inputValue={list.filterText}
-                onInputChange={list.setFilterText}
-                loadingState={list.loadingState}
-                onLoadMore={list.loadMore}
+                items={paperList.items}
+                inputValue={paperList.filterText}
+                onInputChange={paperList.setFilterText}
+                loadingState={paperList.loadingState}
+                onLoadMore={paperList.loadMore}
                 button={
                   <Button
                     background="protBlue.300"
@@ -342,11 +367,11 @@ function Home({
 
                     <Autocomplete
                       label="Journal"
-                      items={list.items}
-                      inputValue={list.filterText}
-                      onInputChange={list.setFilterText}
-                      loadingState={list.loadingState}
-                      onLoadMore={list.loadMore}
+                      items={journalList.items}
+                      inputValue={journalList.filterText}
+                      onInputChange={journalList.setFilterText}
+                      loadingState={journalList.loadingState}
+                      onLoadMore={journalList.loadMore}
                       placeholder="Start typing to get suggestions..."
                       placeholderProps={{
                         color: 'protBlue.900',
@@ -359,7 +384,11 @@ function Home({
                         borderRadius: '8px',
                       }}
                     >
-                      {(item) => <Item key={item.pmid}>{item.title}</Item>}
+                      {(item) => (
+                        <Item key={item.journal?.toLowerCase()}>
+                          {item.journal}
+                        </Item>
+                      )}
                     </Autocomplete>
                   </GridItem>
 
