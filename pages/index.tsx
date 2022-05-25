@@ -1,31 +1,36 @@
+import { Search2Icon, TriangleDownIcon } from '@chakra-ui/icons';
 import {
   Box,
+  Button,
+  Flex,
   FormControl,
   FormLabel,
-  Button,
-  Text,
-  Flex,
+  GridItem,
   Heading,
-  Link,
   Input,
   InputGroup,
   InputRightElement,
-  SimpleGrid,
-  GridItem,
+  Link,
   Select,
+  SimpleGrid,
+  Text,
 } from '@chakra-ui/react';
 import type { MetadataPub } from '@prisma/client';
 import axios from 'axios';
+import type { InferGetStaticPropsType } from 'next';
 import Head from 'next/head';
-import { debounce } from '../lib/debounce';
-import { Autocomplete, Item } from '../components/Autocomplete';
-import { useAsyncList } from 'react-stately';
 import { useState } from 'react';
-import { Search2Icon, TriangleDownIcon } from '@chakra-ui/icons';
+import { useAsyncList } from 'react-stately';
+import { Autocomplete, Item } from '../components/Autocomplete';
+import { debounce } from '../lib/debounce';
+import { prisma } from '../lib/prisma';
+import type { LanguagePub } from '../lib/types';
 
 const OFFSET_VALUE: number = 20;
 
-function Home(): JSX.Element {
+function Home({
+  languages,
+}: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
   const [offset, setOffset] = useState(0);
 
   let list = useAsyncList<MetadataPub>({
@@ -324,9 +329,14 @@ function Home(): JSX.Element {
                           iconColor="protBlue.900"
                           iconSize="md"
                         >
-                          <option value="english">English</option>
-                          <option value="spanish">Spanish</option>
-                          <option value="portuguese">Portuguese</option>
+                          {languages.map((language) => (
+                            <option
+                              value={language?.toLowerCase()}
+                              key={language?.toLowerCase()}
+                            >
+                              {language}
+                            </option>
+                          ))}
                         </Select>
                       </FormControl>
                     </Flex>
@@ -379,6 +389,22 @@ function Home(): JSX.Element {
       </Flex>
     </Flex>
   );
+}
+
+export async function getStaticProps() {
+  const data = await prisma.metadataPub.findMany({
+    distinct: ['languagePub'],
+    select: { languagePub: true },
+    where: {
+      NOT: [{ languagePub: null }],
+    },
+  });
+
+  const languages: LanguagePub[] = data.map(
+    (languagePub) => languagePub.languagePub
+  );
+
+  return { props: { languages } };
 }
 
 export default Home;
