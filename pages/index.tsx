@@ -23,7 +23,12 @@ import { useAsyncList } from 'react-stately';
 import { Autocomplete, Item } from '../components/Autocomplete';
 import { debounce } from '../lib/debounce';
 import { prisma } from '../lib/prisma';
-import type { Journal, LanguagePub, PaperTitlePMID } from '../lib/types';
+import type {
+  Journal,
+  LanguagePub,
+  PaperTitlePMID,
+  AsyncListDataDebouncedReturn,
+} from '../lib/types';
 
 const OFFSET_VALUE: number = 20;
 
@@ -32,53 +37,49 @@ function Home({
 }: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
   const [offset, setOffset] = useState(0);
 
+  async function getAsyncListDataDebounced<T>(
+    queryUrl: string,
+    signal: AbortSignal,
+    cursor: string | undefined,
+    filterText: string | undefined
+  ): Promise<AsyncListDataDebouncedReturn<T>> {
+    const [debouncedRequest] = debounce(async (signal, cursor, filterText) => {
+      let res = await axios.get(cursor || `${queryUrl}=${filterText}`, {
+        signal,
+      });
+
+      return res.data;
+    }, 500);
+
+    let data = await debouncedRequest(signal, cursor, filterText);
+
+    setOffset((previousOffset) => previousOffset + OFFSET_VALUE);
+
+    return {
+      items: data,
+      cursor: `${queryUrl}=${filterText}&offset=${offset}`,
+    };
+  }
+
   let paperList = useAsyncList<PaperTitlePMID>({
     async load({ signal, cursor, filterText }) {
-      const [debouncedRequest] = debounce(
-        async (signal, cursor, filterText) => {
-          let res = await axios.get(
-            cursor || `/api/getAutocompletePapers?paperTitle=${filterText}`,
-            { signal }
-          );
-
-          return res.data;
-        },
-        500
+      return getAsyncListDataDebounced(
+        '/api/getAutocompletePapers?paperTitle',
+        signal,
+        cursor,
+        filterText
       );
-
-      let data = await debouncedRequest(signal, cursor, filterText);
-
-      setOffset(offset + OFFSET_VALUE);
-
-      return {
-        items: data,
-        cursor: `/api/getAutocompletePapers?paperTitle=${filterText}&offset=${offset}`,
-      };
     },
   });
 
   let journalList = useAsyncList<Journal>({
     async load({ signal, cursor, filterText }) {
-      const [debouncedRequest] = debounce(
-        async (signal, cursor, filterText) => {
-          let res = await axios.get(
-            cursor || `/api/getAutocompleteJournals?journalName=${filterText}`,
-            { signal }
-          );
-
-          return res.data;
-        },
-        500
+      return getAsyncListDataDebounced(
+        '/api/getAutocompleteJournals?journalName',
+        signal,
+        cursor,
+        filterText
       );
-
-      let data = await debouncedRequest(signal, cursor, filterText);
-
-      setOffset(offset + OFFSET_VALUE);
-
-      return {
-        items: data,
-        cursor: `/api/getAutocompleteJournals?journalName=${filterText}&offset=${offset}`,
-      };
     },
   });
 
@@ -392,8 +393,20 @@ function Home({
                     </Autocomplete>
                   </GridItem>
 
-                  <GridItem background="protGray.100"></GridItem>
-                  <GridItem background="protGray.100"></GridItem>
+                  <GridItem
+                    background="protGray.100"
+                    borderRadius="8px"
+                    display="flex"
+                    flexDirection="column"
+                    padding="1rem 0.5rem"
+                  ></GridItem>
+                  <GridItem
+                    background="protGray.100"
+                    borderRadius="8px"
+                    display="flex"
+                    flexDirection="column"
+                    padding="1rem 0.5rem"
+                  ></GridItem>
                 </SimpleGrid>
 
                 <Button
