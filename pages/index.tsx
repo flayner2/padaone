@@ -29,6 +29,8 @@ import type {
   LanguagePub,
   PaperTitlePMID,
 } from '../lib/types';
+import { DateRangePicker } from '../components/DateRangePicker';
+import { today, now, getLocalTimeZone } from '@internationalized/date';
 
 const OFFSET_VALUE: number = 20;
 
@@ -391,6 +393,14 @@ function Home({
                         </Item>
                       )}
                     </Autocomplete>
+                    <DateRangePicker
+                      label="Date and time range"
+                      minValue={today(getLocalTimeZone())}
+                      defaultValue={{
+                        start: now(getLocalTimeZone()),
+                        end: now(getLocalTimeZone()).add({ weeks: 1 }),
+                      }}
+                    />
                   </GridItem>
 
                   <GridItem
