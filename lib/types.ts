@@ -13,3 +13,8 @@ export interface DebounceReturn<F extends FunctionWithArguments> extends
 }
 
 export type LanguagePub = string|null;
+
+export interface PaperTitlePMID {
+  title: string;
+  pmid: number;
+}
