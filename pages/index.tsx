@@ -15,7 +15,6 @@ import {
   SimpleGrid,
   Text,
 } from '@chakra-ui/react';
-import type { MetadataPub } from '@prisma/client';
 import axios from 'axios';
 import type { InferGetStaticPropsType } from 'next';
 import Head from 'next/head';
@@ -24,7 +23,7 @@ import { useAsyncList } from 'react-stately';
 import { Autocomplete, Item } from '../components/Autocomplete';
 import { debounce } from '../lib/debounce';
 import { prisma } from '../lib/prisma';
-import type { LanguagePub } from '../lib/types';
+import type { LanguagePub, PaperTitlePMID } from '../lib/types';
 
 const OFFSET_VALUE: number = 20;
 
@@ -33,7 +32,7 @@ function Home({
 }: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
   const [offset, setOffset] = useState(0);
 
-  let list = useAsyncList<MetadataPub>({
+  let list = useAsyncList<PaperTitlePMID>({
     async load({ signal, cursor, filterText }) {
       const [debouncedRequest] = debounce(
         async (signal, cursor, filterText) => {
