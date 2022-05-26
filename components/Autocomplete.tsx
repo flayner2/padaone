@@ -97,7 +97,7 @@ export function Autocomplete<T extends object>(props: AutocompleteProps<T>) {
                 justifyContent="center"
               >
                 <Spinner
-                  color="blue.400"
+                  color="protBlue.300"
                   size="sm"
                 />
               </Box>
