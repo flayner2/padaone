@@ -25,15 +25,13 @@ import { useState } from 'react';
 import { useAsyncList } from 'react-stately';
 import { Autocomplete, Item } from '../components/Autocomplete';
 import { debounce } from '../lib/debounce';
-import { prisma } from '../lib/prisma';
 import type {
   AsyncListDataDebouncedReturn,
   Journal,
-  LanguagePub,
   PaperTitlePMID,
 } from '../lib/types';
-import { today, now, getLocalTimeZone } from '@internationalized/date';
 import DatePicker from '../components/DatePicker';
+import { getAllUniqueLanguages } from '../lib/getStaticData';
 
 const OFFSET_VALUE: number = 20;
 
@@ -43,6 +41,7 @@ function Home({
   const [offset, setOffset] = useState(0);
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
+  const [allDatesChecked, setAllDatesChecked] = useState(true);
 
   async function getAsyncListDataDebounced<T>(
     queryUrl: string,
@@ -413,6 +412,7 @@ function Home({
                           endDate={endDate}
                           showMonthYearPicker
                           selectsStart
+                          disabled={allDatesChecked}
                         />
 
                         <DatePicker
@@ -425,7 +425,20 @@ function Home({
                           minDate={startDate}
                           showMonthYearPicker
                           selectsEnd
+                          disabled={allDatesChecked}
                         />
+                        <Checkbox
+                          value="any"
+                          colorScheme="blue"
+                          iconColor="protGray.100"
+                          alignSelf="flex-end"
+                          defaultChecked
+                          onChange={() => {
+                            setAllDatesChecked((current) => !current);
+                          }}
+                        >
+                          Any
+                        </Checkbox>
                       </HStack>
                     </FormControl>
 
@@ -511,17 +524,7 @@ function Home({
 }
 
 export async function getStaticProps() {
-  const data = await prisma.metadataPub.findMany({
-    distinct: ['languagePub'],
-    select: { languagePub: true },
-    where: {
-      NOT: [{ languagePub: null }],
-    },
-  });
-
-  const languages: LanguagePub[] = data.map(
-    (languagePub) => languagePub.languagePub
-  );
+  const languages = await getAllUniqueLanguages();
 
   return { props: { languages } };
 }
