@@ -15,6 +15,9 @@ const theme = extendTheme({
       lightHover: '#2f72f9',
       veryLightHover: '#8ab6f7',
     },
+    blue: {
+      500: '#87b7fe',
+    },
     protBlack: {
       100: '#1a202c',
     },
