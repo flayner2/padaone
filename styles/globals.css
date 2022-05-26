@@ -23,6 +23,10 @@ a {
   color: #1a202c !important;
 }
 
+.react-datepicker__month-text:hover {
+  background-color: #e2e8f0 !important;
+}
+
 .react-datepicker__month--selected,
 .react-datepicker__month--in-selecting-range,
 .react-datepicker__month--in-range,
@@ -36,7 +40,7 @@ a {
 .react-datepicker__month--selected:hover,
 .react-datepicker__month--in-selecting-range:hover,
 .react-datepicker__month--in-range:hover {
-  background-color: #2f72f9 !important;
+  background-color: #a2c5fa !important;
 }
 
 .react-datepicker__month-text--today,
