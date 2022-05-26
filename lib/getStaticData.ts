@@ -1,12 +1,13 @@
+import {Prisma} from '@prisma/client';
 import {prisma} from './prisma';
-import type {LanguagePub} from './types';
+import type {LanguagePub, MinMaxYearPub} from './types';
 
 export async function getAllUniqueLanguages(): Promise<LanguagePub[]> {
   const data = await prisma.metadataPub.findMany({
     distinct: ['languagePub'],
     select: {languagePub: true},
     where: {
-      NOT: [{languagePub: null}],
+      languagePub: {not: null},
     },
   });
 
@@ -16,8 +17,16 @@ export async function getAllUniqueLanguages(): Promise<LanguagePub[]> {
   return languages;
 }
 
-export async function getPubDateRange() {
-  const data = await prisma.metadataPub.findMany({
-    select: {pubDate: true, yearPub: true},
+export async function getPubDateRange():
+    Promise<Prisma.GetMetadataPubAggregateType<MinMaxYearPub>> {
+  const minMaxYear = await prisma.metadataPub.aggregate({
+    _max: {
+      yearPub: true,
+    },
+    _min: {
+      yearPub: true,
+    },
   });
+
+  return minMaxYear;
 }
