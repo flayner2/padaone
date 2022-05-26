@@ -68,7 +68,7 @@ function WithSubnavigation() {
           <Link
             textAlign={useBreakpointValue({ base: 'center', md: 'left' })}
             fontFamily={'heading'}
-            color="protBlack.100"
+            color="protBlack.800"
             href="/"
             _hover={{ textDecoration: 'none' }}
           >
