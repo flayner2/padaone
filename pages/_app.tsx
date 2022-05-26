@@ -19,7 +19,8 @@ const theme = extendTheme({
       500: '#87b7fe',
     },
     protBlack: {
-      100: '#1a202c',
+      700: '#303a4e',
+      800: '#1a202c',
     },
     protGray: {
       100: '#f5f5f5',
