@@ -8,9 +8,7 @@ export async function getJournalsByName(
     where: {
       journal: {contains: query},
       AND: {
-        NOT: {
-          journal: null,
-        },
+        journal: {not: null},
       },
     },
     take: 20,
