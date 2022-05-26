@@ -14,6 +14,9 @@ import {
   Select,
   SimpleGrid,
   Text,
+  HStack,
+  Checkbox,
+  CheckboxGroup,
 } from '@chakra-ui/react';
 import axios from 'axios';
 import type { InferGetStaticPropsType } from 'next';
@@ -296,7 +299,7 @@ function Home({
                       Paper metadata
                     </Text>
 
-                    <FormControl marginBottom="1.5rem">
+                    <FormControl marginBottom="1rem">
                       <FormLabel
                         fontSize="md"
                         color="protBlack.100"
@@ -315,11 +318,11 @@ function Home({
                       />
                     </FormControl>
 
-                    <Flex
+                    <HStack
                       marginBottom="1rem"
                       justifyContent="space-between"
                     >
-                      <FormControl marginRight="1rem">
+                      <FormControl marginRight="0.5rem">
                         <FormLabel
                           fontSize="md"
                           color="protBlack.100"
@@ -337,7 +340,7 @@ function Home({
                           borderRadius="8px"
                         />
                       </FormControl>
-                      <FormControl width="60%">
+                      <FormControl width="55%">
                         <FormLabel
                           fontSize="md"
                           htmlFor="language"
@@ -366,7 +369,7 @@ function Home({
                           ))}
                         </Select>
                       </FormControl>
-                    </Flex>
+                    </HStack>
 
                     <Autocomplete
                       label="Journal"
@@ -386,6 +389,7 @@ function Home({
                         color: 'protBlack.100',
                         borderRadius: '8px',
                       }}
+                      boxProps={{ marginBottom: '1rem' }}
                     >
                       {(item) => (
                         <Item key={item.journal?.toLowerCase()}>
@@ -393,14 +397,73 @@ function Home({
                         </Item>
                       )}
                     </Autocomplete>
-                    <DateRangePicker
+                    <FormControl marginBottom="1.5rem">
+                      <FormLabel
+                        fontSize="md"
+                        color="protBlack.100"
+                      >
+                        Placeholder
+                      </FormLabel>
+                      <Input
+                        placeholder="This will be the date picker"
+                        _placeholder={{
+                          color: 'protBlue.900',
+                          fontSize: 'sm',
+                        }}
+                        background="protGray.500"
+                        color="protBlack.100"
+                        borderRadius="8px"
+                      />
+                    </FormControl>
+                    {/*<DateRangePicker
                       label="Date and time range"
                       minValue={today(getLocalTimeZone())}
                       defaultValue={{
                         start: now(getLocalTimeZone()),
                         end: now(getLocalTimeZone()).add({ weeks: 1 }),
                       }}
-                    />
+                      />*/}
+                    <FormControl>
+                      <FormLabel>Number of citations</FormLabel>
+                      <CheckboxGroup colorScheme="blue">
+                        <HStack
+                          spacing="2rem"
+                          paddingLeft="1rem"
+                        >
+                          <Checkbox
+                            value="1"
+                            iconColor="protGray.100"
+                            verticalAlign="top"
+                          >
+                            0 - 10
+                          </Checkbox>
+                          <Checkbox
+                            value="2"
+                            iconColor="protGray.100"
+                          >
+                            11 - 21
+                          </Checkbox>
+                          <Checkbox
+                            value="3"
+                            iconColor="protGray.100"
+                          >
+                            21 - 50
+                          </Checkbox>
+                          <Checkbox
+                            value="4"
+                            iconColor="protGray.100"
+                          >
+                            51 - 100
+                          </Checkbox>
+                          <Checkbox
+                            value="5"
+                            iconColor="protGray.100"
+                          >
+                            {'>'} 100
+                          </Checkbox>
+                        </HStack>
+                      </CheckboxGroup>
+                    </FormControl>
                   </GridItem>
 
                   <GridItem
