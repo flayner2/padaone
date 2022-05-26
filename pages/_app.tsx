@@ -1,8 +1,8 @@
-import '../styles/globals.css';
+import { ChakraProvider, extendTheme } from '@chakra-ui/react';
 import type { AppProps } from 'next/app';
-import { ChakraProvider } from '@chakra-ui/react';
+import 'react-datepicker/dist/react-datepicker.css';
 import WithSubnavigation from '../components/Navbar';
-import { extendTheme } from '@chakra-ui/react';
+import '../styles/globals.css';
 
 const theme = extendTheme({
   colors: {
