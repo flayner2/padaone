@@ -45,3 +45,8 @@ export interface CalendarContainerProps {
   showPopperArrow?: boolean|undefined;
   arrowProps?: {[propName: string]: any}|undefined;
 }
+
+export interface MinMaxYearPub {
+  _min: {yearPub: true};
+  _max: {yearPub: true};
+}
