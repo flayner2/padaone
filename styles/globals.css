@@ -18,3 +18,34 @@ a {
 * {
   box-sizing: border-box;
 }
+
+.react-datepicker__month {
+  color: #1a202c !important;
+}
+
+.react-datepicker__month--selected,
+.react-datepicker__month--in-selecting-range,
+.react-datepicker__month--in-range,
+.react-datepicker__quarter--selected,
+.react-datepicker__quarter--in-selecting-range,
+.react-datepicker__quarter--in-range {
+  background-color: #87b7fe !important;
+  color: #1a202c !important;
+}
+
+.react-datepicker__month--selected:hover,
+.react-datepicker__month--in-selecting-range:hover,
+.react-datepicker__month--in-range:hover {
+  background-color: #2f72f9 !important;
+}
+
+.react-datepicker__month-text--today,
+.react-datepicker__quarter-text--today,
+.react-datepicker-year-header,
+.react-datepicker__current-month {
+  font-weight: normal !important;
+}
+
+.react-datepicker__header {
+  border-bottom: 1px solid #e2e8f0 !important;
+}
