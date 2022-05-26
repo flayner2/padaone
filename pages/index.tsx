@@ -32,8 +32,8 @@ import type {
   LanguagePub,
   PaperTitlePMID,
 } from '../lib/types';
-import { DateRangePicker } from '../components/DateRangePicker';
 import { today, now, getLocalTimeZone } from '@internationalized/date';
+import DatePicker from '../components/DatePicker';
 
 const OFFSET_VALUE: number = 20;
 
@@ -41,6 +41,8 @@ function Home({
   languages,
 }: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
   const [offset, setOffset] = useState(0);
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
 
   async function getAsyncListDataDebounced<T>(
     queryUrl: string,
@@ -118,7 +120,7 @@ function Home({
           <Heading
             as="h1"
             size="lg"
-            color="protBlack.100"
+            color="protBlack.800"
             fontWeight="semibold"
             marginBottom="1rem"
           >
@@ -128,7 +130,7 @@ function Home({
           <Text
             marginBottom="1rem"
             textAlign="justify"
-            color="protBlack.100"
+            color="protBlack.800"
           >
             XXX (database’s name) is a database that hosts scientific papers
             predicted to describe protective antigens (PAgs) from a variety of
@@ -183,7 +185,7 @@ function Home({
             <Text
               fontSize="xl"
               padding="1rem 0 1rem"
-              color="protBlack.100"
+              color="protBlack.800"
             >
               Find a specific paper by title or PMID:
             </Text>
@@ -202,7 +204,7 @@ function Home({
                       background: 'protBlue.veryLightHover',
                     }}
                   >
-                    <Search2Icon color="protBlack.100" />
+                    <Search2Icon color="protBlack.800" />
                   </Button>
                 }
                 placeholder="Start typing to get suggestions..."
@@ -210,11 +212,11 @@ function Home({
                   color: 'protBlue.900',
                   fontSize: 'sm',
                 }}
-                labelProps={{ color: 'protBlack.100', fontSize: 'md' }}
+                labelProps={{ color: 'protBlack.800', fontSize: 'md' }}
                 boxProps={{ width: '85%', marginRight: '1rem' }}
                 inputProps={{
                   background: 'protGray.500',
-                  color: 'protBlack.100',
+                  color: 'protBlack.800',
                   borderRadius: '8px',
                 }}
               >
@@ -224,7 +226,7 @@ function Home({
               <FormControl width="40%">
                 <FormLabel
                   fontSize="md"
-                  color="protBlack.100"
+                  color="protBlack.800"
                 >
                   PMID
                 </FormLabel>
@@ -236,7 +238,7 @@ function Home({
                         background: 'protBlue.veryLightHover',
                       }}
                     >
-                      <Search2Icon color="protBlack.100" />
+                      <Search2Icon color="protBlack.800" />
                     </Button>
                   </InputRightElement>
                   <Input
@@ -246,7 +248,7 @@ function Home({
                       fontSize: 'sm',
                     }}
                     background="protGray.500"
-                    color="protBlack.100"
+                    color="protBlack.800"
                     borderRadius="8px"
                   />
                 </InputGroup>
@@ -262,7 +264,7 @@ function Home({
             <Text
               fontSize="xl"
               padding="1rem 0 1rem"
-              color="protBlack.100"
+              color="protBlack.800"
             >
               Or use the filters below to find a set of papers that match:
             </Text>
@@ -271,7 +273,7 @@ function Home({
               <Flex
                 background="protGray.500"
                 borderRadius="20px"
-                height="100vh"
+                height="100%"
                 flexDirection="column"
                 justifyContent="space-between"
                 padding="2.25rem 1rem"
@@ -281,6 +283,7 @@ function Home({
                   spacing="1rem 1.75rem"
                   width="100%"
                   height="90%"
+                  marginBottom="1.5rem"
                 >
                   <GridItem
                     background="protGray.100"
@@ -288,11 +291,11 @@ function Home({
                     borderRadius="8px"
                     display="flex"
                     flexDirection="column"
-                    padding="1rem 0.5rem"
+                    padding="1rem 0.5rem 1.5rem"
                   >
                     <Text
                       fontSize="lg"
-                      color="protBlack.100"
+                      color="protBlack.800"
                       alignSelf="center"
                       marginBottom="2rem"
                     >
@@ -302,7 +305,7 @@ function Home({
                     <FormControl marginBottom="1rem">
                       <FormLabel
                         fontSize="md"
-                        color="protBlack.100"
+                        color="protBlack.800"
                       >
                         Terms
                       </FormLabel>
@@ -313,7 +316,7 @@ function Home({
                           fontSize: 'sm',
                         }}
                         background="protGray.500"
-                        color="protBlack.100"
+                        color="protBlack.800"
                         borderRadius="8px"
                       />
                     </FormControl>
@@ -325,7 +328,7 @@ function Home({
                       <FormControl marginRight="0.5rem">
                         <FormLabel
                           fontSize="md"
-                          color="protBlack.100"
+                          color="protBlack.800"
                         >
                           Last author
                         </FormLabel>
@@ -336,7 +339,7 @@ function Home({
                             fontSize: 'sm',
                           }}
                           background="protGray.500"
-                          color="protBlack.100"
+                          color="protBlack.800"
                           borderRadius="8px"
                         />
                       </FormControl>
@@ -344,14 +347,14 @@ function Home({
                         <FormLabel
                           fontSize="md"
                           htmlFor="language"
-                          color="protBlack.100"
+                          color="protBlack.800"
                         >
                           Language
                         </FormLabel>
                         <Select
                           id="language"
                           placeholder="Choose language"
-                          color="protBlack.100"
+                          color="protBlack.800"
                           fontSize="sm"
                           background="protGray.500"
                           borderRadius="8px"
@@ -383,10 +386,10 @@ function Home({
                         color: 'protBlue.900',
                         fontSize: 'sm',
                       }}
-                      labelProps={{ color: 'protBlack.100', fontSize: 'md' }}
+                      labelProps={{ color: 'protBlack.800', fontSize: 'md' }}
                       inputProps={{
                         background: 'protGray.500',
-                        color: 'protBlack.100',
+                        color: 'protBlack.800',
                         borderRadius: '8px',
                       }}
                       boxProps={{ marginBottom: '1rem' }}
@@ -397,32 +400,35 @@ function Home({
                         </Item>
                       )}
                     </Autocomplete>
-                    <FormControl marginBottom="1.5rem">
-                      <FormLabel
-                        fontSize="md"
-                        color="protBlack.100"
-                      >
-                        Placeholder
-                      </FormLabel>
-                      <Input
-                        placeholder="This will be the date picker"
-                        _placeholder={{
-                          color: 'protBlue.900',
-                          fontSize: 'sm',
-                        }}
-                        background="protGray.500"
-                        color="protBlack.100"
-                        borderRadius="8px"
-                      />
+
+                    <FormControl marginBottom="1rem">
+                      <FormLabel>Publication date</FormLabel>
+                      <HStack>
+                        <DatePicker
+                          inputLabel="From"
+                          selected={startDate}
+                          onChange={(date: Date) => setStartDate(date)}
+                          dateFormat="MM/yyyy"
+                          startDate={startDate}
+                          endDate={endDate}
+                          showMonthYearPicker
+                          selectsStart
+                        />
+
+                        <DatePicker
+                          inputLabel="To"
+                          selected={endDate}
+                          onChange={(date: Date) => setEndDate(date)}
+                          dateFormat="MM/yyyy"
+                          startDate={startDate}
+                          endDate={endDate}
+                          minDate={startDate}
+                          showMonthYearPicker
+                          selectsEnd
+                        />
+                      </HStack>
                     </FormControl>
-                    {/*<DateRangePicker
-                      label="Date and time range"
-                      minValue={today(getLocalTimeZone())}
-                      defaultValue={{
-                        start: now(getLocalTimeZone()),
-                        end: now(getLocalTimeZone()).add({ weeks: 1 }),
-                      }}
-                      />*/}
+
                     <FormControl>
                       <FormLabel>Number of citations</FormLabel>
                       <CheckboxGroup colorScheme="blue">
@@ -485,7 +491,7 @@ function Home({
                   type="submit"
                   width="10%"
                   alignSelf="center"
-                  color="protBlack.100"
+                  color="protBlack.800"
                   borderRadius="8px"
                   fontWeight="regular"
                   background="protBlue.300"
