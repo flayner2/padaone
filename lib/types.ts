@@ -1,3 +1,6 @@
+import type {InputProps} from '@chakra-ui/react';
+import type {ReactDatePickerProps} from 'react-datepicker';
+
 export interface FunctionWithArguments {
   (...args: any): any;
 }
@@ -26,4 +29,19 @@ export interface PaperTitlePMID {
 export interface AsyncListDataDebouncedReturn<T> {
   items: T[];
   cursor: string;
+}
+
+export interface DatePickerInputProps extends InputProps {
+  inputLabel?: string;
+}
+
+export interface CustomDatePickerProps extends ReactDatePickerProps {
+  inputLabel?: string;
+}
+
+export interface CalendarContainerProps {
+  className?: string|undefined;
+  children?: React.ReactNode|undefined;
+  showPopperArrow?: boolean|undefined;
+  arrowProps?: {[propName: string]: any}|undefined;
 }
