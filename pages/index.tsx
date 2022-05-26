@@ -433,7 +433,6 @@ function Home({
                           <Checkbox
                             value="1"
                             iconColor="protGray.100"
-                            verticalAlign="top"
                           >
                             0 - 10
                           </Checkbox>
