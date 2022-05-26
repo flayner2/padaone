@@ -2,11 +2,14 @@ import { Search2Icon, TriangleDownIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
+  Checkbox,
+  CheckboxGroup,
   Flex,
   FormControl,
   FormLabel,
   GridItem,
   Heading,
+  HStack,
   Input,
   InputGroup,
   InputRightElement,
@@ -14,9 +17,6 @@ import {
   Select,
   SimpleGrid,
   Text,
-  HStack,
-  Checkbox,
-  CheckboxGroup,
 } from '@chakra-ui/react';
 import axios from 'axios';
 import type { InferGetStaticPropsType } from 'next';
@@ -24,23 +24,30 @@ import Head from 'next/head';
 import { useState } from 'react';
 import { useAsyncList } from 'react-stately';
 import { Autocomplete, Item } from '../components/Autocomplete';
+import DatePicker from '../components/DatePicker';
 import { debounce } from '../lib/debounce';
+import { getAllUniqueLanguages, getPubDateRange } from '../lib/getStaticData';
 import type {
   AsyncListDataDebouncedReturn,
   Journal,
   PaperTitlePMID,
 } from '../lib/types';
-import DatePicker from '../components/DatePicker';
-import { getAllUniqueLanguages } from '../lib/getStaticData';
 
 const OFFSET_VALUE: number = 20;
 
 function Home({
   languages,
+  pubDateRange,
 }: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
+  const minDate = new Date(pubDateRange._min.yearPub || 1970, 0);
+  const maxDate = new Date(
+    pubDateRange._max.yearPub || Date.prototype.getFullYear(),
+    11
+  );
+
   const [offset, setOffset] = useState(0);
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+  const [startDate, setStartDate] = useState(minDate);
+  const [endDate, setEndDate] = useState(maxDate);
   const [allDatesChecked, setAllDatesChecked] = useState(true);
 
   async function getAsyncListDataDebounced<T>(
@@ -413,6 +420,9 @@ function Home({
                           showMonthYearPicker
                           selectsStart
                           disabled={allDatesChecked}
+                          includeDateIntervals={[
+                            { start: minDate, end: maxDate },
+                          ]}
                         />
 
                         <DatePicker
@@ -426,6 +436,9 @@ function Home({
                           showMonthYearPicker
                           selectsEnd
                           disabled={allDatesChecked}
+                          includeDateIntervals={[
+                            { start: minDate, end: maxDate },
+                          ]}
                         />
                         <Checkbox
                           value="any"
@@ -525,8 +538,9 @@ function Home({
 
 export async function getStaticProps() {
   const languages = await getAllUniqueLanguages();
+  const pubDateRange = await getPubDateRange();
 
-  return { props: { languages } };
+  return { props: { languages, pubDateRange } };
 }
 
 export default Home;
