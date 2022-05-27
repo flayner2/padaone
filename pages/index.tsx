@@ -1,4 +1,4 @@
-import { Search2Icon, TriangleDownIcon } from '@chakra-ui/icons';
+import { Search2Icon, TriangleDownIcon, HamburgerIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
@@ -17,6 +17,12 @@ import {
   Select,
   SimpleGrid,
   Text,
+  RangeSlider,
+  RangeSliderTrack,
+  RangeSliderFilledTrack,
+  RangeSliderThumb,
+  Tooltip,
+  VStack,
 } from '@chakra-ui/react';
 import axios from 'axios';
 import type { InferGetStaticPropsType } from 'next';
@@ -49,6 +55,10 @@ function Home({
   const [startDate, setStartDate] = useState(minDate);
   const [endDate, setEndDate] = useState(maxDate);
   const [allDatesChecked, setAllDatesChecked] = useState(true);
+  const [minLayer1Value, setMinLayer1Value] = useState(0);
+  const [maxLayer1Value, setMaxLayer1Value] = useState(100);
+  const [minLayer2Value, setMinLayer2Value] = useState(0);
+  const [maxLayer2Value, setMaxLayer2Value] = useState(100);
 
   async function getAsyncListDataDebounced<T>(
     queryUrl: string,
@@ -289,14 +299,13 @@ function Home({
               <Flex
                 background="protGray.500"
                 borderRadius="20px"
-                height="100%"
                 flexDirection="column"
                 justifyContent="space-between"
                 padding="2.25rem 1rem"
               >
                 <SimpleGrid
                   columns={2}
-                  spacing="1rem 1.75rem"
+                  spacing="1rem 1rem"
                   width="100%"
                   height="90%"
                   marginBottom="1.5rem"
@@ -307,18 +316,18 @@ function Home({
                     borderRadius="8px"
                     display="flex"
                     flexDirection="column"
-                    padding="1rem 0.5rem 1.5rem"
+                    padding="1rem 0.5rem"
                   >
                     <Text
                       fontSize="lg"
                       color="protBlack.800"
                       alignSelf="center"
-                      marginBottom="2rem"
+                      marginBottom="1.5rem"
                     >
                       Paper metadata
                     </Text>
 
-                    <FormControl marginBottom="1rem">
+                    <FormControl marginBottom="1.5rem">
                       <FormLabel
                         fontSize="md"
                         color="protBlack.800"
@@ -338,7 +347,7 @@ function Home({
                     </FormControl>
 
                     <HStack
-                      marginBottom="1rem"
+                      marginBottom="1.5rem"
                       justifyContent="space-between"
                     >
                       <FormControl marginRight="0.5rem">
@@ -410,7 +419,7 @@ function Home({
                         color: 'protBlack.800',
                         borderRadius: '8px',
                       }}
-                      boxProps={{ marginBottom: '1rem' }}
+                      boxProps={{ marginBottom: '1.5rem' }}
                     >
                       {(item) => (
                         <Item key={item.journal?.toLowerCase()}>
@@ -419,8 +428,10 @@ function Home({
                       )}
                     </Autocomplete>
 
-                    <FormControl marginBottom="1rem">
-                      <FormLabel>Publication date</FormLabel>
+                    <FormControl marginBottom="1.5rem">
+                      <FormLabel marginBottom="1rem">
+                        Publication date
+                      </FormLabel>
                       <HStack>
                         <DatePicker
                           inputLabel="From"
@@ -505,15 +516,207 @@ function Home({
                     borderRadius="8px"
                     display="flex"
                     flexDirection="column"
-                    padding="1rem 0.5rem"
-                  ></GridItem>
+                    padding="1rem 0.5rem 1.5rem"
+                  >
+                    <Text
+                      fontSize="lg"
+                      color="protBlack.800"
+                      alignSelf="center"
+                      marginBottom="1.5rem"
+                    >
+                      Classification scores
+                    </Text>
+
+                    <FormControl marginBottom="3rem">
+                      <VStack width="100%">
+                        <FormLabel
+                          marginBottom="1rem"
+                          alignSelf="flex-start"
+                          color="protBlack.800"
+                        >
+                          1st Layer Probability
+                        </FormLabel>
+                        <RangeSlider
+                          aria-label={['min', 'max']}
+                          width="90%"
+                          alignSelf="center"
+                          defaultValue={[minLayer1Value, maxLayer1Value]}
+                          onChange={([v1, v2]) => {
+                            setMinLayer1Value(v1);
+                            setMaxLayer1Value(v2);
+                          }}
+                          step={0.1}
+                        >
+                          <RangeSliderTrack bg="protBlue.900">
+                            <RangeSliderFilledTrack bg="protBlue.100" />
+                          </RangeSliderTrack>
+                          <Tooltip
+                            hasArrow
+                            bg="protBlue.100"
+                            color="white"
+                            placement="bottom"
+                            isOpen
+                            label={`${minLayer1Value}%`}
+                          >
+                            <RangeSliderThumb
+                              boxSize={6}
+                              index={0}
+                              background="protBlue.100"
+                            />
+                          </Tooltip>
+                          <Tooltip
+                            hasArrow
+                            bg="protBlue.100"
+                            color="white"
+                            placement="bottom"
+                            isOpen
+                            label={`${maxLayer1Value}%`}
+                          >
+                            <RangeSliderThumb
+                              boxSize={6}
+                              index={1}
+                              background="protBlue.100"
+                            />
+                          </Tooltip>
+                        </RangeSlider>
+                      </VStack>
+                    </FormControl>
+
+                    <FormControl marginBottom="1.5rem">
+                      <VStack width="100%">
+                        <FormLabel
+                          marginBottom="1rem"
+                          alignSelf="flex-start"
+                          color="protBlack.800"
+                        >
+                          2nd Layer Probability
+                        </FormLabel>
+                        <RangeSlider
+                          aria-label={['min', 'max']}
+                          width="90%"
+                          alignSelf="center"
+                          defaultValue={[minLayer2Value, maxLayer2Value]}
+                          onChange={([v1, v2]) => {
+                            setMinLayer2Value(v1);
+                            setMaxLayer2Value(v2);
+                          }}
+                          step={0.1}
+                        >
+                          <RangeSliderTrack bg="protBlue.900">
+                            <RangeSliderFilledTrack bg="protBlue.100" />
+                          </RangeSliderTrack>
+                          <Tooltip
+                            hasArrow
+                            bg="protBlue.100"
+                            color="white"
+                            placement="bottom"
+                            isOpen
+                            label={`${minLayer2Value}%`}
+                          >
+                            <RangeSliderThumb
+                              boxSize={6}
+                              index={0}
+                              background="protBlue.100"
+                            />
+                          </Tooltip>
+                          <Tooltip
+                            hasArrow
+                            bg="protBlue.100"
+                            color="white"
+                            placement="bottom"
+                            isOpen
+                            label={`${maxLayer2Value}%`}
+                          >
+                            <RangeSliderThumb
+                              boxSize={6}
+                              index={1}
+                              background="protBlue.100"
+                            />
+                          </Tooltip>
+                        </RangeSlider>
+                      </VStack>
+                    </FormControl>
+                  </GridItem>
+
                   <GridItem
                     background="protGray.100"
                     borderRadius="8px"
                     display="flex"
                     flexDirection="column"
-                    padding="1rem 0.5rem"
-                  ></GridItem>
+                    padding="1rem 0.5rem 1.5rem"
+                  >
+                    <Text
+                      fontSize="lg"
+                      color="protBlack.800"
+                      alignSelf="center"
+                      marginBottom="1.5rem"
+                    >
+                      Taxon data
+                    </Text>
+
+                    <Autocomplete
+                      label="Taxon name (or Taxon ID)"
+                      items={journalList.items}
+                      inputValue={journalList.filterText}
+                      onInputChange={(value) =>
+                        handleAutocompleteInputChange(value, journalList)
+                      }
+                      loadingState={journalList.loadingState}
+                      onLoadMore={journalList.loadMore}
+                      placeholder="Start typing to get suggestions..."
+                      placeholderProps={{
+                        color: 'protBlue.900',
+                        fontSize: 'sm',
+                      }}
+                      labelProps={{ color: 'protBlack.800', fontSize: 'md' }}
+                      inputProps={{
+                        background: 'protGray.500',
+                        color: 'protBlack.800',
+                        borderRadius: '8px',
+                      }}
+                      boxProps={{ marginBottom: '1rem' }}
+                    >
+                      {(item) => (
+                        <Item key={item.journal?.toLowerCase()}>
+                          {item.journal}
+                        </Item>
+                      )}
+                    </Autocomplete>
+
+                    <HStack justifyContent="space-between">
+                      <FormControl marginRight="0.5rem">
+                        <FormLabel
+                          fontSize="md"
+                          color="protBlack.800"
+                        >
+                          Gene ID
+                        </FormLabel>
+                        <Input
+                          placeholder="E.g.: NP_001191615"
+                          _placeholder={{
+                            color: 'protBlue.900',
+                            fontSize: 'sm',
+                          }}
+                          background="protGray.500"
+                          color="protBlack.800"
+                          borderRadius="8px"
+                        />
+                      </FormControl>
+
+                      <Checkbox
+                        value="taxonRequired"
+                        colorScheme="blue"
+                        iconColor="protGray.100"
+                        alignSelf="flex-end"
+                        defaultChecked
+                        onChange={() => {
+                          setAllDatesChecked((current) => !current);
+                        }}
+                      >
+                        Required
+                      </Checkbox>
+                    </HStack>
+                  </GridItem>
                 </SimpleGrid>
 
                 <Button
