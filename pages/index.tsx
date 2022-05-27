@@ -238,43 +238,54 @@ function Home({
             >
               Find a specific paper by title or PMID:
             </Text>
-            <Flex justifyContent="space-between">
-              <Autocomplete
-                label="Title"
-                items={paperList.items}
-                inputValue={paperList.filterText}
-                onInputChange={(value) =>
-                  handleAutocompleteInputChange(value, paperList)
-                }
-                loadingState={paperList.loadingState}
-                onLoadMore={paperList.loadMore}
-                button={
-                  <Button
-                    background="protBlue.300"
-                    _hover={{
-                      background: 'protBlue.veryLightHover',
-                    }}
-                  >
-                    <Search2Icon color="protBlack.800" />
-                  </Button>
-                }
-                placeholder="Start typing to get suggestions..."
-                placeholderProps={{
-                  color: 'protBlue.900',
-                  fontSize: 'sm',
-                }}
-                labelProps={{ color: 'protBlack.800', fontSize: 'md' }}
-                boxProps={{ width: '85%', marginRight: '1rem' }}
-                inputProps={{
-                  background: 'protGray.500',
-                  color: 'protBlack.800',
-                  borderRadius: '8px',
-                }}
-              >
-                {(item) => <Item key={item.pmid}>{item.title}</Item>}
-              </Autocomplete>
+            <HStack
+              width="100%"
+              spacing="0.5rem"
+            >
+              <FormControl>
+                <FormLabel
+                  color="protBlack.800"
+                  fontSize="md"
+                >
+                  Title
+                </FormLabel>
+                <Autocomplete
+                  label="Title"
+                  items={paperList.items}
+                  inputValue={paperList.filterText}
+                  onInputChange={(value) =>
+                    handleAutocompleteInputChange(value, paperList)
+                  }
+                  loadingState={paperList.loadingState}
+                  onLoadMore={paperList.loadMore}
+                  button={
+                    <Button
+                      background="protBlue.300"
+                      _hover={{
+                        background: 'protBlue.veryLightHover',
+                      }}
+                      type="submit"
+                    >
+                      <Search2Icon color="protBlack.800" />
+                    </Button>
+                  }
+                  placeholder="Start typing to get suggestions..."
+                  placeholderProps={{
+                    color: 'protBlue.900',
+                    fontSize: 'sm',
+                  }}
+                  boxProps={{ width: '100%' }}
+                  inputProps={{
+                    background: 'protGray.500',
+                    color: 'protBlack.800',
+                    borderRadius: '8px',
+                  }}
+                >
+                  {(item) => <Item key={item.pmid}>{item.title}</Item>}
+                </Autocomplete>
+              </FormControl>
 
-              <FormControl width="40%">
+              <FormControl width="50%">
                 <FormLabel
                   fontSize="md"
                   color="protBlack.800"
@@ -304,7 +315,7 @@ function Home({
                   />
                 </InputGroup>
               </FormControl>
-            </Flex>
+            </HStack>
           </Flex>
 
           {/* Bottom search form */}
@@ -424,34 +435,43 @@ function Home({
                       </FormControl>
                     </HStack>
 
-                    <Autocomplete
-                      label="Journal"
-                      items={journalList.items}
-                      inputValue={journalList.filterText}
-                      onInputChange={(value) =>
-                        handleAutocompleteInputChange(value, journalList)
-                      }
-                      loadingState={journalList.loadingState}
-                      onLoadMore={journalList.loadMore}
-                      placeholder="Start typing to get suggestions..."
-                      placeholderProps={{
-                        color: 'protBlue.900',
-                        fontSize: 'sm',
-                      }}
-                      labelProps={{ color: 'protBlack.800', fontSize: 'md' }}
-                      inputProps={{
-                        background: 'protGray.500',
-                        color: 'protBlack.800',
-                        borderRadius: '8px',
-                      }}
-                      boxProps={{ marginBottom: '1.5rem' }}
-                    >
-                      {(item) => (
-                        <Item key={item.journal?.toLowerCase()}>
-                          {item.journal}
-                        </Item>
-                      )}
-                    </Autocomplete>
+                    <FormControl marginBottom="1.5rem">
+                      <FormLabel
+                        color="protBlack.800"
+                        fontSize="md"
+                      >
+                        Journal
+                      </FormLabel>
+                      <Autocomplete
+                        label="Journal"
+                        items={journalList.items}
+                        inputValue={journalList.filterText}
+                        onInputChange={(value) =>
+                          handleAutocompleteInputChange(value, journalList)
+                        }
+                        loadingState={journalList.loadingState}
+                        onLoadMore={journalList.loadMore}
+                        placeholder="Start typing to get suggestions..."
+                        placeholderProps={{
+                          color: 'protBlue.900',
+                          fontSize: 'sm',
+                        }}
+                        inputProps={{
+                          background: 'protGray.500',
+                          color: 'protBlack.800',
+                          borderRadius: '8px',
+                        }}
+                        boxProps={{
+                          width: '100%',
+                        }}
+                      >
+                        {(item) => (
+                          <Item key={item.journal?.toLowerCase()}>
+                            {item.journal}
+                          </Item>
+                        )}
+                      </Autocomplete>
+                    </FormControl>
 
                     <FormControl marginBottom="1.5rem">
                       <FormLabel marginBottom="1rem">
@@ -692,32 +712,38 @@ function Home({
                       Taxon data
                     </Text>
 
-                    <Autocomplete
-                      label="Taxon name (or Taxon ID)"
-                      items={taxaList.items}
-                      inputValue={taxaList.filterText}
-                      onInputChange={(value) =>
-                        handleAutocompleteInputChange(value, taxaList)
-                      }
-                      loadingState={taxaList.loadingState}
-                      onLoadMore={taxaList.loadMore}
-                      placeholder="Start typing to get suggestions..."
-                      placeholderProps={{
-                        color: 'protBlue.900',
-                        fontSize: 'sm',
-                      }}
-                      labelProps={{ color: 'protBlack.800', fontSize: 'md' }}
-                      inputProps={{
-                        background: 'protGray.500',
-                        color: 'protBlack.800',
-                        borderRadius: '8px',
-                      }}
-                      boxProps={{ marginBottom: '1rem' }}
-                    >
-                      {(item) => (
-                        <Item key={item.taxID}>{item.orgTaxName}</Item>
-                      )}
-                    </Autocomplete>
+                    <FormControl marginBottom="1rem">
+                      <FormLabel
+                        color="protBlack.800"
+                        fontSize="md"
+                      >
+                        Taxon Name {'(or Taxon ID)'}
+                      </FormLabel>
+                      <Autocomplete
+                        items={taxaList.items}
+                        inputValue={taxaList.filterText}
+                        onInputChange={(value) =>
+                          handleAutocompleteInputChange(value, taxaList)
+                        }
+                        loadingState={taxaList.loadingState}
+                        onLoadMore={taxaList.loadMore}
+                        placeholder="Start typing to get suggestions..."
+                        placeholderProps={{
+                          color: 'protBlue.900',
+                          fontSize: 'sm',
+                        }}
+                        inputProps={{
+                          background: 'protGray.500',
+                          color: 'protBlack.800',
+                          borderRadius: '8px',
+                        }}
+                        boxProps={{ width: '100%' }}
+                      >
+                        {(item) => (
+                          <Item key={item.taxID}>{item.orgTaxName}</Item>
+                        )}
+                      </Autocomplete>
+                    </FormControl>
 
                     <HStack justifyContent="space-between">
                       <FormControl marginRight="0.5rem">
