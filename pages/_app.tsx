@@ -1,5 +1,6 @@
 import { ChakraProvider, extendTheme } from '@chakra-ui/react';
 import type { AppProps } from 'next/app';
+import { SSRProvider } from 'react-aria';
 import 'react-datepicker/dist/react-datepicker.css';
 import WithSubnavigation from '../components/Navbar';
 import '../styles/globals.css';
@@ -32,10 +33,12 @@ const theme = extendTheme({
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <ChakraProvider theme={theme}>
-      <WithSubnavigation></WithSubnavigation>
-      <Component {...pageProps} />
-    </ChakraProvider>
+    <SSRProvider>
+      <ChakraProvider theme={theme}>
+        <WithSubnavigation></WithSubnavigation>
+        <Component {...pageProps} />
+      </ChakraProvider>
+    </SSRProvider>
   );
 }
 
