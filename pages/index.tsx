@@ -96,6 +96,14 @@ function Home({
     },
   });
 
+  function handleAutocompleteInputChange(
+    value: string,
+    list: ReturnType<typeof useAsyncList>
+  ) {
+    setOffset(0);
+    list.setFilterText(value);
+  }
+
   return (
     <Flex
       display="flex"
@@ -200,7 +208,9 @@ function Home({
                 label="Title"
                 items={paperList.items}
                 inputValue={paperList.filterText}
-                onInputChange={paperList.setFilterText}
+                onInputChange={(value) =>
+                  handleAutocompleteInputChange(value, paperList)
+                }
                 loadingState={paperList.loadingState}
                 onLoadMore={paperList.loadMore}
                 button={
@@ -384,7 +394,9 @@ function Home({
                       label="Journal"
                       items={journalList.items}
                       inputValue={journalList.filterText}
-                      onInputChange={journalList.setFilterText}
+                      onInputChange={(value) =>
+                        handleAutocompleteInputChange(value, journalList)
+                      }
                       loadingState={journalList.loadingState}
                       onLoadMore={journalList.loadMore}
                       placeholder="Start typing to get suggestions..."
