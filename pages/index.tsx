@@ -1,4 +1,4 @@
-import { Search2Icon, TriangleDownIcon, HamburgerIcon } from '@chakra-ui/icons';
+import { Search2Icon, TriangleDownIcon } from '@chakra-ui/icons';
 import {
   Box,
   Button,
@@ -32,7 +32,11 @@ import { useAsyncList } from 'react-stately';
 import { Autocomplete, Item } from '../components/Autocomplete';
 import DatePicker from '../components/DatePicker';
 import { debounce } from '../lib/debounce';
-import { getAllUniqueLanguages, getPubDateRange } from '../lib/getStaticData';
+import {
+  getAllUniqueLanguages,
+  getPubDateRange,
+  getClassificationLayersRange,
+} from '../lib/getStaticData';
 import type {
   AsyncListDataDebouncedReturn,
   Journal,
@@ -44,6 +48,7 @@ const OFFSET_VALUE: number = 20;
 function Home({
   languages,
   pubDateRange,
+  classificationScores,
 }: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
   const minDate = new Date(pubDateRange._min.yearPub || 1970, 0);
   const maxDate = new Date(
@@ -55,10 +60,18 @@ function Home({
   const [startDate, setStartDate] = useState(minDate);
   const [endDate, setEndDate] = useState(maxDate);
   const [allDatesChecked, setAllDatesChecked] = useState(true);
-  const [minLayer1Value, setMinLayer1Value] = useState(0);
-  const [maxLayer1Value, setMaxLayer1Value] = useState(100);
-  const [minLayer2Value, setMinLayer2Value] = useState(0);
-  const [maxLayer2Value, setMaxLayer2Value] = useState(100);
+  const [minLayer1Value, setMinLayer1Value] = useState(
+    classificationScores.firstLayer.min
+  );
+  const [maxLayer1Value, setMaxLayer1Value] = useState(
+    classificationScores.firstLayer.max
+  );
+  const [minLayer2Value, setMinLayer2Value] = useState(
+    classificationScores.secondLayer.min
+  );
+  const [maxLayer2Value, setMaxLayer2Value] = useState(
+    classificationScores.secondLayer.max
+  );
 
   async function getAsyncListDataDebounced<T>(
     queryUrl: string,
@@ -540,7 +553,12 @@ function Home({
                           aria-label={['min', 'max']}
                           width="90%"
                           alignSelf="center"
-                          defaultValue={[minLayer1Value, maxLayer1Value]}
+                          min={classificationScores.firstLayer.min}
+                          max={classificationScores.firstLayer.max}
+                          defaultValue={[
+                            classificationScores.firstLayer.min,
+                            classificationScores.firstLayer.max,
+                          ]}
                           onChange={([v1, v2]) => {
                             setMinLayer1Value(v1);
                             setMaxLayer1Value(v2);
@@ -595,7 +613,12 @@ function Home({
                           aria-label={['min', 'max']}
                           width="90%"
                           alignSelf="center"
-                          defaultValue={[minLayer2Value, maxLayer2Value]}
+                          min={classificationScores.secondLayer.min}
+                          max={classificationScores.secondLayer.max}
+                          defaultValue={[
+                            classificationScores.secondLayer.min,
+                            classificationScores.secondLayer.max,
+                          ]}
                           onChange={([v1, v2]) => {
                             setMinLayer2Value(v1);
                             setMaxLayer2Value(v2);
@@ -745,8 +768,9 @@ function Home({
 export async function getStaticProps() {
   const languages = await getAllUniqueLanguages();
   const pubDateRange = await getPubDateRange();
+  const classificationScores = await getClassificationLayersRange();
 
-  return { props: { languages, pubDateRange } };
+  return { props: { languages, pubDateRange, classificationScores } };
 }
 
 export default Home;
