@@ -41,6 +41,7 @@ import type {
   AsyncListDataDebouncedReturn,
   Journal,
   PaperTitlePMID,
+  TaxonNameAndID,
 } from '../lib/types';
 
 const OFFSET_VALUE: number = 20;
@@ -112,6 +113,17 @@ function Home({
     async load({ signal, cursor, filterText }) {
       return getAsyncListDataDebounced(
         '/api/getAutocompleteJournals?journalName',
+        signal,
+        cursor,
+        filterText
+      );
+    },
+  });
+
+  let taxaList = useAsyncList<TaxonNameAndID>({
+    async load({ signal, cursor, filterText }) {
+      return getAsyncListDataDebounced(
+        '/api/getAutocompleteTaxa?taxonName',
         signal,
         cursor,
         filterText
@@ -679,13 +691,13 @@ function Home({
 
                     <Autocomplete
                       label="Taxon name (or Taxon ID)"
-                      items={journalList.items}
-                      inputValue={journalList.filterText}
+                      items={taxaList.items}
+                      inputValue={taxaList.filterText}
                       onInputChange={(value) =>
-                        handleAutocompleteInputChange(value, journalList)
+                        handleAutocompleteInputChange(value, taxaList)
                       }
-                      loadingState={journalList.loadingState}
-                      onLoadMore={journalList.loadMore}
+                      loadingState={taxaList.loadingState}
+                      onLoadMore={taxaList.loadMore}
                       placeholder="Start typing to get suggestions..."
                       placeholderProps={{
                         color: 'protBlue.900',
@@ -700,9 +712,7 @@ function Home({
                       boxProps={{ marginBottom: '1rem' }}
                     >
                       {(item) => (
-                        <Item key={item.journal?.toLowerCase()}>
-                          {item.journal}
-                        </Item>
+                        <Item key={item.taxID}>{item.orgTaxName}</Item>
                       )}
                     </Autocomplete>
 
