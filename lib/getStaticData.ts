@@ -1,5 +1,6 @@
 import {Prisma} from '@prisma/client';
 
+import {convertToFloatOrDefault} from './helpers';
 import {prisma} from './prisma';
 
 import type {ClassificationRangeReturn, LanguagePub, MinMaxYearPub,} from './types';
@@ -55,24 +56,15 @@ export async function getClassificationLayersRange():
 
   const classificationScores = {
     firstLayer: {
-      min: firstLayerRange._min.probability ?
-          parseFloat(
-              (Number(firstLayerRange._min.probability) * 100).toFixed(2)) :
-          0,
-      max: firstLayerRange._max.probability ?
-          parseFloat(
-              (Number(firstLayerRange._max.probability) * 100).toFixed(2)) :
-          100,
+      min: convertToFloatOrDefault(firstLayerRange._min.probability, 2, 100, 0),
+      max: convertToFloatOrDefault(
+          firstLayerRange._max.probability, 2, 100, 100),
     },
     secondLayer: {
-      min: secondLayerRange._min.probability ?
-          parseFloat(
-              (Number(secondLayerRange._min.probability) * 100).toFixed(2)) :
-          0,
-      max: secondLayerRange._max.probability ?
-          parseFloat(
-              (Number(secondLayerRange._max.probability) * 100).toFixed(2)) :
-          100,
+      min:
+          convertToFloatOrDefault(secondLayerRange._min.probability, 2, 100, 0),
+      max: convertToFloatOrDefault(
+          secondLayerRange._max.probability, 2, 100, 100),
     },
   };
 
