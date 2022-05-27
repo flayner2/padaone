@@ -29,6 +29,7 @@ import type { InferGetStaticPropsType } from 'next';
 import Head from 'next/head';
 import { useState } from 'react';
 import { useAsyncList } from 'react-stately';
+import { useForm } from 'react-hook-form';
 import { Autocomplete, Item } from '../components/Autocomplete';
 import DatePicker from '../components/DatePicker';
 import { debounce } from '../lib/debounce';
@@ -73,6 +74,14 @@ function Home({
   const [maxLayer2Value, setMaxLayer2Value] = useState(
     classificationScores.secondLayer.max
   );
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm();
+  const onSubmit = (data) => console.log(data);
 
   async function getAsyncListDataDebounced<T>(
     queryUrl: string,
@@ -242,49 +251,55 @@ function Home({
               width="100%"
               spacing="0.5rem"
             >
-              <FormControl>
-                <FormLabel
-                  color="protBlack.800"
-                  fontSize="md"
-                  htmlFor="paperTitle"
-                >
-                  Title
-                </FormLabel>
-                <Autocomplete
-                  items={paperList.items}
-                  inputValue={paperList.filterText}
-                  onInputChange={(value) =>
-                    handleAutocompleteInputChange(value, paperList)
-                  }
-                  loadingState={paperList.loadingState}
-                  onLoadMore={paperList.loadMore}
-                  button={
-                    <Button
-                      background="protBlue.300"
-                      _hover={{
-                        background: 'protBlue.veryLightHover',
-                      }}
-                      type="submit"
-                    >
-                      <Search2Icon color="protBlack.800" />
-                    </Button>
-                  }
-                  placeholder="Start typing to get suggestions..."
-                  placeholderProps={{
-                    color: 'protBlue.900',
-                    fontSize: 'sm',
-                  }}
-                  boxProps={{ width: '100%' }}
-                  inputProps={{
-                    background: 'protGray.500',
-                    color: 'protBlack.800',
-                    borderRadius: '8px',
-                    id: 'paperTitle',
-                  }}
-                >
-                  {(item) => <Item key={item.pmid}>{item.title}</Item>}
-                </Autocomplete>
-              </FormControl>
+              <form
+                style={{ width: '100%' }}
+                onSubmit={handleSubmit(onSubmit)}
+              >
+                <FormControl>
+                  <FormLabel
+                    color="protBlack.800"
+                    fontSize="md"
+                    htmlFor="paperTitle"
+                  >
+                    Title
+                  </FormLabel>
+                  <Autocomplete
+                    items={paperList.items}
+                    inputValue={paperList.filterText}
+                    onInputChange={(value) =>
+                      handleAutocompleteInputChange(value, paperList)
+                    }
+                    loadingState={paperList.loadingState}
+                    onLoadMore={paperList.loadMore}
+                    button={
+                      <Button
+                        background="protBlue.300"
+                        _hover={{
+                          background: 'protBlue.veryLightHover',
+                        }}
+                        type="submit"
+                      >
+                        <Search2Icon color="protBlack.800" />
+                      </Button>
+                    }
+                    placeholder="Start typing to get suggestions..."
+                    placeholderProps={{
+                      color: 'protBlue.900',
+                      fontSize: 'sm',
+                    }}
+                    boxProps={{ width: '100%' }}
+                    inputProps={{
+                      background: 'protGray.500',
+                      color: 'protBlack.800',
+                      borderRadius: '8px',
+                      id: 'paperTitle',
+                    }}
+                    {...register('paperTitle')}
+                  >
+                    {(item) => <Item key={item.pmid}>{item.title}</Item>}
+                  </Autocomplete>
+                </FormControl>
+              </form>
 
               <FormControl width="50%">
                 <FormLabel
