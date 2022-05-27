@@ -496,7 +496,10 @@ function Home({
 
                     <FormControl>
                       <FormLabel>Number of citations</FormLabel>
-                      <CheckboxGroup colorScheme="blue">
+                      <CheckboxGroup
+                        colorScheme="blue"
+                        defaultValue={['1', '2', '3', '4', '5']}
+                      >
                         <HStack
                           spacing="2rem"
                           paddingLeft="1rem"
