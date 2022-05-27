@@ -39,9 +39,10 @@ function Home({
   languages,
   pubDateRange,
 }: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
-  const minDate = new Date(pubDateRange._min.yearPub || 1970);
+  const minDate = new Date(pubDateRange._min.yearPub || 1970, 0);
   const maxDate = new Date(
-    pubDateRange._max.yearPub || Date.prototype.getFullYear()
+    pubDateRange._max.yearPub || Date.prototype.getFullYear(),
+    11
   );
 
   const [offset, setOffset] = useState(0);
@@ -414,14 +415,10 @@ function Home({
                           selected={startDate}
                           onChange={(date: Date) => setStartDate(date)}
                           dateFormat="yyyy"
-                          startDate={startDate}
-                          endDate={endDate}
+                          minDate={minDate}
+                          maxDate={maxDate}
                           showYearPicker
-                          selectsStart
                           disabled={allDatesChecked}
-                          includeDateIntervals={[
-                            { start: minDate, end: maxDate },
-                          ]}
                         />
 
                         <DatePicker
@@ -429,15 +426,10 @@ function Home({
                           selected={endDate}
                           onChange={(date: Date) => setEndDate(date)}
                           dateFormat="yyyy"
-                          startDate={startDate}
-                          endDate={endDate}
                           minDate={startDate}
+                          maxDate={maxDate}
                           showYearPicker
-                          selectsEnd
                           disabled={allDatesChecked}
-                          includeDateIntervals={[
-                            { start: minDate, end: maxDate },
-                          ]}
                         />
                         <Checkbox
                           value="any"
