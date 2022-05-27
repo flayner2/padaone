@@ -1,4 +1,5 @@
 import type {InputProps} from '@chakra-ui/react';
+import {Prisma} from '@prisma/client';
 import type {ReactDatePickerProps} from 'react-datepicker';
 
 export interface FunctionWithArguments {
@@ -49,4 +50,16 @@ export interface CalendarContainerProps {
 export interface MinMaxYearPub {
   _min: {yearPub: true};
   _max: {yearPub: true};
+}
+
+export interface ClassificationScoreRange {
+  _min: {score: true};
+  _max: {score: true};
+}
+
+export interface ClassificationRangeReturn {
+  firstLayerRange:
+      Prisma.GetClassification1stLayAggregateType<ClassificationScoreRange>;
+  secondLayerRange:
+      Prisma.GetClassification2ndLayAggregateType<ClassificationScoreRange>;
 }
