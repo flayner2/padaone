@@ -14,13 +14,13 @@ import {
   InputGroup,
   InputRightElement,
   Link,
+  RangeSlider,
+  RangeSliderFilledTrack,
+  RangeSliderThumb,
+  RangeSliderTrack,
   Select,
   SimpleGrid,
   Text,
-  RangeSlider,
-  RangeSliderTrack,
-  RangeSliderFilledTrack,
-  RangeSliderThumb,
   Tooltip,
   VStack,
 } from '@chakra-ui/react';
@@ -34,8 +34,8 @@ import DatePicker from '../components/DatePicker';
 import { debounce } from '../lib/debounce';
 import {
   getAllUniqueLanguages,
-  getPubDateRange,
   getClassificationLayersRange,
+  getPubDateRange,
 } from '../lib/getStaticData';
 import type {
   AsyncListDataDebouncedReturn,
