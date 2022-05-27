@@ -39,10 +39,9 @@ function Home({
   languages,
   pubDateRange,
 }: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
-  const minDate = new Date(pubDateRange._min.yearPub || 1970, 0);
+  const minDate = new Date(pubDateRange._min.yearPub || 1970);
   const maxDate = new Date(
-    pubDateRange._max.yearPub || Date.prototype.getFullYear(),
-    11
+    pubDateRange._max.yearPub || Date.prototype.getFullYear()
   );
 
   const [offset, setOffset] = useState(0);
@@ -414,10 +413,10 @@ function Home({
                           inputLabel="From"
                           selected={startDate}
                           onChange={(date: Date) => setStartDate(date)}
-                          dateFormat="MM/yyyy"
+                          dateFormat="yyyy"
                           startDate={startDate}
                           endDate={endDate}
-                          showMonthYearPicker
+                          showYearPicker
                           selectsStart
                           disabled={allDatesChecked}
                           includeDateIntervals={[
@@ -429,11 +428,11 @@ function Home({
                           inputLabel="To"
                           selected={endDate}
                           onChange={(date: Date) => setEndDate(date)}
-                          dateFormat="MM/yyyy"
+                          dateFormat="yyyy"
                           startDate={startDate}
                           endDate={endDate}
                           minDate={startDate}
-                          showMonthYearPicker
+                          showYearPicker
                           selectsEnd
                           disabled={allDatesChecked}
                           includeDateIntervals={[
