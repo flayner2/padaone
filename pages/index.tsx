@@ -246,11 +246,11 @@ function Home({
                 <FormLabel
                   color="protBlack.800"
                   fontSize="md"
+                  htmlFor="paperTitle"
                 >
                   Title
                 </FormLabel>
                 <Autocomplete
-                  label="Title"
                   items={paperList.items}
                   inputValue={paperList.filterText}
                   onInputChange={(value) =>
@@ -279,6 +279,7 @@ function Home({
                     background: 'protGray.500',
                     color: 'protBlack.800',
                     borderRadius: '8px',
+                    id: 'paperTitle',
                   }}
                 >
                   {(item) => <Item key={item.pmid}>{item.title}</Item>}
@@ -367,6 +368,7 @@ function Home({
                       <FormLabel
                         fontSize="md"
                         color="protBlack.800"
+                        htmlFor="paperTerms"
                       >
                         Terms
                       </FormLabel>
@@ -379,6 +381,7 @@ function Home({
                         background="protGray.500"
                         color="protBlack.800"
                         borderRadius="8px"
+                        id="paperTerms"
                       />
                     </FormControl>
 
@@ -390,6 +393,7 @@ function Home({
                         <FormLabel
                           fontSize="md"
                           color="protBlack.800"
+                          htmlFor="lastAuthor"
                         >
                           Last author
                         </FormLabel>
@@ -402,6 +406,7 @@ function Home({
                           background="protGray.500"
                           color="protBlack.800"
                           borderRadius="8px"
+                          id="lastAuthor"
                         />
                       </FormControl>
                       <FormControl width="55%">
@@ -439,11 +444,11 @@ function Home({
                       <FormLabel
                         color="protBlack.800"
                         fontSize="md"
+                        htmlFor="journalName"
                       >
                         Journal
                       </FormLabel>
                       <Autocomplete
-                        label="Journal"
                         items={journalList.items}
                         inputValue={journalList.filterText}
                         onInputChange={(value) =>
@@ -460,6 +465,7 @@ function Home({
                           background: 'protGray.500',
                           color: 'protBlack.800',
                           borderRadius: '8px',
+                          id: 'journalName',
                         }}
                         boxProps={{
                           width: '100%',
@@ -474,7 +480,10 @@ function Home({
                     </FormControl>
 
                     <FormControl marginBottom="1.5rem">
-                      <FormLabel marginBottom="1rem">
+                      <FormLabel
+                        marginBottom="1rem"
+                        htmlFor="startDate"
+                      >
                         Publication date
                       </FormLabel>
                       <HStack>
@@ -487,6 +496,7 @@ function Home({
                           maxDate={maxDate}
                           showYearPicker
                           disabled={allDatesChecked}
+                          id="startDate"
                         />
 
                         <DatePicker
@@ -515,7 +525,9 @@ function Home({
                     </FormControl>
 
                     <FormControl>
-                      <FormLabel>Number of citations</FormLabel>
+                      <FormLabel htmlFor="citations-1">
+                        Number of citations
+                      </FormLabel>
                       <CheckboxGroup
                         colorScheme="blue"
                         defaultValue={['1', '2', '3', '4', '5']}
@@ -525,6 +537,7 @@ function Home({
                           paddingLeft="1rem"
                         >
                           <Checkbox
+                            id="citations-1"
                             value="1"
                             iconColor="protGray.100"
                           >
@@ -581,6 +594,7 @@ function Home({
                           marginBottom="1rem"
                           alignSelf="flex-start"
                           color="protBlack.800"
+                          htmlFor="firstLayer"
                         >
                           1st Layer Probability
                         </FormLabel>
@@ -599,6 +613,7 @@ function Home({
                             setMaxLayer1Value(v2);
                           }}
                           step={0.1}
+                          id="firstLayer"
                         >
                           <RangeSliderTrack bg="protBlue.900">
                             <RangeSliderFilledTrack bg="protBlue.100" />
@@ -641,6 +656,7 @@ function Home({
                           marginBottom="1rem"
                           alignSelf="flex-start"
                           color="protBlack.800"
+                          htmlFor="secondLayer"
                         >
                           2nd Layer Probability
                         </FormLabel>
@@ -659,6 +675,7 @@ function Home({
                             setMaxLayer2Value(v2);
                           }}
                           step={0.1}
+                          id="secondLayer"
                         >
                           <RangeSliderTrack bg="protBlue.900">
                             <RangeSliderFilledTrack bg="protBlue.100" />
@@ -716,6 +733,7 @@ function Home({
                       <FormLabel
                         color="protBlack.800"
                         fontSize="md"
+                        htmlFor="taxonName"
                       >
                         Taxon Name {'(or Taxon ID)'}
                       </FormLabel>
@@ -736,6 +754,7 @@ function Home({
                           background: 'protGray.500',
                           color: 'protBlack.800',
                           borderRadius: '8px',
+                          id: 'taxonName',
                         }}
                         boxProps={{ width: '100%' }}
                       >
@@ -750,6 +769,7 @@ function Home({
                         <FormLabel
                           fontSize="md"
                           color="protBlack.800"
+                          htmlFor="geneID"
                         >
                           Gene ID
                         </FormLabel>
@@ -762,6 +782,7 @@ function Home({
                           background="protGray.500"
                           color="protBlack.800"
                           borderRadius="8px"
+                          id="geneID"
                         />
                       </FormControl>
 
