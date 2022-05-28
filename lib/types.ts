@@ -60,3 +60,8 @@ export interface ClassificationRangeReturn {
   firstLayer: {min: number; max: number};
   secondLayer: {min: number; max: number};
 }
+
+export interface PaperProbabilityReturn {
+  probability1stLay: number;
+  probability2ndLay: number;
+}
