@@ -149,10 +149,7 @@ function Home({
   }
 
   return (
-    <Flex
-      display="flex"
-      justifyContent="center"
-    >
+    <Flex justifyContent="center">
       <Head>
         <title>Prot DB</title>
         <meta
@@ -203,6 +200,7 @@ function Home({
               isExternal
               _hover={{
                 textDecoration: 'none',
+                color: 'protBlue.lightHover',
               }}
             >
               NCBI
@@ -224,6 +222,7 @@ function Home({
               color="protBlue.400"
               _hover={{
                 textDecoration: 'none',
+                color: 'protBlue.lightHover',
               }}
             >
               Search
