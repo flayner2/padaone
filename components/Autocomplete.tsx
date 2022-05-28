@@ -1,6 +1,5 @@
 import {
   Box,
-  FormLabel,
   Input,
   InputGroup,
   InputRightElement,
