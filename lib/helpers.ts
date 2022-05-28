@@ -8,8 +8,8 @@ export function filterYears(
 }
 
 export function convertToFloatOrDefault(
-    original: number|Prisma.Decimal|null, precision: number, factor: number = 1,
-    fallback: number = 0): number {
+    original: number|Prisma.Decimal|null|undefined, precision: number,
+    factor: number = 1, fallback: number = 0): number {
   return original ? parseFloat((Number(original) * factor).toFixed(precision)) :
                     fallback;
 }
