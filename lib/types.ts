@@ -65,3 +65,10 @@ export interface PaperProbabilityReturn {
   probability1stLay: number;
   probability2ndLay: number;
 }
+
+export interface FullTaxonomicData {
+  taxPath: {orgLineage: string|null}|null;
+  orgTaxName: string|null;
+  taxID: number|null;
+  accNumb: string|null;
+}
