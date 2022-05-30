@@ -10,14 +10,21 @@ import {
   Heading,
   Link,
   Divider,
+  Button,
+  chakra,
 } from '@chakra-ui/react';
 import { ExternalLinkIcon } from '@chakra-ui/icons';
-import { getPaper, getPaperProbability } from '../api/getPaper';
+import {
+  getPaper,
+  getPaperProbability,
+  getPaperTaxonomicData,
+} from '../api/getPaper';
 import Head from 'next/head';
 
 function Paper({
   paper,
   paperProbability,
+  taxonomicData,
 }: InferGetServerSidePropsType<typeof getServerSideProps>): JSX.Element {
   return (
     <Flex justifyContent="center">
@@ -34,17 +41,19 @@ function Paper({
       </Head>
 
       {/* Main wrapper */}
-      <VStack
+      <Flex
         minHeight="100vh"
         width="100vw"
         padding="3rem 8rem"
         flex={1}
         flexDirection="column"
         justifyContent="space-betwen"
-        spacing="1.5rem"
       >
         {/* Top card (title, info) */}
-        <HStack spacing="6rem">
+        <HStack
+          spacing="6rem"
+          marginBottom="1rem"
+        >
           <VStack
             width="80%"
             marginTop="0.5rem"
@@ -112,6 +121,8 @@ function Paper({
         <VStack
           alignSelf="flex-start"
           alignItems="flex-start"
+          justifyContent="space-between"
+          marginBottom="2.5rem"
         >
           <Heading
             as="h2"
@@ -129,7 +140,10 @@ function Paper({
           </Text>
         </VStack>
 
-        <VStack spacing="1.25rem">
+        <VStack
+          spacing="1rem"
+          marginBottom="2.5rem"
+        >
           <Heading
             as="h2"
             fontSize="xl"
@@ -176,20 +190,122 @@ function Paper({
         </VStack>
 
         <Divider
-          padding="1rem 0"
           width="80%"
+          marginBottom="2.5rem"
+          alignSelf="center"
         />
 
-        <VStack background="protGray.500">
+        <Flex
+          background="protGray.500"
+          flexDirection="column"
+          alignItems="center"
+          justifyContent="space-between"
+          borderRadius="20px"
+          padding="1.5rem"
+        >
           <Heading
             as="h2"
             fontSize="xl"
             color="protBlack.800"
+            marginBottom="1.5rem"
           >
             Taxonomic information
           </Heading>
-        </VStack>
-      </VStack>
+
+          {taxonomicData &&
+            taxonomicData.map((taxon) => (
+              <VStack
+                background="protGray.100"
+                padding="1.5rem"
+                justifyContent="space-between"
+                spacing="1.5rem"
+                borderRadius="20px"
+                width="100%"
+                alignItems="flex-start"
+                key={taxon.taxID}
+              >
+                <HStack
+                  width="100%"
+                  justifyContent="space-between"
+                >
+                  <Text
+                    fontWeight="semibold"
+                    fontStyle="italic"
+                    color="protBlack.800"
+                  >
+                    {taxon.orgTaxName}
+                  </Text>
+
+                  <Text color="protBlack.800">
+                    Taxon ID:{' '}
+                    <Link
+                      href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=${taxon.taxID}`}
+                      color="protBlue.400"
+                      isExternal
+                      _hover={{
+                        textDecoration: 'none',
+                        color: 'protBlue.lightHover',
+                      }}
+                    >
+                      {taxon.taxID} <ExternalLinkIcon />
+                    </Link>
+                  </Text>
+                </HStack>
+
+                <Text color="protBlack.800">
+                  <chakra.span fontWeight="semibold">Lineage: </chakra.span>
+                  {taxon.taxPath?.orgLineage}
+                </Text>
+
+                {taxon.accNumb && (
+                  <VStack
+                    width="100%"
+                    alignItems="flex-start"
+                  >
+                    <Text color="protBlack.800">
+                      <chakra.span fontWeight="semibold">
+                        Gene IDs:{' '}
+                      </chakra.span>
+                      {taxon.accNumb
+                        .split(',')
+                        .map((accession, index, allNumbs) => (
+                          <>
+                            <Link
+                              key={accession}
+                              href={`https://www.ncbi.nlm.nih.gov/protein/${accession}`}
+                              color="protBlue.400"
+                              isExternal
+                              _hover={{
+                                textDecoration: 'none',
+                                color: 'protBlue.lightHover',
+                              }}
+                            >
+                              {accession}
+                              <ExternalLinkIcon />
+                            </Link>
+                            {index < allNumbs.length - 1 && '; '}
+                          </>
+                        ))}
+                    </Text>
+
+                    <Button
+                      color="protBlack.800"
+                      background="protBlue.300"
+                      borderRadius="8px"
+                      alignSelf="flex-end"
+                      fontWeight="regular"
+                      _hover={{
+                        background: 'protBlue.veryLightHover',
+                      }}
+                    >
+                      Download list
+                    </Button>
+                  </VStack>
+                )}
+              </VStack>
+            ))}
+        </Flex>
+      </Flex>
     </Flex>
   );
 }
@@ -202,11 +318,13 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 
   const paper = await getPaper(pmid);
   const paperProbability = await getPaperProbability(pmid);
+  const taxonomicData = await getPaperTaxonomicData(pmid);
 
   return {
     props: {
       paper,
       paperProbability,
+      taxonomicData,
     },
   };
 }
