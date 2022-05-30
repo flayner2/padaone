@@ -2,7 +2,7 @@ import type {MetadataPub} from '@prisma/client';
 import type {NextApiRequest, NextApiResponse} from 'next';
 import {convertToFloatOrDefault} from '../../lib/helpers';
 import {prisma} from '../../lib/prisma';
-import type {PaperProbabilityReturn} from '../../lib/types';
+import type {PaperProbabilityReturn, FullTaxonomicData,} from '../../lib/types';
 
 export async function getPaper(pmid: number): Promise<MetadataPub|null> {
   const paper = await prisma.metadataPub.findFirst({
@@ -40,6 +40,30 @@ export async function getPaperProbability(pmid: number):
     probability2ndLay:
         convertToFloatOrDefault(paperProbability2ndLay?.probability, 0, 100, 0),
   };
+}
+
+export async function getPaperTaxonomicData(pmid: number):
+    Promise<FullTaxonomicData[]> {
+  const taxonData = await prisma.geneIDToPMID.findMany({
+    where: {pmid},
+    distinct: ['geneID'],
+    select: {
+      taxIDsAccNumb: {
+        select: {
+          orgTaxName: true,
+          taxID: true,
+          accNumb: true,
+          taxPath: {
+            select: {
+              orgLineage: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  return taxonData.map((taxon) => ({...taxon.taxIDsAccNumb}));
 }
 
 async function handler(
