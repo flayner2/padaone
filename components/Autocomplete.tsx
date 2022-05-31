@@ -8,7 +8,7 @@ import {
 } from '@chakra-ui/react';
 import type { CSSObject, BoxProps, InputProps } from '@chakra-ui/react';
 import type { ComboBoxProps } from '@react-types/combobox';
-import type { LoadingState } from '@react-types/shared';
+import type { LoadingState, SelectionMode } from '@react-types/shared';
 import * as React from 'react';
 import { useComboBox, useFilter } from 'react-aria';
 import { useComboBoxState } from 'react-stately';
@@ -24,9 +24,20 @@ interface AutocompleteProps<T> extends ComboBoxProps<T> {
   placeholderProps?: CSSObject;
   boxProps?: BoxProps;
   inputProps?: InputProps;
+  selectedKeys?: Iterable<React.Key> | 'all' | undefined;
+  selectionMode?: SelectionMode;
 }
 
-export function Autocomplete<T extends object>(props: AutocompleteProps<T>) {
+// export const Autocomplete1 = React.forwardRef<HTMLDivElement, AutocompleteProps<any>>((props: AutocompleteProps<any>, ref) => {
+//   return (
+//     <div></div>
+//   )
+// })
+
+export const Autocomplete = React.forwardRef<
+  HTMLDivElement,
+  AutocompleteProps<any>
+>((props: AutocompleteProps<any>, ref) => {
   let { contains } = useFilter({ sensitivity: 'base' });
   let state = useComboBoxState({ ...props, defaultFilter: contains });
 
@@ -92,6 +103,8 @@ export function Autocomplete<T extends object>(props: AutocompleteProps<T>) {
           ) : (
             <ListBox
               {...listBoxProps}
+              selectedKeys={props.selectedKeys}
+              selectionMode={props.selectionMode}
               listBoxRef={listBoxRef}
               state={state}
               loadingState={props.loadingState}
@@ -102,4 +115,4 @@ export function Autocomplete<T extends object>(props: AutocompleteProps<T>) {
       )}
     </Box>
   );
-}
+});

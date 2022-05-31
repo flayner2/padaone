@@ -27,9 +27,9 @@ import {
 import axios from 'axios';
 import type { InferGetStaticPropsType } from 'next';
 import Head from 'next/head';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAsyncList } from 'react-stately';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { Autocomplete, Item } from '../components/Autocomplete';
 import DatePicker from '../components/DatePicker';
 import { debounce } from '../lib/debounce';
@@ -79,9 +79,12 @@ function Home({
     register,
     handleSubmit,
     watch,
+    control,
     formState: { errors },
   } = useForm();
   const onSubmit = (data) => console.log(data);
+
+  let listBoxRef = useRef(null);
 
   async function getAsyncListDataDebounced<T>(
     queryUrl: string,
@@ -109,7 +112,7 @@ function Home({
 
   let paperList = useAsyncList<PaperTitlePMID>({
     async load({ signal, cursor, filterText }) {
-      return getAsyncListDataDebounced(
+      return await getAsyncListDataDebounced(
         '/api/getAutocompletePapers?paperTitle',
         signal,
         cursor,
@@ -120,7 +123,7 @@ function Home({
 
   let journalList = useAsyncList<Journal>({
     async load({ signal, cursor, filterText }) {
-      return getAsyncListDataDebounced(
+      return await getAsyncListDataDebounced(
         '/api/getAutocompleteJournals?journalName',
         signal,
         cursor,
@@ -131,7 +134,7 @@ function Home({
 
   let taxaList = useAsyncList<TaxonNameAndID>({
     async load({ signal, cursor, filterText }) {
-      return getAsyncListDataDebounced(
+      return await getAsyncListDataDebounced(
         '/api/getAutocompleteTaxa?taxonName',
         signal,
         cursor,
@@ -262,41 +265,59 @@ function Home({
                   >
                     Title
                   </FormLabel>
-                  <Autocomplete
-                    items={paperList.items}
-                    inputValue={paperList.filterText}
-                    onInputChange={(value) =>
-                      handleAutocompleteInputChange(value, paperList)
-                    }
-                    loadingState={paperList.loadingState}
-                    onLoadMore={paperList.loadMore}
-                    button={
-                      <Button
-                        background="protBlue.300"
-                        _hover={{
-                          background: 'protBlue.veryLightHover',
+                  <Controller
+                    control={control}
+                    name="paperTitle"
+                    render={({
+                      field: { onChange, onBlur, value, name, ref },
+                      fieldState: { invalid, isTouched, isDirty, error },
+                      formState,
+                    }) => (
+                      <Autocomplete
+                        onBlur={onBlur}
+                        items={paperList.items}
+                        inputValue={paperList.filterText}
+                        onInputChange={(value) =>
+                          handleAutocompleteInputChange(value, paperList)
+                        }
+                        loadingState={paperList.loadingState}
+                        onLoadMore={paperList.loadMore}
+                        button={
+                          <Button
+                            background="protBlue.300"
+                            _hover={{
+                              background: 'protBlue.veryLightHover',
+                            }}
+                            type="submit"
+                          >
+                            <Search2Icon color="protBlack.800" />
+                          </Button>
+                        }
+                        placeholder="Start typing to get suggestions..."
+                        placeholderProps={{
+                          color: 'protBlue.900',
+                          fontSize: 'sm',
                         }}
-                        type="submit"
+                        boxProps={{ width: '100%' }}
+                        inputProps={{
+                          background: 'protGray.500',
+                          color: 'protBlack.800',
+                          borderRadius: '8px',
+                          id: 'paperTitle',
+                        }}
+                        onSelectionChange={(value) => {
+                          paperList.setSelectedKeys(new Set([value]));
+                          onChange(value);
+                        }}
+                        selectedKeys={paperList.selectedKeys}
+                        selectionMode="single"
+                        ref={ref}
+                        // {...register('paperTitle')}
                       >
-                        <Search2Icon color="protBlack.800" />
-                      </Button>
-                    }
-                    placeholder="Start typing to get suggestions..."
-                    placeholderProps={{
-                      color: 'protBlue.900',
-                      fontSize: 'sm',
-                    }}
-                    boxProps={{ width: '100%' }}
-                    inputProps={{
-                      background: 'protGray.500',
-                      color: 'protBlack.800',
-                      borderRadius: '8px',
-                      id: 'paperTitle',
-                    }}
-                    {...register('paperTitle')}
-                  >
-                    {(item) => <Item key={item.pmid}>{item.title}</Item>}
-                  </Autocomplete>
+                        {(item) => <Item key={item.pmid}>{item.title}</Item>}
+                      </Autocomplete>
+                    )}
+                  />
                 </FormControl>
               </form>
 
