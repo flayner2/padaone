@@ -28,16 +28,7 @@ interface AutocompleteProps<T> extends ComboBoxProps<T> {
   selectionMode?: SelectionMode;
 }
 
-// export const Autocomplete1 = React.forwardRef<HTMLDivElement, AutocompleteProps<any>>((props: AutocompleteProps<any>, ref) => {
-//   return (
-//     <div></div>
-//   )
-// })
-
-export const Autocomplete = React.forwardRef<
-  HTMLDivElement,
-  AutocompleteProps<any>
->((props: AutocompleteProps<any>, ref) => {
+export function Autocomplete(props: AutocompleteProps<any>) {
   let { contains } = useFilter({ sensitivity: 'base' });
   let state = useComboBoxState({ ...props, defaultFilter: contains });
 
@@ -115,4 +106,4 @@ export const Autocomplete = React.forwardRef<
       )}
     </Box>
   );
-});
+}
