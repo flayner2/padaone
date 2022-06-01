@@ -13,6 +13,7 @@
     "@chakra-ui/react": "^1.8.8",
     "@emotion/react": "^11.9.0",
     "@emotion/styled": "^11.8.1",
+    "@hookform/resolvers": "^2.8.10",
     "@prisma/client": "^3.14.0",
     "@types/react-datepicker": "^4.4.1",
     "axios": "^0.27.2",
@@ -23,7 +24,8 @@
     "react-datepicker": "^4.8.0",
     "react-dom": "^18.1.0",
     "react-hook-form": "^7.31.2",
-    "react-stately": "^3.13.0"
+    "react-stately": "^3.13.0",
+    "yup": "^0.32.11"
   },
   "devDependencies": {
     "@types/node": "17.0.31",
