@@ -7,6 +7,7 @@ import {
   Flex,
   FormControl,
   FormLabel,
+  FormErrorMessage,
   GridItem,
   Heading,
   HStack,
@@ -27,9 +28,10 @@ import {
 import axios from 'axios';
 import type { InferGetStaticPropsType } from 'next';
 import Head from 'next/head';
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useAsyncList } from 'react-stately';
 import { useForm, Controller } from 'react-hook-form';
+import type { SubmitHandler } from 'react-hook-form';
 import { Autocomplete, Item } from '../components/Autocomplete';
 import DatePicker from '../components/DatePicker';
 import { debounce } from '../lib/debounce';
@@ -43,7 +45,14 @@ import type {
   Journal,
   PaperTitlePMID,
   TaxonNameAndID,
+  PaperTitleFormValue,
+  PaperPMIDFormValue,
+  PaperFiltersFormValues,
 } from '../lib/types';
+import { getPaper } from './api/getPaper';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import { useRouter } from 'next/router';
 
 const OFFSET_VALUE: number = 20;
 
@@ -52,6 +61,10 @@ function Home({
   pubDateRange,
   classificationScores,
 }: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
+  // Routing
+  const router = useRouter();
+
+  // State
   const minDate = new Date(pubDateRange._min.yearPub || 1970, 0);
   const maxDate = new Date(
     pubDateRange._max.yearPub || Date.prototype.getFullYear(),
@@ -75,17 +88,7 @@ function Home({
     classificationScores.secondLayer.max
   );
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    control,
-    formState: { errors },
-  } = useForm();
-  const onSubmit = (data) => console.log(data);
-
-  let listBoxRef = useRef(null);
-
+  // Async lists
   async function getAsyncListDataDebounced<T>(
     queryUrl: string,
     signal: AbortSignal,
@@ -150,6 +153,67 @@ function Home({
     setOffset(0);
     list.setFilterText(value);
   }
+
+  // Hook-form
+  const paperTitleValidationSchema = yup.object({
+    paperTitle: yup
+      .string()
+      .required('Please start typing and select one of the suggestions.'),
+  });
+
+  const paperPMIDValidationSchema = yup.object({
+    paperPMID: yup
+      .string()
+      .matches(/([0-9])/, 'Please, only enter numbers on this field.')
+      .required('Please enter a valid PMID.')
+      .test(
+        'pmid-exists',
+        'PMID not found',
+        async (value) =>
+          value && (await axios.get(`/api/getPaper?pmid=${value}`)).data && true
+      ),
+  });
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm();
+
+  const {
+    handleSubmit: paperTitleHandleSubmit,
+    control: paperTitleControl,
+    formState: { errors: paperTitleErrors },
+  } = useForm<PaperTitleFormValue>({
+    resolver: yupResolver(paperTitleValidationSchema),
+    reValidateMode: 'onSubmit',
+  });
+
+  const {
+    handleSubmit: paperPMIDHandleSubmit,
+    register: paperPMIDRegister,
+    formState: { errors: paperPMIDErrors },
+  } = useForm<PaperPMIDFormValue>({
+    resolver: yupResolver(paperPMIDValidationSchema),
+    reValidateMode: 'onSubmit',
+  });
+
+  const onSubmitPaperTitleOrPMID: SubmitHandler<
+    PaperTitleFormValue | PaperPMIDFormValue
+  > = (data, event) => {
+    event?.preventDefault();
+
+    let selectedPMID;
+
+    if ('paperTitle' in data) {
+      selectedPMID = parseInt(data.paperTitle);
+    } else {
+      selectedPMID = parseInt(data.paperPMID);
+    }
+
+    router.push(`/paper/${selectedPMID}`);
+  };
 
   return (
     <Flex justifyContent="center">
@@ -254,10 +318,10 @@ function Home({
               spacing="0.5rem"
             >
               <form
-                style={{ width: '100%' }}
-                onSubmit={handleSubmit(onSubmit)}
+                style={{ width: '100%', alignSelf: 'flex-start' }}
+                onSubmit={paperTitleHandleSubmit(onSubmitPaperTitleOrPMID)}
               >
-                <FormControl>
+                <FormControl isInvalid={paperTitleErrors.paperTitle && true}>
                   <FormLabel
                     color="protBlack.800"
                     fontSize="md"
@@ -266,13 +330,9 @@ function Home({
                     Title
                   </FormLabel>
                   <Controller
-                    control={control}
+                    control={paperTitleControl}
                     name="paperTitle"
-                    render={({
-                      field: { onChange, onBlur, value, name, ref },
-                      fieldState: { invalid, isTouched, isDirty, error },
-                      formState,
-                    }) => (
+                    render={({ field: { onChange, onBlur } }) => (
                       <Autocomplete
                         onBlur={onBlur}
                         items={paperList.items}
@@ -311,46 +371,59 @@ function Home({
                         }}
                         selectedKeys={paperList.selectedKeys}
                         selectionMode="single"
-                        ref={ref}
-                        // {...register('paperTitle')}
                       >
                         {(item) => <Item key={item.pmid}>{item.title}</Item>}
                       </Autocomplete>
                     )}
                   />
+                  <FormErrorMessage>
+                    {paperTitleErrors.paperTitle?.message}
+                  </FormErrorMessage>
                 </FormControl>
               </form>
 
-              <FormControl width="50%">
-                <FormLabel
-                  fontSize="md"
-                  color="protBlack.800"
-                >
-                  PMID
-                </FormLabel>
-                <InputGroup>
-                  <InputRightElement>
-                    <Button
-                      background="protBlue.300"
-                      _hover={{
-                        background: 'protBlue.veryLightHover',
-                      }}
-                    >
-                      <Search2Icon color="protBlack.800" />
-                    </Button>
-                  </InputRightElement>
-                  <Input
-                    placeholder="E.g.: 123"
-                    _placeholder={{
-                      color: 'protBlue.900',
-                      fontSize: 'sm',
-                    }}
-                    background="protGray.500"
+              <form
+                style={{ width: '50%', alignSelf: 'flex-start' }}
+                onSubmit={paperPMIDHandleSubmit(onSubmitPaperTitleOrPMID)}
+              >
+                <FormControl isInvalid={paperPMIDErrors.paperPMID && true}>
+                  <FormLabel
+                    fontSize="md"
                     color="protBlack.800"
-                    borderRadius="8px"
-                  />
-                </InputGroup>
-              </FormControl>
+                  >
+                    PMID
+                  </FormLabel>
+                  <InputGroup>
+                    <InputRightElement>
+                      <Button
+                        background="protBlue.300"
+                        _hover={{
+                          background: 'protBlue.veryLightHover',
+                        }}
+                        type="submit"
+                      >
+                        <Search2Icon color="protBlack.800" />
+                      </Button>
+                    </InputRightElement>
+                    <Input
+                      placeholder="E.g.: 123"
+                      _placeholder={{
+                        color: 'protBlue.900',
+                        fontSize: 'sm',
+                      }}
+                      background="protGray.500"
+                      color="protBlack.800"
+                      borderRadius="8px"
+                      {...paperPMIDRegister('paperPMID', {
+                        required: true,
+                      })}
+                    />
+                  </InputGroup>
+                  <FormErrorMessage>
+                    {paperPMIDErrors.paperPMID?.message}
+                  </FormErrorMessage>
+                </FormControl>
+              </form>
             </HStack>
           </Flex>
 
