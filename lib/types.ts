@@ -1,5 +1,5 @@
-import type {InputProps} from '@chakra-ui/react';
-import type {ReactDatePickerProps} from 'react-datepicker';
+import type { InputProps } from '@chakra-ui/react';
+import type { ReactDatePickerProps } from 'react-datepicker';
 
 export interface FunctionWithArguments {
   (...args: any): any;
@@ -9,16 +9,16 @@ export interface DebouncedFunction<F extends FunctionWithArguments> {
   (...args: Parameters<F>): Promise<ReturnType<F>>;
 }
 
-export interface DebounceReturn<F extends FunctionWithArguments> extends
-    Array<DebouncedFunction<F>|(() => void)> {
+export interface DebounceReturn<F extends FunctionWithArguments>
+  extends Array<DebouncedFunction<F> | (() => void)> {
   0: (...args: Parameters<F>) => Promise<ReturnType<F>>;
   1: () => void;
 }
 
-export type LanguagePub = string|null;
+export type LanguagePub = string | null;
 
 export interface Journal {
-  journal: string|null;
+  journal: string | null;
 }
 
 export interface PaperTitlePMID {
@@ -27,8 +27,8 @@ export interface PaperTitlePMID {
 }
 
 export interface TaxonNameAndID {
-  orgTaxName: string|null;
-  taxID: number|null;
+  orgTaxName: string | null;
+  taxID: number | null;
 }
 
 export interface AsyncListDataDebouncedReturn<T> {
@@ -45,20 +45,20 @@ export interface CustomDatePickerProps extends ReactDatePickerProps {
 }
 
 export interface CalendarContainerProps {
-  className?: string|undefined;
-  children?: React.ReactNode|undefined;
-  showPopperArrow?: boolean|undefined;
-  arrowProps?: {[propName: string]: any}|undefined;
+  className?: string | undefined;
+  children?: React.ReactNode | undefined;
+  showPopperArrow?: boolean | undefined;
+  arrowProps?: { [propName: string]: any } | undefined;
 }
 
 export interface MinMaxYearPub {
-  _min: {yearPub: true};
-  _max: {yearPub: true};
+  _min: { yearPub: true };
+  _max: { yearPub: true };
 }
 
 export interface ClassificationRangeReturn {
-  firstLayer: {min: number; max: number};
-  secondLayer: {min: number; max: number};
+  firstLayer: { min: number; max: number };
+  secondLayer: { min: number; max: number };
 }
 
 export interface PaperProbabilityReturn {
@@ -67,8 +67,18 @@ export interface PaperProbabilityReturn {
 }
 
 export interface FullTaxonomicData {
-  taxPath: {orgLineage: string|null}|null;
-  orgTaxName: string|null;
-  taxID: number|null;
-  accNumb: string|null;
+  taxPath: { orgLineage: string | null } | null;
+  orgTaxName: string | null;
+  taxID: number | null;
+  accNumb: string | null;
 }
+
+export interface PaperTitleFormValue {
+  paperTitle: string;
+}
+
+export interface PaperPMIDFormValue {
+  paperPMID: string;
+}
+
+export interface PaperFiltersFormValues {}
