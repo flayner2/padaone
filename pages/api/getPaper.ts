@@ -45,9 +45,10 @@ export async function getPaperProbability(pmid: number):
 export async function getPaperTaxonomicData(pmid: number):
     Promise<FullTaxonomicData[]> {
   const taxonData = await prisma.geneIDToPMID.findMany({
-    where: {pmid},
+    where: {pmid, NOT: [{taxIDsAccNumb: {accNumb: 'NaN'}}]},
     distinct: ['geneID'],
     select: {
+      geneID: true,
       taxIDsAccNumb: {
         select: {
           orgTaxName: true,
@@ -63,17 +64,40 @@ export async function getPaperTaxonomicData(pmid: number):
     },
   });
 
-  return taxonData.map((taxon) => ({...taxon.taxIDsAccNumb}));
+  return taxonData.map(({geneID, taxIDsAccNumb}) => ({
+                         geneID,
+                         ...taxIDsAccNumb,
+                       }));
 }
 
 async function handler(
-    req: NextApiRequest, res: NextApiResponse<MetadataPub|null>) {
+    req: NextApiRequest, res: NextApiResponse<MetadataPub|Error>) {
+  if (req.method !== 'GET') {
+    res.status(405).send(Error(`Method ${req.method} is not allowed.`));
+  }
+
   const pmid = parseInt(
       Array.isArray(req.query.pmid) ? req.query.pmid[0] : req.query.pmid);
 
-  const paper = await getPaper(pmid);
+  const message = `The requested paper with PMID ${pmid} was not found.`;
 
-  res.status(200).send(paper);
+  try {
+    const paper = await getPaper(pmid);
+
+    if (!paper) {
+      res.status(400).send(Error(message));
+    } else {
+      res.status(200).send(paper);
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.name == 'NotFoundError') {
+        res.status(400).send({...error, message});
+      } else {
+        res.status(500).send(error);
+      }
+    }
+  }
 }
 
 export default handler;
