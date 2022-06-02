@@ -23,6 +23,9 @@ export async function getJournalsByName(
 }
 
 async function handler(req: NextApiRequest, res: NextApiResponse<Journal[]>) {
+  if (req.method !== 'GET') {
+    res.status(405).send(Error(`Method ${req.method} is not allowed.`));
+  }
   const journal = Array.isArray(req.query.journalName) ?
       req.query.journalName[0] :
       req.query.journalName;

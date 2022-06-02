@@ -19,6 +19,9 @@ export async function getPapersByTitle(
 
 async function handler(
     req: NextApiRequest, res: NextApiResponse<PaperTitlePMID[]>) {
+  if (req.method !== 'GET') {
+    res.status(405).send(Error(`Method ${req.method} is not allowed.`));
+  }
   const title = Array.isArray(req.query.paperTitle) ? req.query.paperTitle[0] :
                                                       req.query.paperTitle;
   const offset = parseInt(

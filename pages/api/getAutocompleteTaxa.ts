@@ -35,6 +35,9 @@ function parseTaxa(foundTaxa: TaxonNameAndID[]): TaxonNameAndID[] {
 
 async function handler(
     req: NextApiRequest, res: NextApiResponse<TaxonNameAndID[]>) {
+  if (req.method !== 'GET') {
+    res.status(405).send(Error(`Method ${req.method} is not allowed.`));
+  }
   const taxonName = Array.isArray(req.query.taxonName) ?
       req.query.taxonName[0] :
       req.query.taxonName;
