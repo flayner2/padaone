@@ -1,31 +1,29 @@
-import type {
-  GetServerSidePropsContext,
-  InferGetServerSidePropsType,
-} from 'next';
+import { ExternalLinkIcon } from '@chakra-ui/icons';
 import {
-  Flex,
-  Text,
-  HStack,
-  VStack,
-  Heading,
-  Link,
-  Divider,
   Button,
   chakra,
+  Divider,
+  Flex,
+  Heading,
+  HStack,
+  Link,
+  Text,
+  VStack,
 } from '@chakra-ui/react';
-import { ExternalLinkIcon } from '@chakra-ui/icons';
+import type { GetServerSidePropsContext } from 'next';
+import Head from 'next/head';
+import type { PaperPageData } from '../../lib/types';
 import {
   getPaper,
   getPaperProbability,
   getPaperTaxonomicData,
 } from '../api/getPaper';
-import Head from 'next/head';
 
 function Paper({
   paper,
   paperProbability,
   taxonomicData,
-}: InferGetServerSidePropsType<typeof getServerSideProps>): JSX.Element {
+}: PaperPageData): JSX.Element {
   return (
     <Flex justifyContent="center">
       <Head>
@@ -262,9 +260,35 @@ function Paper({
                     width="100%"
                     alignItems="flex-start"
                   >
+                    {/*<Text color="protBlack.800">
+                      <chakra.span fontWeight="semibold">
+                        Gene ids:{' '}
+                      </chakra.span>
+                      {taxon.geneID
+                        .split(',')
+                        .map((accession, index, allNumbs) => (
+                          <>
+                            <Link
+                              key={accession}
+                              href={`https://www.ncbi.nlm.nih.gov/protein/${accession}`}
+                              color="protBlue.400"
+                              isExternal
+                              _hover={{
+                                textDecoration: 'none',
+                                color: 'protBlue.lightHover',
+                              }}
+                            >
+                              {accession}
+                              <ExternalLinkIcon />
+                            </Link>
+                            {index < allNumbs.length - 1 && '; '}
+                          </>
+                        ))}
+                        </Text>*/}
+
                     <Text color="protBlack.800">
                       <chakra.span fontWeight="semibold">
-                        Gene IDs:{' '}
+                        Accession numbers:{' '}
                       </chakra.span>
                       {taxon.accNumb
                         .split(',')
@@ -316,17 +340,27 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     rawPmid ? (Array.isArray(rawPmid) ? rawPmid[0] : rawPmid) : '0'
   );
 
-  const paper = await getPaper(pmid);
-  const paperProbability = await getPaperProbability(pmid);
-  const taxonomicData = await getPaperTaxonomicData(pmid);
+  try {
+    const paper = await getPaper(pmid);
+    const paperProbability = await getPaperProbability(pmid);
+    const taxonomicData = await getPaperTaxonomicData(pmid);
 
-  return {
-    props: {
-      paper,
-      paperProbability,
-      taxonomicData,
-    },
-  };
+    return {
+      props: {
+        paper,
+        paperProbability,
+        taxonomicData,
+      },
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.name === 'NotFoundError') {
+        return {
+          notFound: true,
+        };
+      }
+    }
+  }
 }
 
 export default Paper;
