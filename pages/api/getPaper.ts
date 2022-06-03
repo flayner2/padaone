@@ -64,10 +64,34 @@ export async function getPaperTaxonomicData(pmid: number):
     },
   });
 
-  return taxonData.map(({geneID, taxIDsAccNumb}) => ({
-                         geneID,
-                         ...taxIDsAccNumb,
-                       }));
+  const wideTaxonData = taxonData.map(({geneID, taxIDsAccNumb}) => ({
+                                        geneIDs: [geneID],
+                                        ...taxIDsAccNumb,
+                                      }));
+
+  let finalTaxonData = new Array<FullTaxonomicData>();
+
+  for (const taxon of wideTaxonData) {
+    const currentIndex =
+        finalTaxonData.findIndex((value) => value.taxID === taxon.taxID);
+
+    if (currentIndex >= 0) {
+      let currentTaxon = finalTaxonData[currentIndex];
+      currentTaxon.geneIDs.push(taxon.geneIDs[0]);
+
+      if (taxon.accNumb) {
+        if (currentTaxon.accNumb === 'NaN' || !currentTaxon.accNumb) {
+          currentTaxon.accNumb = taxon.accNumb;
+        } else {
+          currentTaxon.accNumb.concat(`; ${taxon.accNumb}`);
+        }
+      }
+    } else {
+      finalTaxonData.push(taxon);
+    }
+  }
+
+  return finalTaxonData;
 }
 
 async function handler(

@@ -72,7 +72,7 @@ export interface FullTaxonomicData {
   orgTaxName: string|null;
   taxID: number|null;
   accNumb: string|null;
-  geneID: number;
+  geneIDs: number[];
 }
 
 export interface PaperPageData {
