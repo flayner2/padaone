@@ -5,56 +5,30 @@ import {prisma} from '../../lib/prisma';
 import type {FullTaxonomicData, PaperProbabilityReturn,} from '../../lib/types';
 
 export async function getPaper(pmid: number): Promise<MetadataPub> {
-  try {
-    const paper = await prisma.metadataPub.findFirst({
-      where: {
-        pmid,
-      },
-    });
+  const paper = await prisma.metadataPub.findFirst({
+    where: {
+      pmid,
+    },
+  });
 
-    if (!paper) {
-      throw new Error(
-          `Something went wrong when searching for paper with PMID ${pmid}`);
-    }
-
-    return paper;
-  } catch (error) {
-    if (error instanceof Error) {
-      if (error.name === 'NotFoundError') {
-        throw error;
-      }
-      throw new Error('Unknown error occurred.', {cause: error});
-    }
-    throw error;
+  if (!paper) {
+    throw new Error(
+        `Something went wrong when searching for paper with PMID ${pmid}`);
   }
+
+  return paper;
 }
 
 export async function getPapers(pmid: number[]):
     Promise<(MetadataPub | null)[]> {
-  try {
-    const papers = await Promise.all(
-        pmid.map(async (pmid) => await prisma.metadataPub.findFirst({
-          where: {
-            pmid,
-          },
-        })));
+  const papers = await Promise.all(
+      pmid.map(async (pmid) => await prisma.metadataPub.findFirst({
+        where: {
+          pmid,
+        },
+      })));
 
-    if (!papers) {
-      throw new Error(
-          `Something went wrong when searching for papers from the list ${
-              pmid}`);
-    }
-
-    return papers;
-  } catch (error) {
-    if (error instanceof Error) {
-      if (error.name === 'NotFoundError') {
-        throw error;
-      }
-      throw new Error('Unknown error occurred.', {cause: error});
-    }
-    throw error;
-  }
+  return papers;
 }
 
 export async function getPaperProbability(pmid: number):
