@@ -163,14 +163,23 @@ function Home({
   const paperPMIDValidationSchema = yup.object({
     paperPMID: yup
       .string()
-      .matches(/([0-9])/, 'Please, only enter numbers on this field.')
       .required('Please enter a valid PMID.')
-      .test(
-        'pmid-exists',
-        'PMID not found',
-        async (value) =>
-          value && (await axios.get(`/api/getPaper?pmid=${value}`)).data && true
-      ),
+      .test('pmid-exists', 'PMID not found', async (value) => {
+        try {
+          await axios.get(`/api/getPaper?pmid=${value}`);
+        } catch (error) {
+          if (axios.isAxiosError(error) && error.response) {
+            if (
+              error.response.status === 404 ||
+              error.response.status === 500
+            ) {
+              return false;
+            }
+          }
+        }
+        return value ? true : false;
+      })
+      .matches(/([0-9])/, 'Please, only enter numbers on this field.'),
   });
 
   const {
