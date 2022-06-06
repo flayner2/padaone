@@ -160,7 +160,7 @@ async function handler(
       }
 
       if (!paper) {
-        res.status(400).send(new Error(
+        res.status(404).send(new Error(
             `The requested paper(s) with PMID ${pmid} was not found.`));
       } else {
         res.status(200).send(paper);
@@ -168,7 +168,7 @@ async function handler(
     } catch (error) {
       if (error instanceof Error) {
         if (error.name == 'NotFoundError') {
-          res.status(400).send({
+          res.status(404).send({
             ...error,
             message: `The requested paper(s) with PMID ${pmid} was not found.`,
           });
