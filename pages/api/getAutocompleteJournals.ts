@@ -22,19 +22,52 @@ export async function getJournalsByName(
   return data;
 }
 
-async function handler(req: NextApiRequest, res: NextApiResponse<Journal[]>) {
+async function handler(
+    req: NextApiRequest, res: NextApiResponse<Journal[]|Error>) {
   if (req.method !== 'GET') {
-    res.status(405).send(Error(`Method ${req.method} is not allowed.`));
+    res.status(405).send(new Error(`Method ${req.method} is not allowed.`));
   }
-  const journal = Array.isArray(req.query.journalName) ?
-      req.query.journalName[0] :
-      req.query.journalName;
-  const offset = parseInt(
-      Array.isArray(req.query.offset) ? req.query.offset[0] : req.query.offset);
 
-  const data = await getJournalsByName(journal, offset ? offset : 0);
+  if (!req.query.journalName.length) {
+    res.status(400).send(
+        new Error('Query parameter "journalName" is required.'));
+  }
 
-  res.status(200).send(data);
+  if (Array.isArray(req.query.journalName)) {
+    res.status(400).send(
+        new Error('Query parameter "journalName" may contain only one value.'));
+  } else {
+    if (Array.isArray(req.query.offset)) {
+      res.status(400).send(
+          new Error('Query parameter "offset" may contain only one value.'));
+    } else {
+      const journal = req.query.journalName;
+      const offset = parseInt(req.query.offset);
+
+      if (!offset && req.query.offset.length) {
+        res.status(400).send(new Error(
+            'Query parameter "offset" must be either empty or a numeric value.'));
+      }
+
+      try {
+        const data = await getJournalsByName(journal, offset ? offset : 0);
+
+        res.status(200).send(data);
+      } catch (error) {
+        if (error instanceof Error) {
+          if (error.name === 'NotFoundError') {
+            res.status(400).send({
+              ...error,
+              message:
+                  `The requested journal with title ${journal} was not found.`,
+            });
+          } else {
+            res.status(500).send(error);
+          }
+        }
+      }
+    }
+  }
 }
 
 export default handler;
