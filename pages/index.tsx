@@ -719,7 +719,7 @@ function Home({
                             setMinLayer1Value(v1);
                             setMaxLayer1Value(v2);
                           }}
-                          step={0.1}
+                          step={1}
                           id="firstLayer"
                         >
                           <RangeSliderTrack bg="protBlue.900">
@@ -781,7 +781,7 @@ function Home({
                             setMinLayer2Value(v1);
                             setMaxLayer2Value(v2);
                           }}
-                          step={0.1}
+                          step={1}
                           id="secondLayer"
                         >
                           <RangeSliderTrack bg="protBlue.900">
