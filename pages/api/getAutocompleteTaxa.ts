@@ -2,7 +2,7 @@ import type {NextApiRequest, NextApiResponse} from 'next';
 import {prisma} from '../../lib/prisma';
 import type {TaxonNameAndID} from '../../lib/types';
 
-export async function getPapersByTitle(
+export async function getTaxaByName(
     query: string, offset: number = 0): Promise<TaxonNameAndID[]> {
   const isID = !isNaN(parseInt(query));
 
@@ -34,21 +34,52 @@ function parseTaxa(foundTaxa: TaxonNameAndID[]): TaxonNameAndID[] {
 }
 
 async function handler(
-    req: NextApiRequest, res: NextApiResponse<TaxonNameAndID[]>) {
+    req: NextApiRequest, res: NextApiResponse<TaxonNameAndID[]|Error>) {
   if (req.method !== 'GET') {
-    res.status(405).send(Error(`Method ${req.method} is not allowed.`));
+    res.status(405).send(new Error(`Method ${req.method} is not allowed.`));
   }
-  const taxonName = Array.isArray(req.query.taxonName) ?
-      req.query.taxonName[0] :
-      req.query.taxonName;
-  const offset = parseInt(
-      Array.isArray(req.query.offset) ? req.query.offset[0] : req.query.offset);
 
-  const data = await getPapersByTitle(taxonName, offset ? offset : 0);
+  if (!req.query.taxonName.length) {
+    res.status(400).send(new Error('Query parameter "taxonName" is required.'));
+  }
 
-  const taxaWithPrettyNames = parseTaxa(data);
+  if (Array.isArray(req.query.taxonName)) {
+    res.status(400).send(
+        new Error('Query parameter "taxonName" may contain only one value.'));
+  } else {
+    if (Array.isArray(req.query.offset)) {
+      res.status(400).send(
+          new Error('Query parameter "offset" may contain only one value.'));
+    } else {
+      const taxonName = req.query.taxonName;
+      const offset = parseInt(req.query.offset);
 
-  res.status(200).send(taxaWithPrettyNames);
+      if (!offset && req.query.offset.length) {
+        res.status(400).send(new Error(
+            'Query parameter "offset" must be either empty or a numeric value.'));
+      }
+
+      try {
+        const data = await getTaxaByName(taxonName, offset ? offset : 0);
+
+        const taxaWithPrettyNames = parseTaxa(data);
+
+        res.status(200).send(taxaWithPrettyNames);
+      } catch (error) {
+        if (error instanceof Error) {
+          if (error.name === 'NotFoundError') {
+            res.status(400).send({
+              ...error,
+              message: `The requested taxonName with title ${
+                  taxonName} was not found.`,
+            });
+          } else {
+            res.status(500).send(error);
+          }
+        }
+      }
+    }
+  }
 }
 
 export default handler;
