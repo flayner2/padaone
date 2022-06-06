@@ -49,7 +49,6 @@ import type {
   PaperPMIDFormValue,
   PaperFiltersFormValues,
 } from '../lib/types';
-import { getPaper } from './api/getPaper';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useRouter } from 'next/router';
