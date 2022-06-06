@@ -2,96 +2,132 @@ import type {MetadataPub} from '@prisma/client';
 import type {NextApiRequest, NextApiResponse} from 'next';
 import {convertToFloatOrDefault} from '../../lib/helpers';
 import {prisma} from '../../lib/prisma';
-import type {PaperProbabilityReturn, FullTaxonomicData,} from '../../lib/types';
+import type {FullTaxonomicData, PaperProbabilityReturn,} from '../../lib/types';
 
 export async function getPaper(pmid: number): Promise<MetadataPub|null> {
-  const paper = await prisma.metadataPub.findFirst({
-    where: {
-      pmid,
-    },
-  });
+  try {
+    const paper = await prisma.metadataPub.findFirst({
+      where: {
+        pmid,
+      },
+    });
 
-  return paper;
+    return paper;
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.name === 'NotFoundError') {
+        throw error;
+      }
+      throw new Error('Unknown error occurred.', {cause: error});
+    }
+    throw error;
+  }
 }
 
 export async function getPaperProbability(pmid: number):
     Promise<PaperProbabilityReturn> {
-  const paperProbability1stLay = await prisma.classification1stLay.findFirst({
-    where: {
-      pmid,
-    },
-    select: {
-      probability: true,
-    },
-  });
+  try {
+    const paperProbability1stLay = await prisma.classification1stLay.findFirst({
+      where: {
+        pmid,
+      },
+      select: {
+        probability: true,
+      },
+    });
 
-  const paperProbability2ndLay = await prisma.classification2ndLay.findFirst({
-    where: {
-      pmid,
-    },
-    select: {
-      probability: true,
-    },
-  });
+    const paperProbability2ndLay = await prisma.classification2ndLay.findFirst({
+      where: {
+        pmid,
+      },
+      select: {
+        probability: true,
+      },
+    });
 
-  return {
-    probability1stLay:
-        convertToFloatOrDefault(paperProbability1stLay?.probability, 0, 100, 0),
-    probability2ndLay:
-        convertToFloatOrDefault(paperProbability2ndLay?.probability, 0, 100, 0),
-  };
+    if (paperProbability1stLay && paperProbability2ndLay) {
+      return {
+        probability1stLay: convertToFloatOrDefault(
+            paperProbability1stLay?.probability, 0, 100, 0),
+        probability2ndLay: convertToFloatOrDefault(
+            paperProbability2ndLay?.probability, 0, 100, 0),
+      };
+    } else {
+      throw new Error(
+          `Something went wrong when searching for the probabilities of paper ${
+              pmid}`);
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.name === 'NotFoundError') {
+        throw error;
+      }
+      throw new Error('Unknown error occurred.', {cause: error});
+    }
+    throw error;
+  }
 }
 
 export async function getPaperTaxonomicData(pmid: number):
     Promise<FullTaxonomicData[]> {
-  const taxonData = await prisma.geneIDToPMID.findMany({
-    where: {pmid, NOT: [{taxIDsAccNumb: {accNumb: 'NaN'}}]},
-    distinct: ['geneID'],
-    select: {
-      geneID: true,
-      taxIDsAccNumb: {
-        select: {
-          orgTaxName: true,
-          taxID: true,
-          accNumb: true,
-          taxPath: {
-            select: {
-              orgLineage: true,
+  try {
+    const taxonData = await prisma.geneIDToPMID.findMany({
+      where: {pmid, NOT: [{taxIDsAccNumb: {accNumb: 'NaN'}}]},
+      distinct: ['geneID'],
+      select: {
+        geneID: true,
+        taxIDsAccNumb: {
+          select: {
+            orgTaxName: true,
+            taxID: true,
+            accNumb: true,
+            taxPath: {
+              select: {
+                orgLineage: true,
+              },
             },
           },
         },
       },
-    },
-  });
+    });
 
-  const wideTaxonData = taxonData.map(({geneID, taxIDsAccNumb}) => ({
-                                        geneIDs: [geneID],
-                                        ...taxIDsAccNumb,
-                                      }));
+    const wideTaxonData = taxonData.map(({geneID, taxIDsAccNumb}) => ({
+                                          geneIDs: [geneID],
+                                          ...taxIDsAccNumb,
+                                        }));
 
-  let finalTaxonData = new Array<FullTaxonomicData>();
+    let finalTaxonData = new Array<FullTaxonomicData>();
 
-  for (const taxon of wideTaxonData) {
-    const currentIndex =
-        finalTaxonData.findIndex((value) => value.taxID === taxon.taxID);
+    for (const taxon of wideTaxonData) {
+      const currentIndex =
+          finalTaxonData.findIndex((value) => value.taxID === taxon.taxID);
 
-    if (currentIndex >= 0) {
-      let currentTaxon = finalTaxonData[currentIndex];
-      currentTaxon.geneIDs.push(taxon.geneIDs[0]);
+      if (currentIndex >= 0) {
+        let currentTaxon = finalTaxonData[currentIndex];
+        currentTaxon.geneIDs.push(taxon.geneIDs[0]);
 
-      if (taxon.accNumb) {
-        if (currentTaxon.accNumb === 'NaN' || !currentTaxon.accNumb) {
-          currentTaxon.accNumb = taxon.accNumb;
-        } else {
-          currentTaxon.accNumb.concat(`; ${taxon.accNumb}`);
+        if (taxon.accNumb) {
+          if (currentTaxon.accNumb === 'NaN' || !currentTaxon.accNumb) {
+            currentTaxon.accNumb = taxon.accNumb;
+          } else {
+            currentTaxon.accNumb.concat(`; ${taxon.accNumb}`);
+          }
         }
+      } else {
+        finalTaxonData.push(taxon);
       }
-    } else {
-      finalTaxonData.push(taxon);
     }
-  }
 
-  return finalTaxonData;
+    return finalTaxonData;
+  } catch (error) {
+    if (error instanceof Error) {
+      if (error.name === 'NotFoundError') {
+        throw error;
+      }
+      throw new Error('Unknown error occurred.', {cause: error});
+    }
+    throw error;
+  }
 }
 
 async function handler(
