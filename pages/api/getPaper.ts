@@ -136,6 +136,11 @@ async function handler(
     res.status(405).send(Error(`Method ${req.method} is not allowed.`));
   }
 
+  if (!req.query.pmid) {
+    res.status(400).send(
+        Error('Query must include the required parameter "pmid"'));
+  }
+
   const pmid = parseInt(
       Array.isArray(req.query.pmid) ? req.query.pmid[0] : req.query.pmid);
 
