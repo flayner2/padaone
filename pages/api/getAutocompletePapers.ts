@@ -32,7 +32,7 @@ async function handler(
       const paper = req.query.paperTitle;
       const offset = parseInt(req.query.offset);
 
-      if (isNaN(offset) && req.query.offset.length) {
+      if (isNaN(offset) && req.query.offset) {
         res.status(400).send(new Error(
             'Query parameter "offset" must be either empty or a numeric value.'));
       } else {

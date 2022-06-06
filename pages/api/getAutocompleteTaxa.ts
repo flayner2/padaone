@@ -48,7 +48,7 @@ async function handler(
       const taxonName = req.query.taxonName;
       const offset = parseInt(req.query.offset);
 
-      if (isNaN(offset) && req.query.offset.length) {
+      if (isNaN(offset) && req.query.offset) {
         res.status(400).send(new Error(
             'Query parameter "offset" must be either empty or a numeric value.'));
       } else {
