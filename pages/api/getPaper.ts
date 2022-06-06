@@ -142,44 +142,39 @@ async function handler(
     res: NextApiResponse<MetadataPub|(MetadataPub | null)[]|Error>) {
   if (req.method !== 'GET') {
     res.status(405).send(Error(`Method ${req.method} is not allowed.`));
-  }
+  } else {
+    let pmid;
 
-  if (!req.query.pmid.length) {
-    res.status(400).send(
-        Error('Query must include the required parameter "pmid".'));
-  }
+    try {
+      let paper;
 
-  let pmid;
-
-  try {
-    let paper;
-
-    if (Array.isArray(req.query.pmid)) {
-      pmid = req.query.pmid.map((pmid) => parseInt(pmid));
-      paper = await getPapers(pmid);
-    } else if (req.query.pmid.includes(',')) {
-      pmid = req.query.pmid.split(',').map((pmid) => parseInt(pmid));
-      paper = await getPapers(pmid);
-    } else {
-      pmid = parseInt(req.query.pmid);
-      paper = await getPaper(pmid);
-    }
-
-    if (!paper) {
-      res.status(400).send(
-          new Error(`The requested paper(s) with PMID ${pmid} was not found.`));
-    } else {
-      res.status(200).send(paper);
-    }
-  } catch (error) {
-    if (error instanceof Error) {
-      if (error.name == 'NotFoundError') {
-        res.status(400).send({
-          ...error,
-          message: `The requested paper(s) with PMID ${pmid} was not found.`,
-        });
+      if (Array.isArray(req.query.pmid)) {
+        pmid = req.query.pmid.map((pmid) => parseInt(pmid));
+        paper = await getPapers(pmid);
+      } else if (req.query.pmid.includes(',')) {
+        pmid = req.query.pmid.split(',').map((pmid) => parseInt(pmid));
+        paper = await getPapers(pmid);
       } else {
-        res.status(500).send(error);
+        pmid = parseInt(req.query.pmid);
+        paper = await getPaper(pmid);
+      }
+
+      if (!paper) {
+        res.status(400).send(new Error(
+            `The requested paper(s) with PMID ${pmid} was not found.`));
+      } else {
+        res.status(200).send(paper);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.name == 'NotFoundError') {
+          res.status(400).send({
+            ...error,
+            message: `The requested paper(s) with PMID ${pmid} was not found.`,
+          });
+        } else {
+          res.status(500).send(error);
+        }
       }
     }
   }

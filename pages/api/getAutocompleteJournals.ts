@@ -26,14 +26,7 @@ async function handler(
     req: NextApiRequest, res: NextApiResponse<Journal[]|Error>) {
   if (req.method !== 'GET') {
     res.status(405).send(new Error(`Method ${req.method} is not allowed.`));
-  }
-
-  if (!req.query.journalName.length) {
-    res.status(400).send(
-        new Error('Query parameter "journalName" is required.'));
-  }
-
-  if (Array.isArray(req.query.journalName)) {
+  } else if (Array.isArray(req.query.journalName)) {
     res.status(400).send(
         new Error('Query parameter "journalName" may contain only one value.'));
   } else {
@@ -44,25 +37,25 @@ async function handler(
       const journal = req.query.journalName;
       const offset = parseInt(req.query.offset);
 
-      if (!offset && req.query.offset.length) {
+      if (isNaN(offset) && req.query.offset.length) {
         res.status(400).send(new Error(
             'Query parameter "offset" must be either empty or a numeric value.'));
-      }
+      } else {
+        try {
+          const data = await getJournalsByName(journal, offset ? offset : 0);
 
-      try {
-        const data = await getJournalsByName(journal, offset ? offset : 0);
-
-        res.status(200).send(data);
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.name === 'NotFoundError') {
-            res.status(400).send({
-              ...error,
-              message:
-                  `The requested journal with name ${journal} was not found.`,
-            });
-          } else {
-            res.status(500).send(error);
+          res.status(200).send(data);
+        } catch (error) {
+          if (error instanceof Error) {
+            if (error.name === 'NotFoundError') {
+              res.status(400).send({
+                ...error,
+                message:
+                    `The requested journal with name ${journal} was not found.`,
+              });
+            } else {
+              res.status(500).send(error);
+            }
           }
         }
       }

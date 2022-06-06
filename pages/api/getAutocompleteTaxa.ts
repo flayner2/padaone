@@ -37,13 +37,7 @@ async function handler(
     req: NextApiRequest, res: NextApiResponse<TaxonNameAndID[]|Error>) {
   if (req.method !== 'GET') {
     res.status(405).send(new Error(`Method ${req.method} is not allowed.`));
-  }
-
-  if (!req.query.taxonName.length) {
-    res.status(400).send(new Error('Query parameter "taxonName" is required.'));
-  }
-
-  if (Array.isArray(req.query.taxonName)) {
+  } else if (Array.isArray(req.query.taxonName)) {
     res.status(400).send(
         new Error('Query parameter "taxonName" may contain only one value.'));
   } else {
@@ -54,27 +48,27 @@ async function handler(
       const taxonName = req.query.taxonName;
       const offset = parseInt(req.query.offset);
 
-      if (!offset && req.query.offset.length) {
+      if (isNaN(offset) && req.query.offset.length) {
         res.status(400).send(new Error(
             'Query parameter "offset" must be either empty or a numeric value.'));
-      }
+      } else {
+        try {
+          const data = await getTaxaByName(taxonName, offset ? offset : 0);
 
-      try {
-        const data = await getTaxaByName(taxonName, offset ? offset : 0);
+          const taxaWithPrettyNames = parseTaxa(data);
 
-        const taxaWithPrettyNames = parseTaxa(data);
-
-        res.status(200).send(taxaWithPrettyNames);
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.name === 'NotFoundError') {
-            res.status(400).send({
-              ...error,
-              message: `The requested taxonName with title ${
-                  taxonName} was not found.`,
-            });
-          } else {
-            res.status(500).send(error);
+          res.status(200).send(taxaWithPrettyNames);
+        } catch (error) {
+          if (error instanceof Error) {
+            if (error.name === 'NotFoundError') {
+              res.status(400).send({
+                ...error,
+                message: `The requested taxonName with title ${
+                    taxonName} was not found.`,
+              });
+            } else {
+              res.status(500).send(error);
+            }
           }
         }
       }
