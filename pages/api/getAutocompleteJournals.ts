@@ -59,7 +59,7 @@ async function handler(
             res.status(400).send({
               ...error,
               message:
-                  `The requested journal with title ${journal} was not found.`,
+                  `The requested journal with name ${journal} was not found.`,
             });
           } else {
             res.status(500).send(error);
