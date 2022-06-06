@@ -56,15 +56,16 @@ export async function getClassificationLayersRange():
 
   const classificationScores = {
     firstLayer: {
-      min: convertToFloatOrDefault(firstLayerRange._min.probability, 2, 100, 0),
-      max: convertToFloatOrDefault(
-          firstLayerRange._max.probability, 2, 100, 100),
+      min: Math.floor(
+          convertToFloatOrDefault(firstLayerRange._min.probability, 2, 100, 0)),
+      max: Math.ceil(convertToFloatOrDefault(
+          firstLayerRange._max.probability, 2, 100, 100)),
     },
     secondLayer: {
-      min:
-          convertToFloatOrDefault(secondLayerRange._min.probability, 2, 100, 0),
-      max: convertToFloatOrDefault(
-          secondLayerRange._max.probability, 2, 100, 100),
+      min: Math.floor(convertToFloatOrDefault(
+          secondLayerRange._min.probability, 2, 100, 0)),
+      max: Math.ceil(convertToFloatOrDefault(
+          secondLayerRange._max.probability, 2, 100, 100)),
     },
   };
 
