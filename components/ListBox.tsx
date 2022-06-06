@@ -22,9 +22,6 @@ export function ListBox(props: ListBoxProps) {
   let ref = React.useRef<HTMLUListElement>(null);
   let { listBoxRef = ref, state } = props;
 
-  // console.log("ref: ", listBoxRef?.current);
-  // console.log("state: ", state);
-
   let { listBoxProps } = useListBox(props, state, listBoxRef);
 
   let onScroll = (e: React.UIEvent) => {
