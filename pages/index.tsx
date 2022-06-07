@@ -24,6 +24,8 @@ import {
   Text,
   Tooltip,
   VStack,
+  Collapse,
+  useDisclosure,
 } from '@chakra-ui/react';
 import axios from 'axios';
 import type { InferGetStaticPropsType } from 'next';
@@ -86,6 +88,10 @@ function Home({
   const [maxLayer2Value, setMaxLayer2Value] = useState(
     classificationScores.secondLayer.max
   );
+
+  // Chakra state
+  const { isOpen: advancedIsOpen, onToggle: onAdvancedToggle } =
+    useDisclosure();
 
   // Async lists
   async function getAsyncListDataDebounced<T>(
@@ -314,134 +320,11 @@ function Home({
         </Box>
 
         {/* Container for both forms, just for the scroll */}
-        <Box id="search-form">
-          {/* Top search form */}
-          <Flex
-            flexDirection="column"
-            marginBottom="2rem"
-          >
-            <Text
-              fontSize="xl"
-              padding="1rem 0 1rem"
-              color="protBlack.800"
-            >
-              Find a specific paper by title or PMID:
-            </Text>
-            <HStack
-              width="100%"
-              spacing="0.5rem"
-            >
-              <form
-                style={{ width: '100%', alignSelf: 'flex-start' }}
-                onSubmit={paperTitleHandleSubmit(onSubmitPaperTitleOrPMID)}
-              >
-                <FormControl isInvalid={paperTitleErrors.paperTitle && true}>
-                  <FormLabel
-                    color="protBlack.800"
-                    fontSize="md"
-                    htmlFor="paperTitle"
-                  >
-                    Title
-                  </FormLabel>
-                  <Controller
-                    control={paperTitleControl}
-                    name="paperTitle"
-                    render={({ field: { onChange, onBlur } }) => (
-                      <Autocomplete
-                        onBlur={onBlur}
-                        items={paperList.items}
-                        inputValue={paperList.filterText}
-                        onInputChange={(value) =>
-                          handleAutocompleteInputChange(value, paperList)
-                        }
-                        loadingState={paperList.loadingState}
-                        onLoadMore={paperList.loadMore}
-                        button={
-                          <Button
-                            background="protBlue.300"
-                            _hover={{
-                              background: 'protBlue.veryLightHover',
-                            }}
-                            type="submit"
-                          >
-                            <Search2Icon color="protBlack.800" />
-                          </Button>
-                        }
-                        placeholder="Start typing to get suggestions..."
-                        placeholderProps={{
-                          color: 'protBlue.900',
-                          fontSize: 'sm',
-                        }}
-                        boxProps={{ width: '100%' }}
-                        inputProps={{
-                          background: 'protGray.500',
-                          color: 'protBlack.800',
-                          borderRadius: '8px',
-                          id: 'paperTitle',
-                        }}
-                        onSelectionChange={(value) => {
-                          paperList.setSelectedKeys(new Set([value]));
-                          onChange(value);
-                        }}
-                        selectedKeys={paperList.selectedKeys}
-                        selectionMode="single"
-                      >
-                        {(item) => <Item key={item.pmid}>{item.title}</Item>}
-                      </Autocomplete>
-                    )}
-                  />
-                  <FormErrorMessage>
-                    {paperTitleErrors.paperTitle?.message}
-                  </FormErrorMessage>
-                </FormControl>
-              </form>
-
-              <form
-                style={{ width: '50%', alignSelf: 'flex-start' }}
-                onSubmit={paperPMIDHandleSubmit(onSubmitPaperTitleOrPMID)}
-              >
-                <FormControl isInvalid={paperPMIDErrors.paperPMID && true}>
-                  <FormLabel
-                    fontSize="md"
-                    color="protBlack.800"
-                  >
-                    PMID
-                  </FormLabel>
-                  <InputGroup>
-                    <InputRightElement>
-                      <Button
-                        background="protBlue.300"
-                        _hover={{
-                          background: 'protBlue.veryLightHover',
-                        }}
-                        type="submit"
-                      >
-                        <Search2Icon color="protBlack.800" />
-                      </Button>
-                    </InputRightElement>
-                    <Input
-                      placeholder="E.g.: 123"
-                      _placeholder={{
-                        color: 'protBlue.900',
-                        fontSize: 'sm',
-                      }}
-                      background="protGray.500"
-                      color="protBlack.800"
-                      borderRadius="8px"
-                      {...paperPMIDRegister('paperPMID', {
-                        required: true,
-                      })}
-                    />
-                  </InputGroup>
-                  <FormErrorMessage>
-                    {paperPMIDErrors.paperPMID?.message}
-                  </FormErrorMessage>
-                </FormControl>
-              </form>
-            </HStack>
-          </Flex>
-
-          {/* Bottom search form */}
+        <Box
+          id="search-form"
+          marginBottom="2rem"
+        >
+          {/* Main form */}
           <Flex
             flexDirection="column"
             justifyContent="space-between"
@@ -451,7 +334,7 @@ function Home({
               padding="1rem 0 1rem"
               color="protBlack.800"
             >
-              Or use the filters below to find a set of papers that match:
+              Use the filters below to find a set of papers that match:
             </Text>
 
             <form onSubmit={handleSubmit(onSubmitMultiFieldForm)}>
@@ -463,252 +346,13 @@ function Home({
                 padding="2.25rem 1rem"
               >
                 <SimpleGrid
-                  columns={2}
-                  spacing="1rem 1rem"
+                  columns={3}
+                  spacing="0.5rem"
                   width="100%"
                   height="90%"
                   marginBottom="1.5rem"
+                  templateColumns="1fr 1fr 0.5fr"
                 >
-                  <GridItem
-                    background="protGray.100"
-                    rowSpan={2}
-                    borderRadius="8px"
-                    display="flex"
-                    flexDirection="column"
-                    padding="1rem 0.5rem"
-                  >
-                    <Text
-                      fontSize="lg"
-                      color="protBlack.800"
-                      alignSelf="center"
-                      marginBottom="1.5rem"
-                    >
-                      Paper metadata
-                    </Text>
-
-                    <FormControl marginBottom="1.5rem">
-                      <FormLabel
-                        fontSize="md"
-                        color="protBlack.800"
-                        htmlFor="paperTerms"
-                      >
-                        Terms
-                      </FormLabel>
-                      <Input
-                        placeholder="E.g.: gene, insulin"
-                        _placeholder={{
-                          color: 'protBlue.900',
-                          fontSize: 'sm',
-                        }}
-                        background="protGray.500"
-                        color="protBlack.800"
-                        borderRadius="8px"
-                        id="paperTerms"
-                        {...register('paperTerms')}
-                      />
-                    </FormControl>
-
-                    <HStack
-                      marginBottom="1.5rem"
-                      justifyContent="space-between"
-                    >
-                      <FormControl marginRight="0.5rem">
-                        <FormLabel
-                          fontSize="md"
-                          color="protBlack.800"
-                          htmlFor="lastAuthor"
-                        >
-                          Last author
-                        </FormLabel>
-                        <Input
-                          placeholder="E.g.: Doe, J."
-                          _placeholder={{
-                            color: 'protBlue.900',
-                            fontSize: 'sm',
-                          }}
-                          background="protGray.500"
-                          color="protBlack.800"
-                          borderRadius="8px"
-                          id="lastAuthor"
-                          {...register('lastAuthor')}
-                        />
-                      </FormControl>
-                      <FormControl width="55%">
-                        <FormLabel
-                          fontSize="md"
-                          htmlFor="language"
-                          color="protBlack.800"
-                        >
-                          Language
-                        </FormLabel>
-                        <Select
-                          id="language"
-                          placeholder="Choose language"
-                          color="protBlack.800"
-                          fontSize="sm"
-                          background="protGray.500"
-                          borderRadius="8px"
-                          icon={<TriangleDownIcon />}
-                          iconColor="protBlue.900"
-                          iconSize="md"
-                        >
-                          {languages.map((language) => (
-                            <option
-                              value={language?.toLowerCase()}
-                              key={language?.toLowerCase()}
-                            >
-                              {language}
-                            </option>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </HStack>
-
-                    <FormControl marginBottom="1.5rem">
-                      <FormLabel
-                        color="protBlack.800"
-                        fontSize="md"
-                        htmlFor="journalName"
-                      >
-                        Journal
-                      </FormLabel>
-                      <Controller
-                        control={control}
-                        name="journalTitles"
-                        render={({ field: { onChange, onBlur } }) => (
-                          <Autocomplete
-                            items={journalList.items}
-                            inputValue={journalList.filterText}
-                            onInputChange={(value) =>
-                              handleAutocompleteInputChange(value, journalList)
-                            }
-                            loadingState={journalList.loadingState}
-                            onLoadMore={journalList.loadMore}
-                            placeholder="Start typing to get suggestions..."
-                            placeholderProps={{
-                              color: 'protBlue.900',
-                              fontSize: 'sm',
-                            }}
-                            inputProps={{
-                              background: 'protGray.500',
-                              color: 'protBlack.800',
-                              borderRadius: '8px',
-                              id: 'journalName',
-                            }}
-                            boxProps={{
-                              width: '100%',
-                            }}
-                            selectedKeys={journalList.selectedKeys}
-                            selectionMode="multiple"
-                            onSelectionChange={(item) => {
-                              journalList.setSelectedKeys(new Set([item]));
-                              console.log(journalList.selectedKeys);
-                              onChange(item);
-                            }}
-                          >
-                            {(item) => (
-                              <Item key={item.journal?.toLowerCase()}>
-                                {item.journal}
-                              </Item>
-                            )}
-                          </Autocomplete>
-                        )}
-                      ></Controller>
-                    </FormControl>
-
-                    <FormControl marginBottom="1.5rem">
-                      <FormLabel
-                        marginBottom="1rem"
-                        htmlFor="startDate"
-                      >
-                        Publication date
-                      </FormLabel>
-                      <HStack>
-                        <DatePicker
-                          inputLabel="From"
-                          selected={startDate}
-                          onChange={(date: Date) => setStartDate(date)}
-                          dateFormat="yyyy"
-                          minDate={minDate}
-                          maxDate={maxDate}
-                          showYearPicker
-                          disabled={allDatesChecked}
-                          id="startDate"
-                        />
-
-                        <DatePicker
-                          inputLabel="To"
-                          selected={endDate}
-                          onChange={(date: Date) => setEndDate(date)}
-                          dateFormat="yyyy"
-                          minDate={startDate}
-                          maxDate={maxDate}
-                          showYearPicker
-                          disabled={allDatesChecked}
-                        />
-                        <Checkbox
-                          value="any"
-                          colorScheme="blue"
-                          iconColor="protGray.100"
-                          alignSelf="flex-end"
-                          defaultChecked
-                          onChange={() => {
-                            setAllDatesChecked((current) => !current);
-                          }}
-                        >
-                          Any
-                        </Checkbox>
-                      </HStack>
-                    </FormControl>
-
-                    <FormControl>
-                      <FormLabel htmlFor="citations-1">
-                        Number of citations
-                      </FormLabel>
-                      <CheckboxGroup
-                        colorScheme="blue"
-                        defaultValue={['1', '2', '3', '4', '5']}
-                      >
-                        <HStack
-                          spacing="2rem"
-                          paddingLeft="1rem"
-                        >
-                          <Checkbox
-                            id="citations-1"
-                            value="1"
-                            iconColor="protGray.100"
-                          >
-                            0 - 10
-                          </Checkbox>
-                          <Checkbox
-                            value="2"
-                            iconColor="protGray.100"
-                          >
-                            11 - 21
-                          </Checkbox>
-                          <Checkbox
-                            value="3"
-                            iconColor="protGray.100"
-                          >
-                            21 - 50
-                          </Checkbox>
-                          <Checkbox
-                            value="4"
-                            iconColor="protGray.100"
-                          >
-                            51 - 100
-                          </Checkbox>
-                          <Checkbox
-                            value="5"
-                            iconColor="protGray.100"
-                          >
-                            {'>'} 100
-                          </Checkbox>
-                        </HStack>
-                      </CheckboxGroup>
-                    </FormControl>
-                  </GridItem>
-
                   <GridItem
                     background="protGray.100"
                     borderRadius="8px"
@@ -866,7 +510,7 @@ function Home({
                       Taxon data
                     </Text>
 
-                    <FormControl marginBottom="1rem">
+                    <FormControl marginBottom="3rem">
                       <FormLabel
                         color="protBlack.800"
                         fontSize="md"
@@ -901,41 +545,65 @@ function Home({
                       </Autocomplete>
                     </FormControl>
 
-                    <HStack justifyContent="space-between">
-                      <FormControl marginRight="0.5rem">
-                        <FormLabel
-                          fontSize="md"
-                          color="protBlack.800"
-                          htmlFor="geneID"
-                        >
-                          Gene ID
-                        </FormLabel>
-                        <Input
-                          placeholder="E.g.: NP_001191615"
-                          _placeholder={{
-                            color: 'protBlue.900',
-                            fontSize: 'sm',
-                          }}
-                          background="protGray.500"
-                          color="protBlack.800"
-                          borderRadius="8px"
-                          id="geneID"
-                        />
-                      </FormControl>
-
-                      <Checkbox
-                        value="taxonRequired"
-                        colorScheme="blue"
-                        iconColor="protGray.100"
-                        alignSelf="flex-end"
-                        defaultChecked
-                        onChange={() => {
-                          setAllDatesChecked((current) => !current);
-                        }}
+                    <FormControl>
+                      <FormLabel
+                        fontSize="md"
+                        color="protBlack.800"
+                        htmlFor="geneID"
                       >
-                        Required
-                      </Checkbox>
-                    </HStack>
+                        Gene ID
+                      </FormLabel>
+                      <Input
+                        placeholder="E.g.: NP_001191615"
+                        _placeholder={{
+                          color: 'protBlue.900',
+                          fontSize: 'sm',
+                        }}
+                        background="protGray.500"
+                        color="protBlack.800"
+                        borderRadius="8px"
+                        id="geneID"
+                      />
+                    </FormControl>
+                  </GridItem>
+
+                  <GridItem
+                    background="protGray.100"
+                    borderRadius="8px"
+                    display="flex"
+                    flexDirection="column"
+                    padding="1rem 0.5rem 1.5rem"
+                  >
+                    <Text
+                      fontSize="lg"
+                      color="protBlack.800"
+                      alignSelf="center"
+                      marginBottom="1.5rem"
+                    >
+                      Filters
+                    </Text>
+
+                    <FormControl>
+                      <CheckboxGroup
+                        colorScheme="blue"
+                        defaultValue={['excludeHosts', 'forceGeneids']}
+                      >
+                        <VStack alignItems="flex-start">
+                          <Checkbox
+                            iconColor="protGray.100"
+                            value="excludeHosts"
+                          >
+                            Exclude hosts
+                          </Checkbox>
+                          <Checkbox
+                            iconColor="protGray.100"
+                            value="forceGeneids"
+                          >
+                            Only papers with associated gene IDs
+                          </Checkbox>
+                        </VStack>
+                      </CheckboxGroup>
+                    </FormControl>
                   </GridItem>
                 </SimpleGrid>
 
@@ -957,6 +625,381 @@ function Home({
             </form>
           </Flex>
         </Box>
+
+        <Button
+          onClick={onAdvancedToggle}
+          width="10%"
+          alignSelf="center"
+        >
+          Advanced options
+        </Button>
+
+        <Collapse
+          in={advancedIsOpen}
+          animateOpacity
+        >
+          <Box
+            background="protGray.100"
+            borderRadius="8px"
+            display="flex"
+            flexDirection="column"
+            padding="1rem 0.5rem"
+          >
+            <Text
+              fontSize="lg"
+              color="protBlack.800"
+              alignSelf="center"
+              marginBottom="1.5rem"
+            >
+              Paper metadata
+            </Text>
+
+            <FormControl marginBottom="1.5rem">
+              <FormLabel
+                fontSize="md"
+                color="protBlack.800"
+                htmlFor="paperTerms"
+              >
+                Terms
+              </FormLabel>
+              <Input
+                placeholder="E.g.: gene, insulin"
+                _placeholder={{
+                  color: 'protBlue.900',
+                  fontSize: 'sm',
+                }}
+                background="protGray.500"
+                color="protBlack.800"
+                borderRadius="8px"
+                id="paperTerms"
+                {...register('paperTerms')}
+              />
+            </FormControl>
+
+            <HStack
+              marginBottom="1.5rem"
+              justifyContent="space-between"
+            >
+              <FormControl marginRight="0.5rem">
+                <FormLabel
+                  fontSize="md"
+                  color="protBlack.800"
+                  htmlFor="lastAuthor"
+                >
+                  Last author
+                </FormLabel>
+                <Input
+                  placeholder="E.g.: Doe, J."
+                  _placeholder={{
+                    color: 'protBlue.900',
+                    fontSize: 'sm',
+                  }}
+                  background="protGray.500"
+                  color="protBlack.800"
+                  borderRadius="8px"
+                  id="lastAuthor"
+                  {...register('lastAuthor')}
+                />
+              </FormControl>
+              <FormControl width="55%">
+                <FormLabel
+                  fontSize="md"
+                  htmlFor="language"
+                  color="protBlack.800"
+                >
+                  Language
+                </FormLabel>
+                <Select
+                  id="language"
+                  placeholder="Choose language"
+                  color="protBlack.800"
+                  fontSize="sm"
+                  background="protGray.500"
+                  borderRadius="8px"
+                  icon={<TriangleDownIcon />}
+                  iconColor="protBlue.900"
+                  iconSize="md"
+                >
+                  {languages.map((language) => (
+                    <option
+                      value={language?.toLowerCase()}
+                      key={language?.toLowerCase()}
+                    >
+                      {language}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+            </HStack>
+
+            <FormControl marginBottom="1.5rem">
+              <FormLabel
+                color="protBlack.800"
+                fontSize="md"
+                htmlFor="journalName"
+              >
+                Journal
+              </FormLabel>
+              <Controller
+                control={control}
+                name="journalTitles"
+                render={({ field: { onChange, onBlur } }) => (
+                  <Autocomplete
+                    items={journalList.items}
+                    inputValue={journalList.filterText}
+                    onInputChange={(value) =>
+                      handleAutocompleteInputChange(value, journalList)
+                    }
+                    loadingState={journalList.loadingState}
+                    onLoadMore={journalList.loadMore}
+                    placeholder="Start typing to get suggestions..."
+                    placeholderProps={{
+                      color: 'protBlue.900',
+                      fontSize: 'sm',
+                    }}
+                    inputProps={{
+                      background: 'protGray.500',
+                      color: 'protBlack.800',
+                      borderRadius: '8px',
+                      id: 'journalName',
+                    }}
+                    boxProps={{
+                      width: '100%',
+                    }}
+                    selectedKeys={journalList.selectedKeys}
+                    selectionMode="multiple"
+                    onSelectionChange={(item) => {
+                      journalList.setSelectedKeys(new Set([item]));
+                      console.log(journalList.selectedKeys);
+                      onChange(item);
+                    }}
+                  >
+                    {(item) => (
+                      <Item key={item.journal?.toLowerCase()}>
+                        {item.journal}
+                      </Item>
+                    )}
+                  </Autocomplete>
+                )}
+              ></Controller>
+            </FormControl>
+
+            <FormControl marginBottom="1.5rem">
+              <FormLabel
+                marginBottom="1rem"
+                htmlFor="startDate"
+              >
+                Publication date
+              </FormLabel>
+              <HStack>
+                <DatePicker
+                  inputLabel="From"
+                  selected={startDate}
+                  onChange={(date: Date) => setStartDate(date)}
+                  dateFormat="yyyy"
+                  minDate={minDate}
+                  maxDate={maxDate}
+                  showYearPicker
+                  disabled={allDatesChecked}
+                  id="startDate"
+                />
+
+                <DatePicker
+                  inputLabel="To"
+                  selected={endDate}
+                  onChange={(date: Date) => setEndDate(date)}
+                  dateFormat="yyyy"
+                  minDate={startDate}
+                  maxDate={maxDate}
+                  showYearPicker
+                  disabled={allDatesChecked}
+                />
+                <Checkbox
+                  value="any"
+                  colorScheme="blue"
+                  iconColor="protGray.100"
+                  alignSelf="flex-end"
+                  defaultChecked
+                  onChange={() => {
+                    setAllDatesChecked((current) => !current);
+                  }}
+                >
+                  Any
+                </Checkbox>
+              </HStack>
+            </FormControl>
+
+            <FormControl>
+              <FormLabel htmlFor="citations-1">Number of citations</FormLabel>
+              <CheckboxGroup
+                colorScheme="blue"
+                defaultValue={['1', '2', '3', '4', '5']}
+              >
+                <HStack
+                  spacing="2rem"
+                  paddingLeft="1rem"
+                >
+                  <Checkbox
+                    id="citations-1"
+                    value="1"
+                    iconColor="protGray.100"
+                  >
+                    0 - 10
+                  </Checkbox>
+                  <Checkbox
+                    value="2"
+                    iconColor="protGray.100"
+                  >
+                    11 - 21
+                  </Checkbox>
+                  <Checkbox
+                    value="3"
+                    iconColor="protGray.100"
+                  >
+                    21 - 50
+                  </Checkbox>
+                  <Checkbox
+                    value="4"
+                    iconColor="protGray.100"
+                  >
+                    51 - 100
+                  </Checkbox>
+                  <Checkbox
+                    value="5"
+                    iconColor="protGray.100"
+                  >
+                    {'>'} 100
+                  </Checkbox>
+                </HStack>
+              </CheckboxGroup>
+            </FormControl>
+          </Box>
+
+          <Flex
+            flexDirection="column"
+            marginBottom="2rem"
+          >
+            <Text
+              fontSize="xl"
+              padding="1rem 0 1rem"
+              color="protBlack.800"
+            >
+              Find a specific paper by title or PMID:
+            </Text>
+            <HStack
+              width="100%"
+              spacing="0.5rem"
+            >
+              <form
+                style={{ width: '100%', alignSelf: 'flex-start' }}
+                onSubmit={paperTitleHandleSubmit(onSubmitPaperTitleOrPMID)}
+              >
+                <FormControl isInvalid={paperTitleErrors.paperTitle && true}>
+                  <FormLabel
+                    color="protBlack.800"
+                    fontSize="md"
+                    htmlFor="paperTitle"
+                  >
+                    Title
+                  </FormLabel>
+                  <Controller
+                    control={paperTitleControl}
+                    name="paperTitle"
+                    render={({ field: { onChange, onBlur } }) => (
+                      <Autocomplete
+                        onBlur={onBlur}
+                        items={paperList.items}
+                        inputValue={paperList.filterText}
+                        onInputChange={(value) =>
+                          handleAutocompleteInputChange(value, paperList)
+                        }
+                        loadingState={paperList.loadingState}
+                        onLoadMore={paperList.loadMore}
+                        button={
+                          <Button
+                            background="protBlue.300"
+                            _hover={{
+                              background: 'protBlue.veryLightHover',
+                            }}
+                            type="submit"
+                          >
+                            <Search2Icon color="protBlack.800" />
+                          </Button>
+                        }
+                        placeholder="Start typing to get suggestions..."
+                        placeholderProps={{
+                          color: 'protBlue.900',
+                          fontSize: 'sm',
+                        }}
+                        boxProps={{ width: '100%' }}
+                        inputProps={{
+                          background: 'protGray.500',
+                          color: 'protBlack.800',
+                          borderRadius: '8px',
+                          id: 'paperTitle',
+                        }}
+                        onSelectionChange={(value) => {
+                          paperList.setSelectedKeys(new Set([value]));
+                          onChange(value);
+                        }}
+                        selectedKeys={paperList.selectedKeys}
+                        selectionMode="single"
+                      >
+                        {(item) => <Item key={item.pmid}>{item.title}</Item>}
+                      </Autocomplete>
+                    )}
+                  />
+                  <FormErrorMessage>
+                    {paperTitleErrors.paperTitle?.message}
+                  </FormErrorMessage>
+                </FormControl>
+              </form>
+
+              <form
+                style={{ width: '50%', alignSelf: 'flex-start' }}
+                onSubmit={paperPMIDHandleSubmit(onSubmitPaperTitleOrPMID)}
+              >
+                <FormControl isInvalid={paperPMIDErrors.paperPMID && true}>
+                  <FormLabel
+                    fontSize="md"
+                    color="protBlack.800"
+                  >
+                    PMID
+                  </FormLabel>
+                  <InputGroup>
+                    <InputRightElement>
+                      <Button
+                        background="protBlue.300"
+                        _hover={{
+                          background: 'protBlue.veryLightHover',
+                        }}
+                        type="submit"
+                      >
+                        <Search2Icon color="protBlack.800" />
+                      </Button>
+                    </InputRightElement>
+                    <Input
+                      placeholder="E.g.: 123"
+                      _placeholder={{
+                        color: 'protBlue.900',
+                        fontSize: 'sm',
+                      }}
+                      background="protGray.500"
+                      color="protBlack.800"
+                      borderRadius="8px"
+                      {...paperPMIDRegister('paperPMID', {
+                        required: true,
+                      })}
+                    />
+                  </InputGroup>
+                  <FormErrorMessage>
+                    {paperPMIDErrors.paperPMID?.message}
+                  </FormErrorMessage>
+                </FormControl>
+              </form>
+            </HStack>
+          </Flex>
+        </Collapse>
       </Flex>
     </Flex>
   );
