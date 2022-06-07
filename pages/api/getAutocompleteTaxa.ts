@@ -61,7 +61,7 @@ async function handler(
         } catch (error) {
           if (error instanceof Error) {
             if (error.name === 'NotFoundError') {
-              res.status(400).send({
+              res.status(404).send({
                 ...error,
                 message: `The requested taxonName with title ${
                     taxonName} was not found.`,
