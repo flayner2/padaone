@@ -223,6 +223,12 @@ function Home({
     router.push(`/paper/${selectedPMID}`);
   };
 
+  const onSubmitMultiFieldForm: SubmitHandler<PaperFiltersFormValues> = (
+    data
+  ) => {
+    console.log(data);
+  };
+
   return (
     <Flex justifyContent="center">
       <Head>
@@ -448,7 +454,7 @@ function Home({
               Or use the filters below to find a set of papers that match:
             </Text>
 
-            <form>
+            <form onSubmit={handleSubmit(onSubmitMultiFieldForm)}>
               <Flex
                 background="protGray.500"
                 borderRadius="20px"
@@ -498,6 +504,7 @@ function Home({
                         color="protBlack.800"
                         borderRadius="8px"
                         id="paperTerms"
+                        {...register('paperTerms')}
                       />
                     </FormControl>
 
@@ -523,6 +530,7 @@ function Home({
                           color="protBlack.800"
                           borderRadius="8px"
                           id="lastAuthor"
+                          {...register('lastAuthor')}
                         />
                       </FormControl>
                       <FormControl width="55%">
@@ -564,35 +572,48 @@ function Home({
                       >
                         Journal
                       </FormLabel>
-                      <Autocomplete
-                        items={journalList.items}
-                        inputValue={journalList.filterText}
-                        onInputChange={(value) =>
-                          handleAutocompleteInputChange(value, journalList)
-                        }
-                        loadingState={journalList.loadingState}
-                        onLoadMore={journalList.loadMore}
-                        placeholder="Start typing to get suggestions..."
-                        placeholderProps={{
-                          color: 'protBlue.900',
-                          fontSize: 'sm',
-                        }}
-                        inputProps={{
-                          background: 'protGray.500',
-                          color: 'protBlack.800',
-                          borderRadius: '8px',
-                          id: 'journalName',
-                        }}
-                        boxProps={{
-                          width: '100%',
-                        }}
-                      >
-                        {(item) => (
-                          <Item key={item.journal?.toLowerCase()}>
-                            {item.journal}
-                          </Item>
+                      <Controller
+                        control={control}
+                        name="journalTitles"
+                        render={({ field: { onChange, onBlur } }) => (
+                          <Autocomplete
+                            items={journalList.items}
+                            inputValue={journalList.filterText}
+                            onInputChange={(value) =>
+                              handleAutocompleteInputChange(value, journalList)
+                            }
+                            loadingState={journalList.loadingState}
+                            onLoadMore={journalList.loadMore}
+                            placeholder="Start typing to get suggestions..."
+                            placeholderProps={{
+                              color: 'protBlue.900',
+                              fontSize: 'sm',
+                            }}
+                            inputProps={{
+                              background: 'protGray.500',
+                              color: 'protBlack.800',
+                              borderRadius: '8px',
+                              id: 'journalName',
+                            }}
+                            boxProps={{
+                              width: '100%',
+                            }}
+                            selectedKeys={journalList.selectedKeys}
+                            selectionMode="multiple"
+                            onSelectionChange={(item) => {
+                              journalList.setSelectedKeys(new Set([item]));
+                              console.log(journalList.selectedKeys);
+                              onChange(item);
+                            }}
+                          >
+                            {(item) => (
+                              <Item key={item.journal?.toLowerCase()}>
+                                {item.journal}
+                              </Item>
+                            )}
+                          </Autocomplete>
                         )}
-                      </Autocomplete>
+                      ></Controller>
                     </FormControl>
 
                     <FormControl marginBottom="1.5rem">
