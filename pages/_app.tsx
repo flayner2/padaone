@@ -12,6 +12,7 @@ const theme = extendTheme({
       300: '#a2c5fa',
       400: '#0b57ee',
       900: '#4a5568',
+      mediumHover: '#3a4351',
       darkHover: '#222833',
       lightHover: '#2f72f9',
       veryLightHover: '#8ab6f7',
