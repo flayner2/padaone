@@ -1042,7 +1042,7 @@ function Home({
                       />
                     )}
                   </Button>
-                  {/*<Button
+                  <Button
                     type="submit"
                     width="10%"
                     alignSelf="center"
@@ -1060,7 +1060,7 @@ function Home({
                       marginLeft="0.5rem"
                       boxSize="0.9rem"
                     />
-                    </Button>*/}
+                  </Button>
                 </HStack>
               </Flex>
             </form>
