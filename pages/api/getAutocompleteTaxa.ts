@@ -11,7 +11,17 @@ export async function getTaxaByName(
     where: {
       OR: [
         {orgTaxName: {contains: query}},
-        {taxID: isID ? parseInt(query) : -1},
+        {
+          taxPath: {
+            orgLineage: {contains: query},
+          },
+        },
+        {
+          taxPath: {
+            lineagePath: {contains: isID ? query : undefined},
+          },
+        },
+        {taxID: isID ? parseInt(query) : undefined},
       ],
     },
     take: 20,
