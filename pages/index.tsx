@@ -81,18 +81,14 @@ function Home({
   const [startDate, setStartDate] = useState(minDate);
   const [endDate, setEndDate] = useState(maxDate);
   const [allDatesChecked, setAllDatesChecked] = useState(true);
-  const [minLayer1Value, setMinLayer1Value] = useState(
-    classificationScores.firstLayer.min
-  );
-  const [maxLayer1Value, setMaxLayer1Value] = useState(
-    classificationScores.firstLayer.max
-  );
-  const [minLayer2Value, setMinLayer2Value] = useState(
-    classificationScores.secondLayer.min
-  );
-  const [maxLayer2Value, setMaxLayer2Value] = useState(
-    classificationScores.secondLayer.max
-  );
+  const [firstLayerValue, setFirstLayerValue] = useState([
+    classificationScores.firstLayer.min,
+    classificationScores.firstLayer.max,
+  ]);
+  const [secondLayerValue, setSecondLayerValue] = useState([
+    classificationScores.secondLayer.min,
+    classificationScores.secondLayer.max,
+  ]);
 
   // Chakra state
   const { isOpen: advancedIsOpen, onToggle: onAdvancedToggle } =
@@ -383,55 +379,66 @@ function Home({
                         >
                           1st Layer Probability
                         </FormLabel>
-                        <RangeSlider
-                          aria-label={['min', 'max']}
-                          width="90%"
-                          alignSelf="center"
-                          min={classificationScores.firstLayer.min}
-                          max={classificationScores.firstLayer.max}
+                        <Controller
+                          control={control}
+                          name="firstLayerRange"
                           defaultValue={[
                             classificationScores.firstLayer.min,
                             classificationScores.firstLayer.max,
                           ]}
-                          onChange={([v1, v2]) => {
-                            setMinLayer1Value(v1);
-                            setMaxLayer1Value(v2);
-                          }}
-                          step={1}
-                          id="firstLayer"
-                        >
-                          <RangeSliderTrack bg="protBlue.900">
-                            <RangeSliderFilledTrack bg="protBlue.100" />
-                          </RangeSliderTrack>
-                          <Tooltip
-                            hasArrow
-                            bg="protBlue.100"
-                            color="white"
-                            placement="bottom"
-                            isOpen
-                            label={`${minLayer1Value}%`}
-                          >
-                            <RangeSliderThumb
-                              boxSize={6}
-                              index={0}
-                              background="protBlue.100"
-                            />
-                          </Tooltip>
-                          <Tooltip
-                            hasArrow
-                            bg="protBlue.100"
-                            color="white"
-                            placement="bottom"
-                            isOpen
-                            label={`${maxLayer1Value}%`}
-                          >
-                            <RangeSliderThumb
-                              boxSize={6}
-                              index={1}
-                              background="protBlue.100"
-                            />
-                          </Tooltip>
-                        </RangeSlider>
+                          render={({ field: { onChange, onBlur } }) => (
+                            <RangeSlider
+                              aria-label={['min', 'max']}
+                              width="90%"
+                              alignSelf="center"
+                              min={classificationScores.firstLayer.min}
+                              max={classificationScores.firstLayer.max}
+                              defaultValue={[
+                                classificationScores.firstLayer.min,
+                                classificationScores.firstLayer.max,
+                              ]}
+                              onChange={([v1, v2]) => {
+                                setFirstLayerValue([v1, v2]);
+                                onChange([v1, v2]);
+                              }}
+                              onBlur={onBlur}
+                              step={1}
+                              id="firstLayer"
+                            >
+                              <RangeSliderTrack bg="protBlue.900">
+                                <RangeSliderFilledTrack bg="protBlue.100" />
+                              </RangeSliderTrack>
+                              <Tooltip
+                                hasArrow
+                                bg="protBlue.100"
+                                color="white"
+                                placement="bottom"
+                                isOpen
+                                label={`${firstLayerValue[0]}%`}
+                              >
+                                <RangeSliderThumb
+                                  boxSize={6}
+                                  index={0}
+                                  background="protBlue.100"
+                                />
+                              </Tooltip>
+                              <Tooltip
+                                hasArrow
+                                bg="protBlue.100"
+                                color="white"
+                                placement="bottom"
+                                isOpen
+                                label={`${firstLayerValue[1]}%`}
+                              >
+                                <RangeSliderThumb
+                                  boxSize={6}
+                                  index={1}
+                                  background="protBlue.100"
+                                />
+                              </Tooltip>
+                            </RangeSlider>
+                          )}
+                        />
                       </VStack>
                     </FormControl>
 
@@ -445,55 +452,66 @@ function Home({
                         >
                           2nd Layer Probability
                         </FormLabel>
-                        <RangeSlider
-                          aria-label={['min', 'max']}
-                          width="90%"
-                          alignSelf="center"
-                          min={classificationScores.secondLayer.min}
-                          max={classificationScores.secondLayer.max}
+                        <Controller
+                          control={control}
+                          name="secondLayerRange"
                           defaultValue={[
                             classificationScores.secondLayer.min,
                             classificationScores.secondLayer.max,
                           ]}
-                          onChange={([v1, v2]) => {
-                            setMinLayer2Value(v1);
-                            setMaxLayer2Value(v2);
-                          }}
-                          step={1}
-                          id="secondLayer"
-                        >
-                          <RangeSliderTrack bg="protBlue.900">
-                            <RangeSliderFilledTrack bg="protBlue.100" />
-                          </RangeSliderTrack>
-                          <Tooltip
-                            hasArrow
-                            bg="protBlue.100"
-                            color="white"
-                            placement="bottom"
-                            isOpen
-                            label={`${minLayer2Value}%`}
-                          >
-                            <RangeSliderThumb
-                              boxSize={6}
-                              index={0}
-                              background="protBlue.100"
-                            />
-                          </Tooltip>
-                          <Tooltip
-                            hasArrow
-                            bg="protBlue.100"
-                            color="white"
-                            placement="bottom"
-                            isOpen
-                            label={`${maxLayer2Value}%`}
-                          >
-                            <RangeSliderThumb
-                              boxSize={6}
-                              index={1}
-                              background="protBlue.100"
-                            />
-                          </Tooltip>
-                        </RangeSlider>
+                          render={({ field: { onChange, onBlur } }) => (
+                            <RangeSlider
+                              aria-label={['min', 'max']}
+                              width="90%"
+                              alignSelf="center"
+                              min={classificationScores.secondLayer.min}
+                              max={classificationScores.secondLayer.max}
+                              defaultValue={[
+                                classificationScores.secondLayer.min,
+                                classificationScores.secondLayer.max,
+                              ]}
+                              onChange={([v1, v2]) => {
+                                setSecondLayerValue([v1, v2]);
+                                onChange([v1, v2]);
+                              }}
+                              onBlur={onBlur}
+                              step={1}
+                              id="secondLayer"
+                            >
+                              <RangeSliderTrack bg="protBlue.900">
+                                <RangeSliderFilledTrack bg="protBlue.100" />
+                              </RangeSliderTrack>
+                              <Tooltip
+                                hasArrow
+                                bg="protBlue.100"
+                                color="white"
+                                placement="bottom"
+                                isOpen
+                                label={`${secondLayerValue[0]}%`}
+                              >
+                                <RangeSliderThumb
+                                  boxSize={6}
+                                  index={0}
+                                  background="protBlue.100"
+                                />
+                              </Tooltip>
+                              <Tooltip
+                                hasArrow
+                                bg="protBlue.100"
+                                color="white"
+                                placement="bottom"
+                                isOpen
+                                label={`${secondLayerValue[1]}%`}
+                              >
+                                <RangeSliderThumb
+                                  boxSize={6}
+                                  index={1}
+                                  background="protBlue.100"
+                                />
+                              </Tooltip>
+                            </RangeSlider>
+                          )}
+                        />
                       </VStack>
                     </FormControl>
                   </GridItem>
