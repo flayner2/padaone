@@ -949,7 +949,7 @@ function Home({
                               defaultValue={dateRangeControl.minDate}
                               render={({ field: { onChange, onBlur } }) => (
                                 <DatePicker
-                                  inputLabel="From"
+                                  inputlabel="From"
                                   selected={dateRangeControl.minDate}
                                   onBlur={onBlur}
                                   onChange={(date: Date) => {
@@ -975,7 +975,7 @@ function Home({
                               defaultValue={dateRangeControl.maxDate}
                               render={({ field: { onChange, onBlur } }) => (
                                 <DatePicker
-                                  inputLabel="To"
+                                  inputlabel="To"
                                   selected={dateRangeControl.maxDate}
                                   onBlur={onBlur}
                                   onChange={(date: Date) => {

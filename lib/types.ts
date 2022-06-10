@@ -38,11 +38,11 @@ export interface AsyncListDataDebouncedReturn<T> {
 }
 
 export interface DatePickerInputProps extends InputProps {
-  inputLabel?: string;
+  inputlabel?: string;
 }
 
 export interface CustomDatePickerProps extends ReactDatePickerProps {
-  inputLabel?: string;
+  inputlabel?: string;
 }
 
 export interface CalendarContainerProps {

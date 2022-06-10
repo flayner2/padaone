@@ -12,7 +12,7 @@ const CustomDateInput = (
       fontSize="sm"
       color="protBlack.700"
     >
-      {props.inputLabel}
+      {props.inputlabel}
     </FormLabel>
     <Input
       placeholder="Description"

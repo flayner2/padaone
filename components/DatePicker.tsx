@@ -19,7 +19,7 @@ const DatePicker = ({ ...props }: CustomDatePickerProps) => {
           borderRadius="8px"
           color="protBlack.800"
           fontSize="sm"
-          inputLabel={props.inputLabel}
+          inputlabel={props.inputlabel}
         />
       }
       {...props}
