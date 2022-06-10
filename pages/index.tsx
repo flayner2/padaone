@@ -576,7 +576,10 @@ function Home({
                       Taxon data
                     </Text>
 
-                    <FormControl marginBottom="3rem">
+                    <FormControl
+                      marginBottom="3rem"
+                      isInvalid={errors.taxon ? true : false}
+                    >
                       <FormLabel
                         color="protBlack.800"
                         fontSize="md"
@@ -621,6 +624,9 @@ function Home({
                           </Autocomplete>
                         )}
                       />
+                      <FormErrorMessage>
+                        {errors.taxon?.message}
+                      </FormErrorMessage>
                     </FormControl>
 
                     <FormControl>
