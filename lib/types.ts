@@ -89,4 +89,17 @@ export interface PaperPMIDFormValue {
   paperPMID: string;
 }
 
-export interface PaperFiltersFormValues {}
+export interface PaperFiltersFormValues {
+  firstLayerRange: number[];
+  secondLayerRange: number[];
+  taxonName?: string;
+  geneID?: string;
+  noHosts?: boolean;
+  forceGeneIDs?: boolean;
+  terms?: string;
+  lastAuthor?: string;
+  language?: string;
+  journal?: string;
+  publicationDate?: number[];
+  citations?: string|string[];
+}
