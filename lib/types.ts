@@ -92,8 +92,8 @@ export interface PaperPMIDFormValue {
 export interface PaperFiltersFormValues {
   firstLayerRange: number[];
   secondLayerRange: number[];
-  taxonName?: string;
-  geneID?: string;
+  taxon?: number;
+  geneIDs?: string;
   noHosts?: boolean;
   forceGeneIDs?: boolean;
   terms?: string;
