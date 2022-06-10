@@ -189,12 +189,34 @@ function Home({
       .matches(/([0-9])/, 'Please, only enter numbers on this field.'),
   });
 
+  const paperFiltersValidationSchema = yup.object({
+    firstLayerRange: yup
+      .array(yup.number())
+      .length(2)
+      .required(
+        'Please choose a minimum and maximum value for the first layer probability range.'
+      ),
+    secondLayerRange: yup
+      .array(yup.number())
+      .length(2)
+      .required(
+        'Please choose a minimum and maximum value for the second layer probability range.'
+      ),
+    taxonName: yup
+      .string()
+      .cast(yup.number())
+      .oneOf(taxaList.items.map((taxon) => taxon.taxID)),
+  });
+
   const {
     register,
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm();
+  } = useForm<PaperFiltersFormValues>({
+    resolver: yupResolver(paperFiltersValidationSchema),
+    reValidateMode: 'onSubmit',
+  });
 
   const {
     handleSubmit: paperTitleHandleSubmit,
@@ -541,31 +563,43 @@ function Home({
                       >
                         Taxon Name {'(or Taxon ID)'}
                       </FormLabel>
-                      <Autocomplete
-                        items={taxaList.items}
-                        inputValue={taxaList.filterText}
-                        onInputChange={(value) =>
-                          handleAutocompleteInputChange(value, taxaList)
-                        }
-                        loadingState={taxaList.loadingState}
-                        onLoadMore={taxaList.loadMore}
-                        placeholder="Start typing to get suggestions..."
-                        placeholderProps={{
-                          color: 'protBlue.900',
-                          fontSize: 'sm',
-                        }}
-                        inputProps={{
-                          background: 'protGray.500',
-                          color: 'protBlack.800',
-                          borderRadius: '8px',
-                          id: 'taxonName',
-                        }}
-                        boxProps={{ width: '100%' }}
-                      >
-                        {(item) => (
-                          <Item key={item.taxID}>{item.orgTaxName}</Item>
+
+                      <Controller
+                        control={control}
+                        name="secondLayerRange"
+                        render={({ field: { onChange, onBlur } }) => (
+                          <Autocomplete
+                            items={taxaList.items}
+                            inputValue={taxaList.filterText}
+                            onInputChange={(value) =>
+                              handleAutocompleteInputChange(value, taxaList)
+                            }
+                            loadingState={taxaList.loadingState}
+                            onLoadMore={taxaList.loadMore}
+                            placeholder="Start typing to get suggestions..."
+                            placeholderProps={{
+                              color: 'protBlue.900',
+                              fontSize: 'sm',
+                            }}
+                            inputProps={{
+                              background: 'protGray.500',
+                              color: 'protBlack.800',
+                              borderRadius: '8px',
+                              id: 'taxonName',
+                            }}
+                            boxProps={{ width: '100%' }}
+                            onBlur={onBlur}
+                            onSelectionChange={(item) => {
+                              taxaList.setSelectedKeys(new Set([item]));
+                              onChange(item);
+                            }}
+                          >
+                            {(item) => (
+                              <Item key={item.taxID}>{item.orgTaxName}</Item>
+                            )}
+                          </Autocomplete>
                         )}
-                      </Autocomplete>
+                      />
                     </FormControl>
 
                     <FormControl>
@@ -764,10 +798,8 @@ function Home({
                               width: '100%',
                             }}
                             selectedKeys={journalList.selectedKeys}
-                            selectionMode="multiple"
                             onSelectionChange={(item) => {
                               journalList.setSelectedKeys(new Set([item]));
-                              console.log(journalList.selectedKeys);
                               onChange(item);
                             }}
                           >
