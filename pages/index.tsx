@@ -202,10 +202,11 @@ function Home({
       .required(
         'Please choose a minimum and maximum value for the second layer probability range.'
       ),
-    taxonName: yup
-      .string()
-      .cast(yup.number())
-      .oneOf(taxaList.items.map((taxon) => taxon.taxID)),
+    taxon: yup.number().oneOf(
+      taxaList.items.map((taxon) => taxon.taxID),
+      "The chosen Taxon ID wasn't found in the database."
+    ),
+    geneIDs: yup.string(),
   });
 
   const {
@@ -391,7 +392,10 @@ function Home({
                       Classification scores
                     </Text>
 
-                    <FormControl marginBottom="3rem">
+                    <FormControl
+                      marginBottom="3rem"
+                      isInvalid={errors.firstLayerRange ? true : false}
+                    >
                       <VStack width="100%">
                         <FormLabel
                           marginBottom="1rem"
@@ -461,10 +465,20 @@ function Home({
                             </RangeSlider>
                           )}
                         />
+                        {errors.firstLayerRange?.map((error, index) => (
+                          <FormErrorMessage
+                            key={`firstLayerRangeError${index}`}
+                          >
+                            {error.message}
+                          </FormErrorMessage>
+                        ))}
                       </VStack>
                     </FormControl>
 
-                    <FormControl marginBottom="1.5rem">
+                    <FormControl
+                      marginBottom="1.5rem"
+                      isInvalid={errors.secondLayerRange ? true : false}
+                    >
                       <VStack width="100%">
                         <FormLabel
                           marginBottom="1rem"
@@ -534,6 +548,13 @@ function Home({
                             </RangeSlider>
                           )}
                         />
+                        {errors.secondLayerRange?.map((error, index) => (
+                          <FormErrorMessage
+                            key={`secondLayerRangeError${index}`}
+                          >
+                            {error.message}
+                          </FormErrorMessage>
+                        ))}
                       </VStack>
                     </FormControl>
                   </GridItem>
@@ -566,7 +587,7 @@ function Home({
 
                       <Controller
                         control={control}
-                        name="secondLayerRange"
+                        name="taxon"
                         render={({ field: { onChange, onBlur } }) => (
                           <Autocomplete
                             items={taxaList.items}
@@ -703,7 +724,7 @@ function Home({
                         color="protBlack.800"
                         borderRadius="8px"
                         id="paperTerms"
-                        {...register('paperTerms')}
+                        {...register('terms')}
                       />
                     </FormControl>
 
@@ -773,7 +794,7 @@ function Home({
                       </FormLabel>
                       <Controller
                         control={control}
-                        name="journalTitles"
+                        name="journal"
                         render={({ field: { onChange, onBlur } }) => (
                           <Autocomplete
                             items={journalList.items}
@@ -947,7 +968,7 @@ function Home({
                       <FormControl
                         width="100%"
                         alignSelf="flex-start"
-                        isInvalid={paperTitleErrors.paperTitle && true}
+                        isInvalid={paperTitleErrors.paperTitle ? true : false}
                       >
                         <FormLabel
                           color="protBlack.800"
@@ -1013,7 +1034,7 @@ function Home({
                       </FormControl>
 
                       <FormControl
-                        isInvalid={paperPMIDErrors.paperPMID && true}
+                        isInvalid={paperPMIDErrors.paperPMID ? true : false}
                         width="50%"
                         alignSelf="flex-start"
                       >
