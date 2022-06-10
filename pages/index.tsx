@@ -207,6 +207,10 @@ function Home({
       "The chosen Taxon ID wasn't found in the database."
     ),
     geneIDs: yup.string(),
+    filters: yup.object({
+      excludeHosts: yup.boolean(),
+      forceGeneIDs: yup.boolean(),
+    }),
   });
 
   const {
@@ -629,13 +633,13 @@ function Home({
                       </FormErrorMessage>
                     </FormControl>
 
-                    <FormControl>
+                    <FormControl isInvalid={errors.geneIDs ? true : false}>
                       <FormLabel
                         fontSize="md"
                         color="protBlack.800"
                         htmlFor="geneID"
                       >
-                        Gene ID
+                        Gene IDs
                       </FormLabel>
                       <Input
                         placeholder="E.g.: NP_001191615"
@@ -646,8 +650,12 @@ function Home({
                         background="protGray.500"
                         color="protBlack.800"
                         borderRadius="8px"
-                        id="geneID"
+                        id="geneIDs"
+                        {...register('geneIDs')}
                       />
+                      <FormErrorMessage>
+                        {errors.geneIDs?.message}
+                      </FormErrorMessage>
                     </FormControl>
                   </GridItem>
 
@@ -668,24 +676,59 @@ function Home({
                       Filters
                     </Text>
 
-                    <FormControl>
+                    <FormControl
+                      isInvalid={
+                        errors.filters?.excludeHosts ||
+                        errors.filters?.forceGeneIDs
+                          ? true
+                          : false
+                      }
+                    >
                       <CheckboxGroup
                         colorScheme="blue"
                         defaultValue={['excludeHosts', 'forceGeneids']}
                       >
                         <VStack alignItems="flex-start">
-                          <Checkbox
-                            iconColor="protGray.100"
-                            value="excludeHosts"
-                          >
-                            Exclude hosts
-                          </Checkbox>
-                          <Checkbox
-                            iconColor="protGray.100"
-                            value="forceGeneids"
-                          >
-                            Only papers with associated gene IDs
-                          </Checkbox>
+                          <Controller
+                            control={control}
+                            name="filters.excludeHosts"
+                            defaultValue={true}
+                            render={({
+                              field: { onChange, onBlur, value },
+                            }) => (
+                              <Checkbox
+                                iconColor="protGray.100"
+                                value="excludeHosts"
+                                onBlur={onBlur}
+                                onChange={() => onChange(!value)}
+                              >
+                                Exclude hosts
+                              </Checkbox>
+                            )}
+                          />
+                          <FormErrorMessage>
+                            {errors.filters?.excludeHosts?.message}
+                          </FormErrorMessage>
+                          <Controller
+                            control={control}
+                            name="filters.forceGeneIDs"
+                            defaultValue={true}
+                            render={({
+                              field: { onChange, onBlur, value },
+                            }) => (
+                              <Checkbox
+                                iconColor="protGray.100"
+                                value="forceGeneids"
+                                onBlur={onBlur}
+                                onChange={() => onChange(!value)}
+                              >
+                                Only papers with associated gene IDs
+                              </Checkbox>
+                            )}
+                          />
+                          <FormErrorMessage>
+                            {errors.filters?.forceGeneIDs.message}
+                          </FormErrorMessage>
                         </VStack>
                       </CheckboxGroup>
                     </FormControl>
