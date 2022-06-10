@@ -99,6 +99,6 @@ export interface PaperFiltersFormValues {
   lastAuthor?: string;
   language?: string;
   journal?: string;
-  publicationDate?: number[];
-  citations?: string|string[];
+  publicationDate?: {minDate?: Date; maxDate?: Date; allDates?: boolean};
+  citations?: [number, number|undefined][];
 }
