@@ -94,8 +94,7 @@ export interface PaperFiltersFormValues {
   secondLayerRange: number[];
   taxon?: number;
   geneIDs?: string;
-  noHosts?: boolean;
-  forceGeneIDs?: boolean;
+  filters?: {excludeHosts?: boolean; forceGeneIDs?: boolean};
   terms?: string;
   lastAuthor?: string;
   language?: string;
