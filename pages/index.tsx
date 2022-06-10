@@ -78,9 +78,11 @@ function Home({
   );
 
   const [offset, setOffset] = useState(0);
-  const [startDate, setStartDate] = useState(minDate);
-  const [endDate, setEndDate] = useState(maxDate);
-  const [allDatesChecked, setAllDatesChecked] = useState(true);
+  const [dateRangeControl, setDateRangeControl] = useState({
+    minDate,
+    maxDate,
+    allDates: true,
+  });
   const [firstLayerValue, setFirstLayerValue] = useState([
     classificationScores.firstLayer.min,
     classificationScores.firstLayer.max,
@@ -206,11 +208,28 @@ function Home({
       taxaList.items.map((taxon) => taxon.taxID),
       "The chosen Taxon ID wasn't found in the database."
     ),
-    geneIDs: yup.string(),
+    geneIDs: yup.string().ensure().lowercase(),
     filters: yup.object({
       excludeHosts: yup.boolean(),
       forceGeneIDs: yup.boolean(),
     }),
+    terms: yup.string().ensure().lowercase(),
+    lastAuthor: yup.string().ensure().lowercase(),
+    language: yup
+      .string()
+      .ensure()
+      .oneOf(
+        [...languages.map((language) => language?.toLowerCase()), ''],
+        'Selected language must be none or one of the provided options.'
+      )
+      .lowercase(),
+    journal: yup.string().ensure().lowercase(),
+    publicationDate: yup.object({
+      minDate: yup.date(),
+      maxDate: yup.date(),
+      allDates: yup.boolean(),
+    }),
+    citations: yup.array(yup.array(yup.number()).length(2)).length(7),
   });
 
   const {
@@ -260,6 +279,7 @@ function Home({
   const onSubmitMultiFieldForm: SubmitHandler<PaperFiltersFormValues> = (
     data
   ) => {
+    console.log(errors);
     console.log(data);
   };
 
@@ -727,7 +747,7 @@ function Home({
                             )}
                           />
                           <FormErrorMessage>
-                            {errors.filters?.forceGeneIDs.message}
+                            {errors.filters?.forceGeneIDs?.message}
                           </FormErrorMessage>
                         </VStack>
                       </CheckboxGroup>
@@ -755,7 +775,10 @@ function Home({
                       Paper metadata
                     </Text>
 
-                    <FormControl marginBottom="1.5rem">
+                    <FormControl
+                      marginBottom="1.5rem"
+                      isInvalid={errors.terms ? true : false}
+                    >
                       <FormLabel
                         fontSize="md"
                         color="protBlack.800"
@@ -775,13 +798,19 @@ function Home({
                         id="paperTerms"
                         {...register('terms')}
                       />
+                      <FormErrorMessage>
+                        {errors.terms?.message}
+                      </FormErrorMessage>
                     </FormControl>
 
                     <HStack
                       marginBottom="1.5rem"
                       justifyContent="space-between"
                     >
-                      <FormControl marginRight="0.5rem">
+                      <FormControl
+                        marginRight="0.5rem"
+                        isInvalid={errors.lastAuthor ? true : false}
+                      >
                         <FormLabel
                           fontSize="md"
                           color="protBlack.800"
@@ -801,8 +830,14 @@ function Home({
                           id="lastAuthor"
                           {...register('lastAuthor')}
                         />
+                        <FormErrorMessage>
+                          {errors.lastAuthor?.message}
+                        </FormErrorMessage>
                       </FormControl>
-                      <FormControl width="55%">
+                      <FormControl
+                        width="55%"
+                        isInvalid={errors.language ? true : false}
+                      >
                         <FormLabel
                           fontSize="md"
                           htmlFor="language"
@@ -820,6 +855,7 @@ function Home({
                           icon={<TriangleDownIcon />}
                           iconColor="protBlue.900"
                           iconSize="md"
+                          {...register('language')}
                         >
                           {languages.map((language) => (
                             <option
@@ -830,10 +866,16 @@ function Home({
                             </option>
                           ))}
                         </Select>
+                        <FormErrorMessage>
+                          {errors.language?.message}
+                        </FormErrorMessage>
                       </FormControl>
                     </HStack>
 
-                    <FormControl marginBottom="1.5rem">
+                    <FormControl
+                      marginBottom="1.5rem"
+                      isInvalid={errors.journal ? true : false}
+                    >
                       <FormLabel
                         color="protBlack.800"
                         fontSize="md"
@@ -868,6 +910,7 @@ function Home({
                               width: '100%',
                             }}
                             selectedKeys={journalList.selectedKeys}
+                            onBlur={onBlur}
                             onSelectionChange={(item) => {
                               journalList.setSelectedKeys(new Set([item]));
                               onChange(item);
@@ -880,11 +923,17 @@ function Home({
                             )}
                           </Autocomplete>
                         )}
-                      ></Controller>
+                      />
+                      <FormErrorMessage>
+                        {errors.journal?.message}
+                      </FormErrorMessage>
                     </FormControl>
 
                     <HStack spacing="2rem">
-                      <FormControl width="max-content">
+                      <FormControl
+                        width="max-content"
+                        isInvalid={errors.publicationDate ? true : false}
+                      >
                         <FormLabel
                           marginBottom="1rem"
                           htmlFor="startDate"
@@ -894,42 +943,93 @@ function Home({
 
                         <VStack alignItems="flex-start">
                           <HStack>
-                            <DatePicker
-                              inputLabel="From"
-                              selected={startDate}
-                              onChange={(date: Date) => setStartDate(date)}
-                              dateFormat="yyyy"
-                              minDate={minDate}
-                              maxDate={maxDate}
-                              showYearPicker
-                              disabled={allDatesChecked}
-                              id="startDate"
+                            <Controller
+                              control={control}
+                              name="publicationDate.minDate"
+                              defaultValue={dateRangeControl.minDate}
+                              render={({ field: { onChange, onBlur } }) => (
+                                <DatePicker
+                                  inputLabel="From"
+                                  selected={dateRangeControl.minDate}
+                                  onBlur={onBlur}
+                                  onChange={(date: Date) => {
+                                    setDateRangeControl((currentDateState) => ({
+                                      ...currentDateState,
+                                      minDate: date,
+                                    }));
+                                    onChange(date);
+                                  }}
+                                  dateFormat="yyyy"
+                                  minDate={minDate}
+                                  maxDate={maxDate}
+                                  showYearPicker
+                                  disabled={dateRangeControl.allDates}
+                                  id="startDate"
+                                />
+                              )}
                             />
 
-                            <DatePicker
-                              inputLabel="To"
-                              selected={endDate}
-                              onChange={(date: Date) => setEndDate(date)}
-                              dateFormat="yyyy"
-                              minDate={startDate}
-                              maxDate={maxDate}
-                              showYearPicker
-                              disabled={allDatesChecked}
+                            <Controller
+                              control={control}
+                              name="publicationDate.maxDate"
+                              defaultValue={dateRangeControl.maxDate}
+                              render={({ field: { onChange, onBlur } }) => (
+                                <DatePicker
+                                  inputLabel="To"
+                                  selected={dateRangeControl.maxDate}
+                                  onBlur={onBlur}
+                                  onChange={(date: Date) => {
+                                    setDateRangeControl((currentDateState) => ({
+                                      ...currentDateState,
+                                      maxDate: date,
+                                    }));
+                                    onChange(date);
+                                  }}
+                                  dateFormat="yyyy"
+                                  minDate={dateRangeControl.minDate}
+                                  maxDate={maxDate}
+                                  showYearPicker
+                                  disabled={dateRangeControl.allDates}
+                                />
+                              )}
                             />
                           </HStack>
 
-                          <Checkbox
-                            value="any"
-                            colorScheme="blue"
-                            iconColor="protGray.100"
-                            alignSelf="flex-end"
-                            defaultChecked
-                            onChange={() => {
-                              setAllDatesChecked((current) => !current);
-                            }}
-                          >
-                            Any
-                          </Checkbox>
+                          <Controller
+                            control={control}
+                            name="publicationDate.allDates"
+                            defaultValue={true}
+                            render={({
+                              field: { onChange, onBlur, value },
+                            }) => (
+                              <Checkbox
+                                value="any"
+                                colorScheme="blue"
+                                iconColor="protGray.100"
+                                alignSelf="flex-end"
+                                defaultChecked
+                                onBlur={onBlur}
+                                onChange={() => {
+                                  setDateRangeControl((dateRangeState) => ({
+                                    ...dateRangeState,
+                                    allDates: !value,
+                                  }));
+                                  onChange(!value);
+                                }}
+                              >
+                                Any
+                              </Checkbox>
+                            )}
+                          />
+                          <FormErrorMessage>
+                            {errors.publicationDate?.maxDate?.message}
+                          </FormErrorMessage>
+                          <FormErrorMessage>
+                            {errors.publicationDate?.minDate?.message}
+                          </FormErrorMessage>
+                          <FormErrorMessage>
+                            {errors.publicationDate?.allDates?.message}
+                          </FormErrorMessage>
                         </VStack>
                       </FormControl>
 
@@ -945,49 +1045,143 @@ function Home({
                             spacing="2rem"
                             paddingLeft="1rem"
                           >
-                            <Checkbox
-                              id="citations-1"
-                              value="1"
-                              iconColor="protGray.100"
-                            >
-                              0 - 10
-                            </Checkbox>
-                            <Checkbox
-                              value="2"
-                              iconColor="protGray.100"
-                            >
-                              11 - 20
-                            </Checkbox>
-                            <Checkbox
-                              value="3"
-                              iconColor="protGray.100"
-                            >
-                              21 - 30
-                            </Checkbox>
-                            <Checkbox
-                              value="4"
-                              iconColor="protGray.100"
-                            >
-                              31 - 40
-                            </Checkbox>
-                            <Checkbox
-                              value="5"
-                              iconColor="protGray.100"
-                            >
-                              41 - 50
-                            </Checkbox>
-                            <Checkbox
-                              value="6"
-                              iconColor="protGray.100"
-                            >
-                              51 - 100
-                            </Checkbox>
-                            <Checkbox
-                              value="7"
-                              iconColor="protGray.100"
-                            >
-                              {'>'} 100
-                            </Checkbox>
+                            <Controller
+                              control={control}
+                              name="citations.0"
+                              defaultValue={[0, 10]}
+                              render={({
+                                field: { onChange, onBlur, value },
+                              }) => (
+                                <Checkbox
+                                  id="citations-1"
+                                  value="1"
+                                  iconColor="protGray.100"
+                                  onBlur={onBlur}
+                                  onChange={() => {
+                                    onChange(value ? undefined : [0, 10]);
+                                  }}
+                                >
+                                  0 - 10
+                                </Checkbox>
+                              )}
+                            />
+                            <Controller
+                              control={control}
+                              name="citations.1"
+                              defaultValue={[11, 20]}
+                              render={({
+                                field: { onChange, onBlur, value },
+                              }) => (
+                                <Checkbox
+                                  value="2"
+                                  iconColor="protGray.100"
+                                  onBlur={onBlur}
+                                  onChange={() => {
+                                    onChange(value ? undefined : [11, 20]);
+                                  }}
+                                >
+                                  11 - 20
+                                </Checkbox>
+                              )}
+                            />
+                            <Controller
+                              control={control}
+                              name="citations.2"
+                              defaultValue={[21, 30]}
+                              render={({
+                                field: { onChange, onBlur, value },
+                              }) => (
+                                <Checkbox
+                                  value="3"
+                                  iconColor="protGray.100"
+                                  onBlur={onBlur}
+                                  onChange={() => {
+                                    onChange(value ? undefined : [21, 30]);
+                                  }}
+                                >
+                                  21 - 30
+                                </Checkbox>
+                              )}
+                            />
+
+                            <Controller
+                              control={control}
+                              name="citations.3"
+                              defaultValue={[31, 40]}
+                              render={({
+                                field: { onChange, onBlur, value },
+                              }) => (
+                                <Checkbox
+                                  value="4"
+                                  iconColor="protGray.100"
+                                  onBlur={onBlur}
+                                  onChange={() => {
+                                    onChange(value ? undefined : [31, 40]);
+                                  }}
+                                >
+                                  31 - 40
+                                </Checkbox>
+                              )}
+                            />
+                            <Controller
+                              control={control}
+                              name="citations.4"
+                              defaultValue={[41, 50]}
+                              render={({
+                                field: { onChange, onBlur, value },
+                              }) => (
+                                <Checkbox
+                                  value="5"
+                                  iconColor="protGray.100"
+                                  onBlur={onBlur}
+                                  onChange={() => {
+                                    onChange(value ? undefined : [41, 50]);
+                                  }}
+                                >
+                                  41 - 50
+                                </Checkbox>
+                              )}
+                            />
+                            <Controller
+                              control={control}
+                              name="citations.5"
+                              defaultValue={[51, 100]}
+                              render={({
+                                field: { onChange, onBlur, value },
+                              }) => (
+                                <Checkbox
+                                  value="6"
+                                  iconColor="protGray.100"
+                                  onBlur={onBlur}
+                                  onChange={() => {
+                                    onChange(value ? undefined : [51, 100]);
+                                  }}
+                                >
+                                  51 - 100
+                                </Checkbox>
+                              )}
+                            />
+                            <Controller
+                              control={control}
+                              name="citations.6"
+                              defaultValue={[100, undefined]}
+                              render={({
+                                field: { onChange, onBlur, value },
+                              }) => (
+                                <Checkbox
+                                  value="7"
+                                  iconColor="protGray.100"
+                                  onBlur={onBlur}
+                                  onChange={() => {
+                                    onChange(
+                                      value ? undefined : [100, undefined]
+                                    );
+                                  }}
+                                >
+                                  {'>'} 100
+                                </Checkbox>
+                              )}
+                            />
                           </HStack>
                         </CheckboxGroup>
                       </FormControl>
