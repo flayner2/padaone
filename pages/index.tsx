@@ -178,12 +178,7 @@ function Home({
           await axios.get(`/api/getPaper?pmid=${value}`);
         } catch (error) {
           if (axios.isAxiosError(error) && error.response) {
-            if (
-              error.response.status === 404 ||
-              error.response.status === 500
-            ) {
-              return false;
-            }
+            return false;
           }
         }
         return value ? true : false;
@@ -204,10 +199,24 @@ function Home({
       .required(
         'Please choose a minimum and maximum value for the second layer probability range.'
       ),
-    taxon: yup.number().oneOf(
-      taxaList.items.map((taxon) => taxon.taxID),
-      "The chosen Taxon ID wasn't found in the database."
-    ),
+    taxon: yup
+      .number()
+      .nullable()
+      .test('taxID-exists', 'Taxon not found', async (value) => {
+        // Accept if the value is empty or null
+        if (!value) {
+          return true;
+        }
+
+        try {
+          await axios.get(`/api/getTaxon?taxonID=${value}`);
+        } catch (error) {
+          if (axios.isAxiosError(error) && error.response) {
+            return false;
+          }
+        }
+        return value ? true : false;
+      }),
     geneIDs: yup.string().ensure().lowercase(),
     filters: yup.object({
       excludeHosts: yup.boolean(),
