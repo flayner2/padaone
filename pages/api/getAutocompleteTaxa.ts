@@ -75,7 +75,7 @@ async function handler(
             if (error.name === 'NotFoundError') {
               res.status(404).send({
                 ...error,
-                message: `The requested taxonName with title ${
+                message: `The requested taxon with name or ID ${
                     taxonName} was not found.`,
               });
             } else {
