@@ -102,3 +102,18 @@ export interface PaperFiltersFormValues {
   publicationDate?: {minDate?: Date; maxDate?: Date; allDates?: boolean};
   citations?: [number, number|undefined][];
 }
+
+export interface PapersFiltersOptions {
+  firstLayerRange: {min: number; max: number};
+  secondLayerRange: {min: number; max: number};
+  taxonID?: number;
+  geneIDs?: number|number[];
+  filters?: {excludeHosts?: boolean; forceGeneIDs?: boolean};
+  terms?: string|string[];
+  lastAuthor?: string|string[];
+  language?: string;
+  journal?: string;
+  allDates?: boolean;
+  dateRange?: {min: number; max: number};
+  citations?: number[][];
+}
