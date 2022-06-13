@@ -124,7 +124,7 @@ function Home({
   let paperList = useAsyncList<PaperTitlePMID>({
     async load({ signal, cursor, filterText }) {
       return await getAsyncListDataDebounced(
-        '/api/getAutocompletePapers?paperTitle',
+        '/api/autocompletePapers?paperTitle',
         signal,
         cursor,
         filterText
@@ -135,7 +135,7 @@ function Home({
   let journalList = useAsyncList<Journal>({
     async load({ signal, cursor, filterText }) {
       return await getAsyncListDataDebounced(
-        '/api/getAutocompleteJournals?journalName',
+        '/api/autocompleteJournals?journalName',
         signal,
         cursor,
         filterText
@@ -146,7 +146,7 @@ function Home({
   let taxaList = useAsyncList<TaxonNameAndID>({
     async load({ signal, cursor, filterText }) {
       return await getAsyncListDataDebounced(
-        '/api/getAutocompleteTaxa?taxonName',
+        '/api/autocompleteTaxa?taxonName',
         signal,
         cursor,
         filterText
@@ -175,7 +175,7 @@ function Home({
       .required('Please enter a valid PMID.')
       .test('pmid-exists', 'PMID not found', async (value) => {
         try {
-          await axios.get(`/api/getPaper?pmid=${value}`);
+          await axios.get(`/api/paper?pmid=${value}`);
         } catch (error) {
           if (axios.isAxiosError(error) && error.response) {
             return false;
@@ -209,7 +209,7 @@ function Home({
         }
 
         try {
-          await axios.get(`/api/getTaxon?taxonID=${value}`);
+          await axios.get(`/api/taxon?taxonID=${value}`);
         } catch (error) {
           if (axios.isAxiosError(error) && error.response) {
             return false;
