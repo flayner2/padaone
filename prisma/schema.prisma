@@ -16,9 +16,9 @@ model Classification2ndLay {
   known__     Int
   knownTerms  String?     @db.VarChar(2000)
   coverage    String      @db.VarChar(10)
-  metadataPub MetadataPub @relation(fields: [pmid], references: [pmid], onDelete: NoAction, onUpdate: NoAction, map: "fkMetadataPubPMID2ndLay")
+  metadataPub MetadataPub @relation(fields: [pmid], references: [pmid], onDelete: Cascade, map: "fkMetadataPubPMID2ndLay")
 
-  @@index([probability], map: "idx_classification_2ndLay_probability")
+  @@index([probability], map: "probability2nd")
   @@map("classification_2ndLay")
 }
 
@@ -31,27 +31,38 @@ model Classification1stLay {
   known__     Int
   knownTerms  String?     @db.VarChar(2000)
   coverage    String      @db.VarChar(10)
-  metadataPub MetadataPub @relation(fields: [pmid], references: [pmid], onDelete: NoAction, onUpdate: NoAction, map: "fkMetadataPubPMID1stLay")
+  metadataPub MetadataPub @relation(fields: [pmid], references: [pmid], onDelete: Cascade, map: "fkMetadataPubPMID1stLay")
 
-  @@index([probability], map: "idx_classifications_1stLay_probability")
+  @@index([probability], map: "probability")
   @@map("classifications_1stLay")
 }
 
 model GeneIDToPMID {
-  pmid          Int           @map("PMID")
-  geneID        Int           @map("geneIDs")
-  metadataPub   MetadataPub   @relation(fields: [pmid], references: [pmid], onDelete: NoAction, onUpdate: NoAction, map: "fkMetadataPubPMIDgeneIDs")
-  taxIDsAccNumb TaxIDToAccNumb @relation(fields: [geneID], references: [geneID], onDelete: NoAction, onUpdate: NoAction, map: "geneIDs_PMIDs_ibfk_2")
+  pmid                    Int @map("PMID")
+  geneID                  Int @map("geneIDs")
+  metadataPub             MetadataPub             @relation(fields: [pmid], references: [pmid], onDelete: Cascade, map: "fkMetadataPubPMIDgeneIDs")
+  geneIDToTaxInfoAccNumb  GeneIDToTaxInfoAccNumb  @relation(fields: [geneID], references: [geneID], onDelete: Cascade, map: "geneIDs_PMIDs_ibfk_2")
 
   @@id([pmid, geneID])
-  @@index([geneID], map: "geneIDs")
-  @@index([pmid, geneID], map: "idx_geneIDs_PMIDs_PMID_geneIDs")
+  @@index([geneID], map: "geneIDs_PMIDs_ibfk_2")
   @@map("geneIDs_PMIDs")
+}
+
+model GeneIDToTaxInfoAccNumb {
+  geneID        Int             @id @map("geneIDs")
+  orgTaxName    String?         @db.VarChar(200) @map("OrgTaxName")
+  taxID         Int?            @map("TaxID")
+  accNumb       String?         @db.VarChar(2000) @map("AccNumb")
+  taxPath       TaxPath?        @relation(fields: [taxID], references: [taxID], onDelete: Cascade, map: "taxIDsAccNumb_ibfk_1")
+  geneIDToPMID  GeneIDToPMID[]
+
+  @@index([taxID], map: "taxIDsAccNumb_ibfk_1")
+  @@map("geneIDs_taxInfo_AccNumb")
 }
 
 model MetadataPub {
   pmid                   Int                     @id @map("PMID")
-  title                  String                  @db.VarChar(2000) @map("Titles")
+  titles                 String                  @db.VarChar(2000) @map("Titles")
   abstract               String?                 @db.VarChar(10000) @map("Abstract")
   pubDate                String?                 @db.VarChar(15) @map("PubDate")
   yearPub                Int?                    @map("YearPub")
@@ -65,30 +76,18 @@ model MetadataPub {
   citations              Int?                    @map("Citations")
   classification2ndLay   Classification2ndLay?
   classification1stLay   Classification1stLay?
-  geneIDToPMID           GeneIDToPMID[]          
+  geneIDToPMID           GeneIDToPMID[]
 
-  @@index([pmid], map: "PMID")
-  @@index([yearPub, lastAuthor, citations], map: "idx_metadataPub_YearPub_LastAuthor_Citations")
+  @@index([citations], map: "citations")
+  @@index([yearPub], map: "yearPub")
   @@map("metadataPub")
 }
 
-model TaxIDToAccNumb {
-  geneID        Int             @id @map("geneIDs")
-  orgTaxName    String?         @db.VarChar(200) @map("OrgTaxName")
-  taxID         Int?            @map("TaxID")
-  accNumb       String?         @db.VarChar(2000) @map("AccNumb")
-  taxPath       TaxPath?        @relation(fields: [taxID], references: [taxID], onDelete: NoAction, onUpdate: NoAction, map: "taxIDsAccNumb_ibfk_1")
-  geneIDToPMID  GeneIDToPMID[]
-
-  @@index([taxID], map: "TaxID")
-  @@index([orgTaxName], map: "idx_taxIDsAccNumb_OrgTaxName")
-  @@map("taxIDsAccNumb")
-}
-
 model TaxPath {
-  taxID         Int             @id @map("TaxID")
-  orgLineage    String?         @db.VarChar(3000) @map("OrgLineage")
-  lineagePath   String?         @db.VarChar(3000) @map("LineagePath")
-  taxIDsAccNumb TaxIDToAccNumb[]
+  taxID                   Int                       @id @map("TaxID")
+  orgLineage              String?                   @db.VarChar(3000) @map("OrgLineage")
+  lineagePath             String?                   @db.VarChar(3000) @map("LineagePath")
+  geneIDToTaxInfoAccNumb  GeneIDToTaxInfoAccNumb[]
+
   @@map("taxPath")
 }
