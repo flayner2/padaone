@@ -69,7 +69,7 @@ export async function getPaperProbability(pmid: number):
       if (error.name === 'NotFoundError') {
         throw error;
       }
-      throw new Error('Unknown error occurred.', {cause: error});
+      throw error;
     }
     throw error;
   }
@@ -79,11 +79,11 @@ export async function getPaperTaxonomicData(pmid: number):
     Promise<FullTaxonomicData[]> {
   try {
     const taxonData = await prisma.geneIDToPMID.findMany({
-      where: {pmid, NOT: [{taxIDsAccNumb: {accNumb: 'NaN'}}]},
+      where: {pmid, NOT: [{geneIDToTaxInfoAccNumb: {accNumb: 'NaN'}}]},
       distinct: ['geneID'],
       select: {
         geneID: true,
-        taxIDsAccNumb: {
+        geneIDToTaxInfoAccNumb: {
           select: {
             orgTaxName: true,
             taxID: true,
@@ -98,9 +98,9 @@ export async function getPaperTaxonomicData(pmid: number):
       },
     });
 
-    const wideTaxonData = taxonData.map(({geneID, taxIDsAccNumb}) => ({
+    const wideTaxonData = taxonData.map(({geneID, geneIDToTaxInfoAccNumb}) => ({
                                           geneIDs: [geneID],
-                                          ...taxIDsAccNumb,
+                                          ...geneIDToTaxInfoAccNumb,
                                         }));
 
     let finalTaxonData = new Array<FullTaxonomicData>();
@@ -131,7 +131,7 @@ export async function getPaperTaxonomicData(pmid: number):
       if (error.name === 'NotFoundError') {
         throw error;
       }
-      throw new Error('Unknown error occurred.', {cause: error});
+      throw error;
     }
     throw error;
   }
