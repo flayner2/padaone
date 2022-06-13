@@ -2,7 +2,7 @@ import type {NextApiRequest, NextApiResponse} from 'next';
 import {prisma} from '../../lib/prisma';
 import type {TaxonNameAndID} from '../../lib/types';
 
-export async function getTaxaByName(
+export async function getTaxa(
     query: string, offset: number = 0): Promise<TaxonNameAndID[]> {
   const isID = !isNaN(parseInt(query));
 
@@ -65,7 +65,7 @@ async function handler(
             'Query parameter "offset" must be either empty or a numeric value.'));
       } else {
         try {
-          const data = await getTaxaByName(taxonName, offset ? offset : 0);
+          const data = await getTaxa(taxonName, offset ? offset : 0);
 
           const taxaWithPrettyNames = parseTaxa(data);
 
