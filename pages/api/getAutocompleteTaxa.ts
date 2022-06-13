@@ -6,7 +6,7 @@ export async function getTaxaByName(
     query: string, offset: number = 0): Promise<TaxonNameAndID[]> {
   const isID = !isNaN(parseInt(query));
 
-  const data = await prisma.taxIDToAccNumb.findMany({
+  const data = await prisma.geneIDToTaxInfoAccNumb.findMany({
     distinct: ['taxID'],
     where: {
       OR: [
@@ -17,11 +17,13 @@ export async function getTaxaByName(
           },
         },
         {
-          taxPath: {
-            lineagePath: {contains: isID ? query : undefined},
-          },
+          ...(isID && {
+            taxPath: {
+              lineagePath: {contains: query},
+            },
+          }),
         },
-        {taxID: isID ? parseInt(query) : undefined},
+        {...(isID && {taxID: parseInt(query)})},
       ],
     },
     take: 20,
