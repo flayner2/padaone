@@ -62,19 +62,34 @@ export async function getPapers(options: PapersFiltersOptions):
                                                          },
                                                        },
                                                      })),
-      ...(options.filters?.excludeHosts && {
-        geneIDToPMID: {
-          none: {
-            geneIDToTaxInfoAccNumb: {
-              OR: [
-                {taxPath: {lineagePath: {contains: '7742'}}},
-                {taxPath: {orgLineage: {contains: 'Vertebrata'}}},
-              ],
-            },
-          },
-        },
-      }),
-      ...(options.filters?.forceGeneIDs && {geneIDToPMID: {some: {}}}),
+
+      ...(options.filters?.forceGeneIDs ?
+              options.filters?.excludeHosts ? {
+                geneIDToPMID: {
+                  some: {},
+                  none: {
+                    geneIDToTaxInfoAccNumb: {
+                      OR: [
+                        {taxPath: {lineagePath: {contains: '7742'}}},
+                        {taxPath: {orgLineage: {contains: 'Vertebrata'}}},
+                      ],
+                    },
+                  },
+                },
+              } :
+                                              {geneIDToPMID: {some: {}}} :
+              options.filters?.excludeHosts && {
+                geneIDToPMID: {
+                  none: {
+                    geneIDToTaxInfoAccNumb: {
+                      OR: [
+                        {taxPath: {lineagePath: {contains: '7742'}}},
+                        {taxPath: {orgLineage: {contains: 'Vertebrata'}}},
+                      ],
+                    },
+                  },
+                },
+              }),
       ...(options.terms &&
           (Array.isArray(options.terms) ?
                {
