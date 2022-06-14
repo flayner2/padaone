@@ -25,14 +25,74 @@ export async function getPapers(options: PapersFiltersOptions):
           some: {geneIDToTaxInfoAccNumb: {taxID: options.taxonID}},
         },
       }),
-      ...(options.geneIDs && Array.isArray(options.geneIDs) ?
-              {
-                OR: options.geneIDs.map((geneID) => ({
-                                          geneIDToPMID: {some: {geneID}},
-                                        })),
-              } :
-              {geneIDToPMID: {some: {geneID: options.geneIDs}}}),
+      ...(options.geneIDs &&
+          (Array.isArray(options.geneIDs) ?
+               {
+                 OR: options.geneIDs.map((geneID) => ({
+                                           geneIDToPMID: {some: {geneID}},
+                                         })),
+               } :
+               {geneIDToPMID: {some: {geneID: options.geneIDs}}})),
+      ...(options.filters?.excludeHosts && {
+        geneIDToPMID: {
+          none: {
+            geneIDToTaxInfoAccNumb: {
+              taxPath: {
+                OR: [
+                  {lineagePath: {contains: '7742'}},
+                  {orgLineage: {contains: 'Vertebrata'}},
+                  {taxID: 7742},
+                ],
+              },
+            },
+          },
+        },
+      }),
+      ...(options.filters?.forceGeneIDs && {geneIDToPMID: {some: {}}}),
+      ...(options.terms &&
+          (Array.isArray(options.terms) ?
+               {
+                 OR: options.terms.map((term) => ({
+                                         OR: [
+                                           {title: {contains: term}},
+                                           {abstract: {contains: term}},
+                                         ],
+                                       })),
+               } :
+               {
+                 OR: [
+                   {title: {contains: options.terms}},
+                   {abstract: {contains: options.terms}},
+                 ],
+               })),
+      ...(options.lastAuthor &&
+          (Array.isArray(options.lastAuthor) ?
+               {
+                 OR: options.lastAuthor.map((author) => ({
+                                              lastAuthor: {contains: author},
+                                            })),
+               } :
+               {lastAuthor: {contains: options.lastAuthor}})),
+      ...(options.language && {languagePub: {contains: options.language}}),
+      ...(options.journal &&
+          {journal: options.journal}),  // Check this for ci collation
+      ...(!options.allDates && options.dateRange && options.dateRange.min &&
+          options.dateRange.max && {
+            AND: [
+              {yearPub: {gte: options.dateRange.min}},
+              {yearPub: {lte: options.dateRange.max}},
+            ],
+          }),
+      ...(options.citations && {
+        OR: options.citations.map((citationRange) => ({
+                                    AND: [
+                                      {citations: {gte: citationRange[0]}},
+                                      {citations: {lte: citationRange[1]}},
+                                    ],
+                                  })),
+      }),
     },
+    // Select fields and relation's fields here
   });
 
   return papers;
@@ -62,11 +122,16 @@ async function handler(
             parseInt(req.query.secondLayerMax),
       },
       taxonID: Array.isArray(req.query.taxonID) ?
+          !isNaN(parseInt(req.query.taxonID[0])) ?
           parseInt(req.query.taxonID[0]) :
-          parseInt(req.query.taxonID),
+          undefined :
+          !isNaN(parseInt(req.query.taxonID)) ? parseInt(req.query.taxonID) :
+                                                undefined,
       geneIDs: Array.isArray(req.query.geneIDs) ?
-          req.query.geneIDs.map((geneID) => parseInt(geneID)) :
-          parseInt(req.query.geneIDs),
+          req.query.geneIDs.filter((value) => !isNaN(parseInt(value)))
+              .map((geneID) => parseInt(geneID)) :
+          !isNaN(parseInt(req.query.geneIDs)) ? parseInt(req.query.geneIDs) :
+                                                undefined,
       filters: {
         excludeHosts: Array.isArray(req.query.excludeHosts) ?
             req.query.excludeHosts[0] === 'true' :
@@ -85,10 +150,18 @@ async function handler(
           req.query.allDates[0] === 'true' :
           req.query.allDates === 'true',
       dateRange: {
-        min: Array.isArray(req.query.minYear) ? parseInt(req.query.minYear[0]) :
-                                                parseInt(req.query.minYear),
-        max: Array.isArray(req.query.maxYear) ? parseInt(req.query.maxYear[0]) :
-                                                parseInt(req.query.maxYear),
+        min: Array.isArray(req.query.minYear) ?
+            !isNaN(parseInt(req.query.minYear[0])) ?
+            parseInt(req.query.minYear[0]) :
+            undefined :
+            !isNaN(parseInt(req.query.minYear)) ? parseInt(req.query.minYear) :
+                                                  undefined,
+        max: Array.isArray(req.query.maxYear) ?
+            !isNaN(parseInt(req.query.maxYear[0])) ?
+            parseInt(req.query.maxYear[0]) :
+            undefined :
+            !isNaN(parseInt(req.query.maxYear)) ? parseInt(req.query.maxYear) :
+                                                  undefined,
       },
       citations: parseCitations(req.query.citations),
     };

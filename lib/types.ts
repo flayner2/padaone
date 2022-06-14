@@ -114,6 +114,6 @@ export interface PapersFiltersOptions {
   language?: string;
   journal?: string;
   allDates?: boolean;
-  dateRange?: {min: number; max: number};
+  dateRange?: {min?: number; max?: number};
   citations?: number[][];
 }
