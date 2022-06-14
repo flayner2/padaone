@@ -17,7 +17,7 @@ import {
   getPaper,
   getPaperProbability,
   getPaperTaxonomicData,
-} from '../api/getPaper';
+} from '../api/paper';
 
 function Paper({
   paper,
