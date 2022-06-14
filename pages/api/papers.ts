@@ -1,8 +1,7 @@
-import type {MetadataPub} from '@prisma/client';
 import type {NextApiRequest, NextApiResponse} from 'next';
+import {parseCitations} from '../../lib/helpers';
 import {prisma} from '../../lib/prisma';
 import type {PapersFiltersOptions, TablePaperInfo} from '../../lib/types';
-import {parseCitations} from '../../lib/helpers';
 
 export async function getPapers(options: PapersFiltersOptions):
     Promise<TablePaperInfo[]> {
@@ -170,8 +169,7 @@ export async function getPapers(options: PapersFiltersOptions):
 }
 
 async function handler(
-    req: NextApiRequest,
-    res: NextApiResponse<MetadataPub|(MetadataPub | null)[]|Error>) {
+    req: NextApiRequest, res: NextApiResponse<TablePaperInfo[]|Error>) {
   if (req.method !== 'GET') {
     res.status(405).send(new Error(`Method ${req.method} is not allowed.`));
   } else {
@@ -238,26 +236,26 @@ async function handler(
       citations: parseCitations(req.query.citations),
     };
 
-    // try {
-    const papers = await getPapers(options);
-    if (!papers) {
-      res.status(404).send(
-          new Error(`No papers were found with the selected filters.`));
-    } else {
-      res.status(200).send(papers);
+    try {
+      const papers = await getPapers(options);
+      if (!papers) {
+        res.status(404).send(
+            new Error(`No papers were found with the selected filters.`));
+      } else {
+        res.status(200).send(papers);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.name == 'NotFoundError') {
+          res.status(404).send({
+            ...error,
+            message: 'No papers were found with the selected filters.',
+          });
+        } else {
+          res.status(500).send(error);
+        }
+      }
     }
-    //} catch (error) {
-    // if (error instanceof Error) {
-    // if (error.name == 'NotFoundError') {
-    // res.status(404).send({
-    //...error,
-    // message: 'No papers were found with the selected filters.',
-    //});
-    //} else {
-    // res.status(500).send(error);
-    //}
-    //}
-    //}
   }
 }
 
