@@ -116,7 +116,7 @@ export async function getPapers(options: PapersFiltersOptions):
       ...(options.language && {languagePub: {contains: options.language}}),
       ...(options.journal && {
         journal: options.journal,
-      }),  // Check this for ci collation
+      }),
       ...(!options.allDates && options.dateRange && options.dateRange.min &&
           options.dateRange.max && {
             AND: [
