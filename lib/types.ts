@@ -1,6 +1,7 @@
 import type {InputProps} from '@chakra-ui/react';
 import type {MetadataPub} from '@prisma/client';
 import type {ReactDatePickerProps} from 'react-datepicker';
+import {Prisma} from '@prisma/client';
 
 export interface FunctionWithArguments {
   (...args: any): any;
@@ -107,7 +108,7 @@ export interface PapersFiltersOptions {
   firstLayerRange: {min: number; max: number};
   secondLayerRange: {min: number; max: number};
   taxonID?: number;
-  geneIDs?: number|number[];
+  geneIDs?: number|string|(number|string)[];
   filters?: {excludeHosts?: boolean; forceGeneIDs?: boolean};
   terms?: string|string[];
   lastAuthor?: string|string[];
@@ -116,4 +117,15 @@ export interface PapersFiltersOptions {
   allDates?: boolean;
   dateRange?: {min?: number; max?: number};
   citations?: number[][];
+}
+
+export interface TablePaperInfo {
+  pmid: number;
+  title: string;
+  yearPub?: number|null;
+  lastAuthor?: string|null;
+  citations?: number|null;
+  classification1stLay?: {probability: Prisma.Decimal}|null;
+  classification2ndLay?: {probability: Prisma.Decimal}|null;
+  geneIDToPMID?: {geneIDToTaxInfoAccNumb?: {taxID: number}};
 }

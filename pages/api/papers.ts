@@ -1,99 +1,164 @@
 import type {MetadataPub} from '@prisma/client';
 import type {NextApiRequest, NextApiResponse} from 'next';
 import {prisma} from '../../lib/prisma';
-import type {PapersFiltersOptions} from '../../lib/types';
+import type {PapersFiltersOptions, TablePaperInfo} from '../../lib/types';
 import {parseCitations} from '../../lib/helpers';
 
 export async function getPapers(options: PapersFiltersOptions):
-    Promise<(MetadataPub | null)[]> {
-  const papers = await prisma.metadataPub.findMany({
-    where: {
-      classification1stLay: {
-        probability: {
-          gte: options.firstLayerRange.min / 100,
-          lte: options.firstLayerRange.max / 100,
-        },
-      },
-      classification2ndLay: {
-        probability: {
-          gte: options.secondLayerRange.min / 100,
-          lte: options.secondLayerRange.max / 100,
-        },
-      },
-      ...(options.taxonID && {
-        geneIDToPMID: {
-          some: {geneIDToTaxInfoAccNumb: {taxID: options.taxonID}},
-        },
-      }),
-      ...(options.geneIDs &&
-          (Array.isArray(options.geneIDs) ?
-               {
-                 OR: options.geneIDs.map((geneID) => ({
-                                           geneIDToPMID: {some: {geneID}},
-                                         })),
-               } :
-               {geneIDToPMID: {some: {geneID: options.geneIDs}}})),
-      ...(options.filters?.excludeHosts && {
-        geneIDToPMID: {
-          none: {
-            geneIDToTaxInfoAccNumb: {
-              taxPath: {
-                OR: [
-                  {lineagePath: {contains: '7742'}},
-                  {orgLineage: {contains: 'Vertebrata'}},
-                  {taxID: 7742},
-                ],
+    Promise<TablePaperInfo[]> {
+  const papers =
+      await prisma.metadataPub.findMany(
+          {
+            where:
+                {
+                  classification1stLay: {
+                    probability: {
+                      gte: options.firstLayerRange.min / 100,
+                      lte: options.firstLayerRange.max / 100,
+                    },
+                  },
+                  classification2ndLay: {
+                    probability: {
+                      gte: options.secondLayerRange.min / 100,
+                      lte: options.secondLayerRange.max / 100,
+                    },
+                  },
+                  ...(options.taxonID && {
+                    geneIDToPMID: {
+                      some: {geneIDToTaxInfoAccNumb: {taxID: options.taxonID}},
+                    },
+                  }),
+                  ...(options.geneIDs &&
+                      (Array.isArray(options.geneIDs) ?
+                           {
+                             OR:
+                                 options.geneIDs.map(
+                                     (geneID) => typeof geneID === 'string' ?
+                                         {
+                                           geneIDToPMID: {
+                                             some: {
+                                               geneIDToTaxInfoAccNumb: {
+                                                 accNumb: {contains: geneID},
+                                               },
+                                             },
+                                           },
+                                         } :
+                                         {geneIDToPMID: {some: {geneID}}}),
+                           } :
+                           typeof options.geneIDs === 'string' ? {
+                             geneIDToPMID: {
+                               some: {
+                                 geneIDToTaxInfoAccNumb: {
+                                   accNumb: {contains: options.geneIDs},
+                                 },
+                               },
+                             },
+                           } :
+                                                                 {
+                                                                   geneIDToPMID: {
+                                                                     some: {
+                                                                       geneID:
+                                                                           options
+                                                                               .geneIDs
+                                                                     }
+                                                                   }
+                                                                 })),
+                  ...(options.filters?.excludeHosts && {
+                    geneIDToPMID: {
+                      none: {
+                        geneIDToTaxInfoAccNumb: {
+                          taxPath: {
+                            OR: [
+                              {lineagePath: {contains: '7742'}},
+                              {orgLineage: {contains: 'Vertebrata'}},
+                              {taxID: 7742},
+                            ],
+                          },
+                        },
+                      },
+                    },
+                  }),
+                  ...(options.filters?.forceGeneIDs &&
+                      {geneIDToPMID: {some: {}}}),
+                  ...(options.terms &&
+                      (Array.isArray(options.terms) ?
+                           {
+                             OR: options.terms.map(
+                                 (term) => ({
+                                   OR: [
+                                     {title: {contains: term}},
+                                     {abstract: {contains: term}},
+                                   ],
+                                 })),
+                           } :
+                           {
+                             OR: [
+                               {title: {contains: options.terms}},
+                               {abstract: {contains: options.terms}},
+                             ],
+                           })),
+                  ...(options.lastAuthor &&
+                      (Array.isArray(options.lastAuthor) ?
+                           {
+                             OR: options.lastAuthor.map(
+                                 (author) => ({
+                                   lastAuthor: {contains: author},
+                                 })),
+                           } :
+                           {lastAuthor: {contains: options.lastAuthor}})),
+                  ...(options.language &&
+                      {languagePub: {contains: options.language}}),
+                  ...(options.journal && {
+                    journal: options.journal,
+                  }),  // Check this for ci collation
+                  ...(!options.allDates && options.dateRange &&
+                      options.dateRange.min && options.dateRange.max && {
+                        AND: [
+                          {yearPub: {gte: options.dateRange.min}},
+                          {yearPub: {lte: options.dateRange.max}},
+                        ],
+                      }),
+                  ...(options.citations && {
+                    OR: options.citations.map(
+                        (citationRange) => ({
+                          AND: [
+                            {citations: {gte: citationRange[0]}},
+                            {citations: {lte: citationRange[1]}},
+                          ],
+                        })),
+                  }),
+                },
+            select: {
+              pmid: true,
+              title: true,
+              yearPub: true,
+              lastAuthor: true,
+              citations: true,
+              classification1stLay: {
+                select: {
+                  probability: true,
+                },
               },
+              classification2ndLay: {
+                select: {
+                  probability: true,
+                },
+              },
+              // geneIDToPMID: {
+              // select: {
+              // geneIDToTaxInfoAccNumb: {
+              // select: {
+              // taxID: true,
+              //},
+              //},
+              //},
+              //},
             },
-          },
-        },
-      }),
-      ...(options.filters?.forceGeneIDs && {geneIDToPMID: {some: {}}}),
-      ...(options.terms &&
-          (Array.isArray(options.terms) ?
-               {
-                 OR: options.terms.map((term) => ({
-                                         OR: [
-                                           {title: {contains: term}},
-                                           {abstract: {contains: term}},
-                                         ],
-                                       })),
-               } :
-               {
-                 OR: [
-                   {title: {contains: options.terms}},
-                   {abstract: {contains: options.terms}},
-                 ],
-               })),
-      ...(options.lastAuthor &&
-          (Array.isArray(options.lastAuthor) ?
-               {
-                 OR: options.lastAuthor.map((author) => ({
-                                              lastAuthor: {contains: author},
-                                            })),
-               } :
-               {lastAuthor: {contains: options.lastAuthor}})),
-      ...(options.language && {languagePub: {contains: options.language}}),
-      ...(options.journal &&
-          {journal: options.journal}),  // Check this for ci collation
-      ...(!options.allDates && options.dateRange && options.dateRange.min &&
-          options.dateRange.max && {
-            AND: [
-              {yearPub: {gte: options.dateRange.min}},
-              {yearPub: {lte: options.dateRange.max}},
+            orderBy: [
+              {classification2ndLay: {probability: 'desc'}},
+              {classification1stLay: {probability: 'desc'}},
             ],
-          }),
-      ...(options.citations && {
-        OR: options.citations.map((citationRange) => ({
-                                    AND: [
-                                      {citations: {gte: citationRange[0]}},
-                                      {citations: {lte: citationRange[1]}},
-                                    ],
-                                  })),
-      }),
-    },
-    // Select fields and relation's fields here
-  });
+          });
 
   return papers;
 }
@@ -128,10 +193,11 @@ async function handler(
           !isNaN(parseInt(req.query.taxonID)) ? parseInt(req.query.taxonID) :
                                                 undefined,
       geneIDs: Array.isArray(req.query.geneIDs) ?
-          req.query.geneIDs.filter((value) => !isNaN(parseInt(value)))
-              .map((geneID) => parseInt(geneID)) :
+          req.query.geneIDs.map(
+              (geneID) =>
+                  !isNaN(parseInt(geneID)) ? parseInt(geneID) : geneID) :
           !isNaN(parseInt(req.query.geneIDs)) ? parseInt(req.query.geneIDs) :
-                                                undefined,
+                                                req.query.geneIDs,
       filters: {
         excludeHosts: Array.isArray(req.query.excludeHosts) ?
             req.query.excludeHosts[0] === 'true' :
@@ -166,26 +232,26 @@ async function handler(
       citations: parseCitations(req.query.citations),
     };
 
-    try {
-      const papers = await getPapers(options);
-      if (!papers) {
-        res.status(404).send(
-            new Error(`No papers were found with the selected filters.`));
-      } else {
-        res.status(200).send(papers);
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        if (error.name == 'NotFoundError') {
-          res.status(404).send({
-            ...error,
-            message: 'No papers were found with the selected filters.',
-          });
-        } else {
-          res.status(500).send(error);
-        }
-      }
+    // try {
+    const papers = await getPapers(options);
+    if (!papers) {
+      res.status(404).send(
+          new Error(`No papers were found with the selected filters.`));
+    } else {
+      res.status(200).send(papers);
     }
+    //} catch (error) {
+    // if (error instanceof Error) {
+    // if (error.name == 'NotFoundError') {
+    // res.status(404).send({
+    //...error,
+    // message: 'No papers were found with the selected filters.',
+    //});
+    //} else {
+    // res.status(500).send(error);
+    //}
+    //}
+    //}
   }
 }
 
