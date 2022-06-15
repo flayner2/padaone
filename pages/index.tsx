@@ -290,6 +290,59 @@ function Home({
   ) => {
     console.log(errors);
     console.log(data);
+    const taxon = data.taxon ? `&taxon=${data.taxon}` : '';
+    const geneIDs = data.geneIDs
+      ? '&geneIDs=' +
+        data.geneIDs
+          .split(/(?:,|;)/)
+          .filter((geneID) => !!geneID.trim())
+          .join('&geneIDs=')
+      : '';
+    const excludeHosts = data.filters?.excludeHosts ? '&excludeHosts=true' : '';
+    const forceGeneIDs = data.filters?.forceGeneIDs ? '&forceGeneIDs=true' : '';
+    const terms = data.terms
+      ? '&terms=' +
+        data.terms
+          .split(/(?:,|;)/)
+          .filter((term) => !!term.trim())
+          .join('&terms=')
+      : '';
+    const lastAuthor = data.lastAuthor
+      ? '&lastAuthor=' +
+        data.lastAuthor
+          .split(/(?:,|;)/)
+          .filter((lastAuthor) => !!lastAuthor.trim())
+          .join('&lastAuthor=')
+      : '';
+    const language = data.language ? `&language=${data.language}` : '';
+    const journal = data.journal ? `&journal=${data.journal}` : '';
+    const allDates = data.publicationDate?.allDates ? `&allDates=true` : '';
+    const date =
+      data.publicationDate?.minDate &&
+      data.publicationDate.maxDate &&
+      !data.publicationDate.allDates
+        ? `&minYear=${data.publicationDate.minDate.getFullYear()}&maxYear=${data.publicationDate.maxDate.getFullYear()}`
+        : '';
+    const citations = data.citations
+      ? '&citations=' +
+        data.citations
+          .map((range) =>
+            range.every((value) => typeof value === 'undefined')
+              ? ''
+              : !range.some((value) => typeof value === 'undefined')
+              ? range.join(',')
+              : typeof range[0] === 'undefined'
+              ? `${range[1]}`
+              : `${range[0]}`
+          )
+          .filter((range) => !!range.trim())
+          .join('&citations=')
+      : '';
+
+    const queryString = `firstLayerMin=${data.firstLayerRange[0]}&firstLayerMax=${data.firstLayerRange[1]}&secondLayerMin=${data.secondLayerRange[0]}&secondLayerMax=${data.secondLayerRange[1]}${taxon}${geneIDs}${excludeHosts}${forceGeneIDs}${terms}${lastAuthor}${language}${journal}${allDates}${date}${citations}`;
+
+    console.log(queryString);
+    router.push(`/papers?${encodeURIComponent(queryString)}`);
   };
 
   return (
