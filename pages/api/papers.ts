@@ -3,8 +3,30 @@ import {parseCitations} from '../../lib/helpers';
 import {prisma} from '../../lib/prisma';
 import type {PapersFiltersOptions, TablePaperInfo} from '../../lib/types';
 
-export async function getPapers(options: PapersFiltersOptions):
+async function getAssociatedTaxIDs(pmid: number): Promise<number[]|undefined> {
+  const queryResult = await prisma.geneIDToTaxInfoAccNumb.findMany({
+    where: {geneIDToPMID: {some: {pmid}}},
+    select: {taxID: true},
+    distinct: ['taxID'],
+  });
+
+  const taxIDs = queryResult.flatMap(({taxID}) => (taxID ? [taxID] : []));
+
+  return taxIDs.length ? taxIDs : undefined;
+}
+
+async function includeTaxonIDs(papers: TablePaperInfo[]):
     Promise<TablePaperInfo[]> {
+  const papersWithIDs = Promise.all(papers.map(async (paper) => {
+    const associatedTaxIDs = await getAssociatedTaxIDs(paper.pmid);
+    return {...paper, taxIDs: associatedTaxIDs};
+  }));
+
+  return papersWithIDs;
+}
+
+export async function getPapers(
+    options: PapersFiltersOptions, offset: number): Promise<TablePaperInfo[]> {
   const papers = await prisma.metadataPub.findMany({
     where: {
       classification1stLay: {
@@ -149,20 +171,13 @@ export async function getPapers(options: PapersFiltersOptions):
           probability: true,
         },
       },
-      // geneIDToPMID: {
-      // select: {
-      // geneIDToTaxInfoAccNumb: {
-      // select: {
-      // taxID: true,
-      //},
-      //},
-      //},
-      //},
     },
     orderBy: [
       {classification2ndLay: {probability: 'desc'}},
       {classification1stLay: {probability: 'desc'}},
     ],
+    take: 20,
+    skip: offset,
   });
 
   return papers;
@@ -235,14 +250,31 @@ async function handler(
       },
       citations: parseCitations(req.query.citations),
     };
+    const offset = Array.isArray(req.query.offset) ?
+        parseInt(req.query.offset[0]) :
+        parseInt(req.query.offset);
 
     try {
-      const papers = await getPapers(options);
+      const papers = await getPapers(options, isNaN(offset) ? 0 : offset);
       if (!papers) {
         res.status(404).send(
             new Error(`No papers were found with the selected filters.`));
       } else {
-        res.status(200).send(papers);
+        try {
+          const papersWithIDs = await includeTaxonIDs(papers);
+          res.status(200).send(papersWithIDs);
+        } catch (error) {
+          if (error instanceof Error) {
+            if (error.name == 'NotFoundError') {
+              res.status(404).send({
+                ...error,
+                message: 'No papers were found with the selected filters.',
+              });
+            } else {
+              res.status(500).send(error);
+            }
+          }
+        }
       }
     } catch (error) {
       if (error instanceof Error) {

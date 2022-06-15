@@ -127,5 +127,5 @@ export interface TablePaperInfo {
   citations?: number|null;
   classification1stLay?: {probability: Prisma.Decimal}|null;
   classification2ndLay?: {probability: Prisma.Decimal}|null;
-  geneIDToPMID?: {geneIDToTaxInfoAccNumb?: {taxID: number}};
+  taxIDs?: number[];
 }
