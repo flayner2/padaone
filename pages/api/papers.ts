@@ -29,12 +29,12 @@ export async function getPapers(
     options: PapersFiltersOptions, offset: number): Promise<TablePaperInfo[]> {
   const papers = await prisma.metadataPub.findMany({
     where: {
-      classification1stLay: {
-        probability: {
-          gte: options.firstLayerRange.min / 100,
-          lte: options.firstLayerRange.max / 100,
-        },
-      },
+      // classification1stLay: {
+      // probability: {
+      // gte: options.firstLayerRange.min / 100,
+      // lte: options.firstLayerRange.max / 100,
+      //},
+      //},
       classification2ndLay: {
         probability: {
           gte: options.secondLayerRange.min / 100,
@@ -172,13 +172,21 @@ export async function getPapers(
         },
       },
     },
-    orderBy: [
-      {classification2ndLay: {probability: 'desc'}},
-      {classification1stLay: {probability: 'desc'}},
-    ],
+    // orderBy: [
+    //{classification2ndLay: {probability: 'asc'}},
+    //{classification1stLay: {probability: 'asc'}},
+    //],
     take: 20,
     skip: offset,
   });
+
+  papers
+      .sort(
+          (a, b) => b.classification1stLay?.probability -
+              a.classification1stLay?.probability)
+      .sort(
+          (a, b) => b.classification2ndLay?.probability -
+              a.classification2ndLay?.probability);
 
   return papers;
 }
@@ -260,6 +268,7 @@ async function handler(
         res.status(404).send(
             new Error(`No papers were found with the selected filters.`));
       } else {
+        // res.status(200).send(papers);
         try {
           const papersWithIDs = await includeTaxonIDs(papers);
           res.status(200).send(papersWithIDs);
