@@ -84,33 +84,33 @@ export async function getPapers(
                                                        },
                                                      })),
 
-      ...(options.filters?.forceGeneIDs ?
-              options.filters?.excludeHosts ? {
-                geneIDToPMID: {
-                  some: {},
-                  none: {
-                    geneIDToTaxInfoAccNumb: {
-                      OR: [
-                        {taxPath: {lineagePath: {contains: '7742'}}},
-                        {taxPath: {orgLineage: {contains: 'Vertebrata'}}},
-                      ],
-                    },
-                  },
-                },
-              } :
-                                              {geneIDToPMID: {some: {}}} :
-              options.filters?.excludeHosts && {
-                geneIDToPMID: {
-                  none: {
-                    geneIDToTaxInfoAccNumb: {
-                      OR: [
-                        {taxPath: {lineagePath: {contains: '7742'}}},
-                        {taxPath: {orgLineage: {contains: 'Vertebrata'}}},
-                      ],
-                    },
-                  },
-                },
-              }),
+      //...(options.filters?.forceGeneIDs ?
+      // options.filters?.excludeHosts ? {
+      // geneIDToPMID: {
+      // some: {},
+      // none: {
+      // geneIDToTaxInfoAccNumb: {
+      // OR: [
+      //{taxPath: {lineagePath: {contains: '7742'}}},
+      //{taxPath: {orgLineage: {contains: 'Vertebrata'}}},
+      //],
+      //},
+      //},
+      //},
+      //} :
+      //{geneIDToPMID: {some: {}}} :
+      // options.filters?.excludeHosts && {
+      // geneIDToPMID: {
+      // none: {
+      // geneIDToTaxInfoAccNumb: {
+      // OR: [
+      //{taxPath: {lineagePath: {contains: '7742'}}},
+      //{taxPath: {orgLineage: {contains: 'Vertebrata'}}},
+      //],
+      //},
+      //},
+      //},
+      //}),
       ...(options.terms &&
           (Array.isArray(options.terms) ?
                {
@@ -172,21 +172,13 @@ export async function getPapers(
         },
       },
     },
-    // orderBy: [
-    //{classification2ndLay: {probability: 'asc'}},
-    //{classification1stLay: {probability: 'asc'}},
-    //],
+    orderBy: [
+      {classification2ndLay: {probability: 'asc'}},
+      {classification1stLay: {probability: 'asc'}},
+    ],
     take: 20,
     skip: offset,
   });
-
-  papers
-      .sort(
-          (a, b) => b.classification1stLay?.probability -
-              a.classification1stLay?.probability)
-      .sort(
-          (a, b) => b.classification2ndLay?.probability -
-              a.classification2ndLay?.probability);
 
   return papers;
 }
