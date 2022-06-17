@@ -1,8 +1,10 @@
 import type {InputProps} from '@chakra-ui/react';
+import {Tbody, Thead} from '@chakra-ui/react';
 import type {MetadataPub} from '@prisma/client';
-import type {ReactDatePickerProps} from 'react-datepicker';
-import {Thead, Tbody} from '@chakra-ui/react';
 import {Prisma} from '@prisma/client';
+import type {GridNode} from '@react-types/grid';
+import type {ReactDatePickerProps} from 'react-datepicker';
+import type {TableState} from 'react-stately';
 
 export interface FunctionWithArguments {
   (...args: any): any;
@@ -134,5 +136,11 @@ export interface TablePaperInfo {
 export interface TableRowGroupProps {
   type: typeof Thead|typeof Tbody;
   style: React.CSSProperties;
+  children: JSX.Element;
+}
+
+export interface TableHeaderRowProps<T> {
+  item: GridNode<T>;
+  state: TableState<T>;
   children: JSX.Element;
 }
