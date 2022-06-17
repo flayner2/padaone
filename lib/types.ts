@@ -1,6 +1,7 @@
 import type {InputProps} from '@chakra-ui/react';
 import type {MetadataPub} from '@prisma/client';
 import type {ReactDatePickerProps} from 'react-datepicker';
+import {Thead, Tbody} from '@chakra-ui/react';
 import {Prisma} from '@prisma/client';
 
 export interface FunctionWithArguments {
@@ -128,4 +129,10 @@ export interface TablePaperInfo {
   classification1stLay?: {probability: Prisma.Decimal}|null;
   classification2ndLay?: {probability: Prisma.Decimal}|null;
   taxIDs?: number[];
+}
+
+export interface TableRowGroupProps {
+  type: typeof Thead|typeof Tbody;
+  style: React.CSSProperties;
+  children: JSX.Element;
 }
