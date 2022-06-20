@@ -29,12 +29,12 @@ export async function getPapers(
     options: PapersFiltersOptions, offset: number): Promise<TablePaperInfo[]> {
   const papers = await prisma.metadataPub.findMany({
     where: {
-      // classification1stLay: {
-      // probability: {
-      // gte: options.firstLayerRange.min / 100,
-      // lte: options.firstLayerRange.max / 100,
-      //},
-      //},
+      classification1stLay: {
+        probability: {
+          gte: options.firstLayerRange.min / 100,
+          lte: options.firstLayerRange.max / 100,
+        },
+      },
       classification2ndLay: {
         probability: {
           gte: options.secondLayerRange.min / 100,
@@ -172,10 +172,10 @@ export async function getPapers(
         },
       },
     },
-    orderBy: [
-      {classification2ndLay: {probability: 'asc'}},
-      {classification1stLay: {probability: 'asc'}},
-    ],
+    // orderBy: [
+    //{classification2ndLay: {probability: 'asc'}},
+    //{classification1stLay: {probability: 'asc'}},
+    //],
     take: 20,
     skip: offset,
   });
