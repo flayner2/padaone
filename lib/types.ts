@@ -149,3 +149,8 @@ export interface TableColumnHeaderProps {
   column: GridNode<unknown>;
   state: TableState<unknown>;
 }
+
+export interface TableCellProps {
+  cell: GridNode<unknown>;
+  state: TableState<unknown>;
+}
