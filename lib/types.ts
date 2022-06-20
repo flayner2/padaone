@@ -144,3 +144,8 @@ export interface TableHeaderRowProps<T> {
   state: TableState<T>;
   children: JSX.Element;
 }
+
+export interface TableColumnHeaderProps<T> {
+  column: GridNode<T>;
+  state: TableState<T>;
+}
