@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import { mergeProps, useFocusRing, useTableColumnHeader } from 'react-aria';
 import type { TableColumnHeaderProps } from '../../lib/types';
 
-function TableColumnHeader<T>({ column, state }: TableColumnHeaderProps<T>) {
+function TableColumnHeader({ column, state }: TableColumnHeaderProps) {
   const ref = useRef<HTMLTableCellElement>(null);
   const { columnHeaderProps } = useTableColumnHeader(
     { node: column },
