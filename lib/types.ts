@@ -139,7 +139,7 @@ export interface TableRowGroupProps {
   children: JSX.Element;
 }
 
-export interface TableHeaderRowProps<T> {
+export interface TableRowProps<T> {
   item: GridNode<T>;
   state: TableState<T>;
   children: JSX.Element;
