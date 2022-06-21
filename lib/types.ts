@@ -135,14 +135,14 @@ export interface TablePaperInfo {
 
 export interface TableRowGroupProps {
   type: typeof Thead|typeof Tbody;
-  style: React.CSSProperties;
-  children: JSX.Element;
+  style?: React.CSSProperties;
+  children: React.ReactNode;
 }
 
 export interface TableRowProps {
   item: GridNode<unknown>;
   state: TableState<unknown>;
-  children: JSX.Element;
+  children: React.ReactNode;
 }
 
 export interface TableColumnHeaderProps {
