@@ -154,3 +154,8 @@ export interface TableCellProps {
   cell: GridNode<unknown>;
   state: TableState<unknown>;
 }
+
+export interface ColumnName {
+  name: string;
+  key: string;
+}

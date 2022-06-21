@@ -29,12 +29,12 @@ export async function getPapers(
     options: PapersFiltersOptions, offset: number): Promise<TablePaperInfo[]> {
   const papers = await prisma.metadataPub.findMany({
     where: {
-      classification1stLay: {
-        probability: {
-          gte: options.firstLayerRange.min / 100,
-          lte: options.firstLayerRange.max / 100,
-        },
-      },
+      // classification1stLay: {
+      // probability: {
+      // gte: options.firstLayerRange.min / 100,
+      // lte: options.firstLayerRange.max / 100,
+      //},
+      //},
       classification2ndLay: {
         probability: {
           gte: options.secondLayerRange.min / 100,
@@ -46,44 +46,43 @@ export async function getPapers(
           some: {geneIDToTaxInfoAccNumb: {taxID: options.taxonID}},
         },
       }),
-      ...(options.geneIDs &&
-          (Array.isArray(options.geneIDs) ?
-               {
-                 OR: options.geneIDs.map(
-                     (geneID) => typeof geneID === 'string' ? {
-                       geneIDToPMID: {
-                         some: {
-                           geneIDToTaxInfoAccNumb: {
-                             accNumb: {contains: geneID},
-                           },
-                         },
-                       },
-                     } :
-                                                              {
-                                                                geneIDToPMID: {
-                                                                  some:
-                                                                      {geneID},
-                                                                },
-                                                              }),
-               } :
-               typeof options.geneIDs === 'string' ? {
-                 geneIDToPMID: {
-                   some: {
-                     geneIDToTaxInfoAccNumb: {
-                       accNumb: {contains: options.geneIDs},
-                     },
-                   },
-                 },
-               } :
-                                                     {
-                                                       geneIDToPMID: {
-                                                         some: {
-                                                           geneID:
-                                                               options.geneIDs,
-                                                         },
-                                                       },
-                                                     })),
-
+      //...(options.geneIDs &&
+      //(Array.isArray(options.geneIDs) ?
+      //{
+      // OR: options.geneIDs.map(
+      //(geneID) => typeof geneID === 'string' ? {
+      // geneIDToPMID: {
+      // some: {
+      // geneIDToTaxInfoAccNumb: {
+      // accNumb: {contains: geneID},
+      //},
+      //},
+      //},
+      //} :
+      //{
+      // geneIDToPMID: {
+      // some:
+      //{geneID},
+      //},
+      //}),
+      //} :
+      // typeof options.geneIDs === 'string' ? {
+      // geneIDToPMID: {
+      // some: {
+      // geneIDToTaxInfoAccNumb: {
+      // accNumb: {contains: options.geneIDs},
+      //},
+      //},
+      //},
+      //} :
+      //{
+      // geneIDToPMID: {
+      // some: {
+      // geneID:
+      // options.geneIDs,
+      //},
+      //},
+      //})),
       //...(options.filters?.forceGeneIDs ?
       // options.filters?.excludeHosts ? {
       // geneIDToPMID: {
@@ -146,14 +145,14 @@ export async function getPapers(
               {yearPub: {lte: options.dateRange.max}},
             ],
           }),
-      ...(options.citations && {
-        OR: options.citations.map((citationRange) => ({
-                                    AND: [
-                                      {citations: {gte: citationRange[0]}},
-                                      {citations: {lte: citationRange[1]}},
-                                    ],
-                                  })),
-      }),
+      //...(options.citations && {
+      // OR: options.citations.map((citationRange) => ({
+      // AND: [
+      //{citations: {gte: citationRange[0]}},
+      //{citations: {lte: citationRange[1]}},
+      //],
+      //})),
+      //}),
     },
     select: {
       pmid: true,
