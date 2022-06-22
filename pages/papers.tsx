@@ -46,15 +46,18 @@ function Papers() {
     filterText: string | undefined
   ): Promise<AsyncListDataDebouncedReturn<T>> {
     const [debouncedRequest] = debounce(async (signal, cursor, filterText) => {
-      let res = await axios.get(cursor || `${queryUrl}?${filterText}`, {
-        signal,
-      });
+      let res = await axios.get(
+        cursor || `${queryUrl}?${filterText}&offset=${offset}`,
+        {
+          signal,
+        }
+      );
 
       return res.data;
     }, 0);
 
     let data = await debouncedRequest(signal, cursor, filterText);
-
+    console.log(`${queryUrl}?${filterText}&offset=${offset}`);
     return {
       items: data,
       cursor: `${queryUrl}?${filterText}&offset=${offset}`,
@@ -70,49 +73,49 @@ function Papers() {
         queryString
       );
     },
-    async sort({ items, sortDescriptor }) {
-      return {
-        items: items.sort((a, b) => {
-          if (!sortDescriptor.column) {
-            return 0;
-          } else {
-            let first;
-            let second;
+    // async sort({ items, sortDescriptor }) {
+    //   return {
+    //     items: items.sort((a, b) => {
+    //       if (!sortDescriptor.column) {
+    //         return 0;
+    //       } else {
+    //         let first;
+    //         let second;
 
-            const isTaxId = sortDescriptor.column === 'taxIDs';
+    //         const isTaxId = sortDescriptor.column === 'taxIDs';
 
-            if (isTaxId) {
-              first = Array.isArray(a[sortDescriptor.column])
-                ? a[sortDescriptor.column][0]
-                : -1;
-              second = Array.isArray(b[sortDescriptor.column])
-                ? b[sortDescriptor.column][0]
-                : -1;
-            }
+    //         if (isTaxId) {
+    //           first = Array.isArray(a[sortDescriptor.column])
+    //             ? a[sortDescriptor.column][0]
+    //             : -1;
+    //           second = Array.isArray(b[sortDescriptor.column])
+    //             ? b[sortDescriptor.column][0]
+    //             : -1;
+    //         }
 
-            const isProbability =
-              sortDescriptor.column === 'classification1stLay' ||
-              sortDescriptor.column === 'classification2ndLay';
-            first = isProbability
-              ? a[sortDescriptor.column]['probability']
-              : a[sortDescriptor.column];
-            second = isProbability
-              ? b[sortDescriptor.column]['probability']
-              : b[sortDescriptor.column];
-            let cmp =
-              (parseInt(first) || first) < (parseInt(second) || second)
-                ? -1
-                : 1;
+    //         const isProbability =
+    //           sortDescriptor.column === 'classification1stLay' ||
+    //           sortDescriptor.column === 'classification2ndLay';
+    //         first = isProbability
+    //           ? a[sortDescriptor.column]['probability']
+    //           : a[sortDescriptor.column];
+    //         second = isProbability
+    //           ? b[sortDescriptor.column]['probability']
+    //           : b[sortDescriptor.column];
+    //         let cmp =
+    //           (parseInt(first) || first) < (parseInt(second) || second)
+    //             ? -1
+    //             : 1;
 
-            if (sortDescriptor.direction === 'descending') {
-              cmp *= -1;
-            }
+    //         if (sortDescriptor.direction === 'descending') {
+    //           cmp *= -1;
+    //         }
 
-            return cmp;
-          }
-        }),
-      };
-    },
+    //         return cmp;
+    //       }
+    //     }),
+    //   };
+    // },
   });
 
   // pagination
