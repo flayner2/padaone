@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type {
   AsyncListDataDebouncedReturn,
   TablePaperInfo,
@@ -16,8 +16,9 @@ import {
   TableBody,
   TableHeader,
 } from '@react-stately/table';
-import { Flex } from '@chakra-ui/react';
+import { Flex, Box } from '@chakra-ui/react';
 import { convertToFloatOrDefault } from '../lib/helpers';
+import Head from 'next/head';
 
 const OFFSET_VALUE: number = 20;
 const COLUMNS: ColumnName[] = [
@@ -26,9 +27,9 @@ const COLUMNS: ColumnName[] = [
   { name: 'Year', key: 'year' },
   { name: 'Last Author', key: 'lastAuthor' },
   { name: 'Citations', key: 'citations' },
-  { name: '1st Layer', key: 'firstLayer' },
-  { name: '2nd Layer', key: 'secondLayer' },
-  { name: 'Taxon Name', key: 'taxonName' },
+  { name: '1st Layer', key: 'classification1stLay' },
+  { name: '2nd Layer', key: 'classification2ndLay' },
+  { name: 'Taxon Name', key: 'taxIDs' },
 ];
 
 function Papers() {
@@ -38,7 +39,6 @@ function Papers() {
   );
   const [offset, setOffset] = useState(0);
 
-  // Async lists
   async function getAsyncListDataDebounced<T>(
     queryUrl: string,
     signal: AbortSignal,
@@ -55,8 +55,6 @@ function Papers() {
 
     let data = await debouncedRequest(signal, cursor, filterText);
 
-    setOffset((previousOffset) => previousOffset + OFFSET_VALUE);
-
     return {
       items: data,
       cursor: `${queryUrl}?${filterText}&offset=${offset}`,
@@ -72,52 +70,151 @@ function Papers() {
         queryString
       );
     },
+    async sort({ items, sortDescriptor }) {
+      return {
+        items: items.sort((a, b) => {
+          if (!sortDescriptor.column) {
+            return 0;
+          } else {
+            let first;
+            let second;
+
+            const isTaxId = sortDescriptor.column === 'taxIDs';
+
+            if (isTaxId) {
+              first = Array.isArray(a[sortDescriptor.column])
+                ? a[sortDescriptor.column][0]
+                : -1;
+              second = Array.isArray(b[sortDescriptor.column])
+                ? b[sortDescriptor.column][0]
+                : -1;
+            }
+
+            const isProbability =
+              sortDescriptor.column === 'classification1stLay' ||
+              sortDescriptor.column === 'classification2ndLay';
+            first = isProbability
+              ? a[sortDescriptor.column]['probability']
+              : a[sortDescriptor.column];
+            second = isProbability
+              ? b[sortDescriptor.column]['probability']
+              : b[sortDescriptor.column];
+            let cmp =
+              (parseInt(first) || first) < (parseInt(second) || second)
+                ? -1
+                : 1;
+
+            if (sortDescriptor.direction === 'descending') {
+              cmp *= -1;
+            }
+
+            return cmp;
+          }
+        }),
+      };
+    },
   });
 
+  // pagination
+  let ward = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!ward.current) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(() => {
+      setOffset((previousOffset) => previousOffset + OFFSET_VALUE);
+    });
+
+    observer.observe(ward.current);
+
+    return () => observer.disconnect();
+  }, [ward]);
+
+  useEffect(() => paperList.loadMore(), [offset]);
+
   return (
-    <Flex
-      minHeight="100vh"
-      width="100vw"
-      padding="2rem 4rem"
-      flex={1}
-      justifyContent="center"
-    >
-      <Table>
-        <TableHeader columns={COLUMNS}>
-          {(column) => <Column key={column.key}>{column.name}</Column>}
-        </TableHeader>
-        <TableBody items={paperList.items}>
-          {(item) => (
-            <Row key={item.pmid}>
-              <Cell>{item.pmid}</Cell>
-              <Cell>{item.title}</Cell>
-              <Cell>{item.yearPub}</Cell>
-              <Cell>{item.lastAuthor}</Cell>
-              <Cell>{item.citations}</Cell>
-              <Cell>
-                {convertToFloatOrDefault(
-                  item.classification1stLay?.probability,
-                  0,
-                  100,
-                  0
-                )}
-                %
-              </Cell>
-              <Cell>
-                {convertToFloatOrDefault(
-                  item.classification2ndLay?.probability,
-                  0,
-                  100,
-                  0
-                )}
-                %
-              </Cell>
-              <Cell>{item.taxIDs?.join(', ')}</Cell>
-            </Row>
-          )}
-        </TableBody>
-      </Table>
-    </Flex>
+    <>
+      <Head>
+        <title>Prot DB | Search Results</title>
+        <meta
+          name="description"
+          content="A database that hosts scientific papers predicted to describe protective antigens (PAgs) from a variety of organisms."
+        />
+        <link
+          rel="icon"
+          href="/favicon.ico"
+        />
+      </Head>
+
+      <Flex
+        minHeight="100vh"
+        width="100%"
+        padding="2rem 4rem"
+        flex={1}
+        alignItems="center"
+        flexDirection="column"
+      >
+        <Table
+          sortDescriptor={paperList.sortDescriptor}
+          onSortChange={paperList.sort}
+          isVirtualized
+        >
+          <TableHeader columns={COLUMNS}>
+            {(column) => (
+              <Column
+                key={column.key}
+                allowsSorting
+              >
+                {column.name}
+              </Column>
+            )}
+          </TableHeader>
+          <TableBody
+            items={paperList.items}
+            loadingState={paperList.loadingState}
+            onLoadMore={paperList.loadMore}
+          >
+            {(item) => (
+              <Row key={item.pmid}>
+                <Cell>{item.pmid}</Cell>
+                <Cell>{item.title}</Cell>
+                <Cell>{item.yearPub || 'NA'}</Cell>
+                <Cell>{item.lastAuthor || 'NA'}</Cell>
+                <Cell>{item.citations}</Cell>
+                <Cell>
+                  {convertToFloatOrDefault(
+                    item.classification1stLay?.probability,
+                    0,
+                    100,
+                    0
+                  )}
+                  %
+                </Cell>
+                <Cell>
+                  {convertToFloatOrDefault(
+                    item.classification2ndLay?.probability,
+                    0,
+                    100,
+                    0
+                  )}
+                  %
+                </Cell>
+                <Cell>{item.taxIDs?.join(', ') || 'NA'}</Cell>
+              </Row>
+            )}
+          </TableBody>
+        </Table>
+
+        <Box
+          ref={ward}
+          background="red"
+          width="10px"
+          height="10px"
+        ></Box>
+      </Flex>
+    </>
   );
 }
 

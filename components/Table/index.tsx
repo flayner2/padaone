@@ -1,7 +1,14 @@
-import { Table as ChakraTable, Tbody, Thead } from '@chakra-ui/react';
+import {
+  Table as ChakraTable,
+  Tbody,
+  Thead,
+  Box,
+  Flex,
+  Spinner,
+} from '@chakra-ui/react';
 import type { TableProps } from '@react-aria/table';
 import type { TableStateProps } from '@react-stately/table';
-import { useRef } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useTable } from 'react-aria';
 import { useTableState } from 'react-stately';
 import TableCell from './TableCell';
@@ -25,67 +32,104 @@ function Table(props: TableStateProps<object> & TableProps<object>) {
   const { gridProps } = useTable(props, state, ref);
 
   return (
-    <ChakraTable
-      {...gridProps}
-      ref={ref}
+    <Flex
+      flexDirection="column"
+      width="100%"
     >
-      <TableRowGroup
-        type={Thead}
-        style={{
-          borderBottom: '2px solid protGray.100',
-        }}
+      <ChakraTable
+        {...gridProps}
+        ref={ref}
       >
-        {collection.headerRows.map((headerRow) => (
-          <TableHeaderRow
-            key={headerRow.key}
-            item={headerRow}
-            state={state}
-          >
-            {[...headerRow.childNodes].map((column) =>
-              column.props.isSelectionCell ? (
-                <TableSelectAllCell
-                  key={column.key}
-                  column={column}
-                  state={state}
-                />
-              ) : (
-                <TableColumnHeader
-                  key={column.key}
-                  column={column}
-                  state={state}
-                />
-              )
-            )}
-          </TableHeaderRow>
-        ))}
-      </TableRowGroup>
+        <TableRowGroup
+          type={Thead}
+          style={{
+            borderBottom: '2px solid protGray.100',
+          }}
+        >
+          {collection.headerRows.map((headerRow) => (
+            <TableHeaderRow
+              key={headerRow.key}
+              item={headerRow}
+              state={state}
+            >
+              {[...headerRow.childNodes].map((column) =>
+                column.props.isSelectionCell ? (
+                  <TableSelectAllCell
+                    key={column.key}
+                    column={column}
+                    state={state}
+                  />
+                ) : (
+                  <TableColumnHeader
+                    key={column.key}
+                    column={column}
+                    state={state}
+                  />
+                )
+              )}
+            </TableHeaderRow>
+          ))}
+        </TableRowGroup>
 
-      <TableRowGroup type={Tbody}>
-        {[...collection.body.childNodes].map((row) => (
-          <TableRow
-            key={row.key}
-            item={row}
-            state={state}
+        {collection.body.props.loadingState === 'loading' ? (
+          <Box
+            role="cell"
+            pt="4"
+            display="flex"
+            pb="2"
+            justifyContent="center"
+            position="absolute"
+            left="50%"
           >
-            {[...row.childNodes].map((cell) =>
-              cell.props.isSelectionCell ? (
-                <TableCheckboxCell
-                  key={cell.key}
-                  cell={cell}
-                  state={state}
-                />
-              ) : (
-                <TableCell
-                  key={cell.key}
-                  cell={cell}
-                  state={state}
-                />
-              )
-            )}
-          </TableRow>
-        ))}
-      </TableRowGroup>
-    </ChakraTable>
+            <Spinner
+              color="blue.400"
+              size="md"
+            />
+          </Box>
+        ) : (
+          <TableRowGroup type={Tbody}>
+            {[...collection.body.childNodes].map((row) => (
+              <TableRow
+                key={row.key}
+                item={row}
+                state={state}
+              >
+                {[...row.childNodes].map((cell) =>
+                  cell.props.isSelectionCell ? (
+                    <TableCheckboxCell
+                      key={cell.key}
+                      cell={cell}
+                      state={state}
+                    />
+                  ) : (
+                    <TableCell
+                      key={cell.key}
+                      cell={cell}
+                      state={state}
+                    />
+                  )
+                )}
+              </TableRow>
+            ))}
+          </TableRowGroup>
+        )}
+      </ChakraTable>
+
+      {collection.body.props.loadingState === 'loadingMore' && (
+        <Box
+          pt="4"
+          display="flex"
+          pb="2"
+          justifyContent="center"
+          alignSelf="center"
+        >
+          <Spinner
+            color="blue.400"
+            size="md"
+          />
+        </Box>
+      )}
+    </Flex>
   );
 }
 
