@@ -18,13 +18,7 @@ function TableRow({ item, children, state }: TableRowProps) {
   return (
     <Tr
       background={
-        isSelected
-          ? 'blueviolet'
-          : isPressed
-          ? 'protGray.100'
-          : item.index && item.index % 2
-          ? 'protBlue.100'
-          : 'none'
+        isSelected ? 'blueviolet' : isPressed ? 'protGray.100' : 'none'
       }
       color={isSelected ? 'white' : undefined}
       outline={isFocusVisible ? '2px solid orange' : 'none'}

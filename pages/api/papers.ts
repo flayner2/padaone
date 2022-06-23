@@ -27,157 +27,202 @@ async function includeTaxonIDs(papers: TablePaperInfo[]):
 
 export async function getPapers(
     options: PapersFiltersOptions, offset: number): Promise<TablePaperInfo[]> {
-  const papers = await prisma.metadataPub.findMany({
-    where: {
-      classification1stLay: {
-        probability: {
-          gte: options.firstLayerRange.min / 100,
-          lte: options.firstLayerRange.max / 100,
+  const papers =
+      await prisma.metadataPub.findMany({
+        where: {
+          AND: [
+            {
+              classification1stLay: {
+                probability: {
+                  gte: options.firstLayerRange.min / 100,
+                  lte: options.firstLayerRange.max / 100,
+                },
+              },
+            },
+            {
+              classification2ndLay: {
+                probability: {
+                  gte: options.secondLayerRange.min / 100,
+                  lte: options.secondLayerRange.max / 100,
+                },
+              },
+            },
+            {
+              ...(options.taxonID && {
+                geneIDToPMID: {
+                  every: {geneIDToTaxInfoAccNumb: {taxID: options.taxonID}},
+                },
+              }),
+            },
+            {
+              ...(options.geneIDs &&
+                  (Array.isArray(options.geneIDs) ?
+                       {
+                         OR: options.geneIDs
+                                 .map(
+                                     (geneID) => typeof geneID === 'string' ?
+                                         {
+                                           geneIDToPMID:
+                                               {
+                                                 some:
+                                                     {
+                                                       geneIDToTaxInfoAccNumb: {
+                                                         accNumb: {
+                                                           contains: geneID,
+                                                         },
+                                                       },
+                                                     },
+                                               },
+                                         } :
+                                         {
+                                           geneIDToPMID:
+                                               {
+                                                 some: {geneID},
+                                               },
+                                         }),
+                       } :
+                       typeof options.geneIDs === 'string' ? {
+                         geneIDToPMID: {
+                           some: {
+                             geneIDToTaxInfoAccNumb: {
+                               accNumb: {contains: options.geneIDs},
+                             },
+                           },
+                         },
+                       } :
+                                                             {
+                                                               geneIDToPMID: {
+                                                                 some: {
+                                                                   geneID:
+                                                                       options
+                                                                           .geneIDs,
+                                                                 },
+                                                               },
+                                                             })),
+            },
+            {
+              ...(options.filters?.forceGeneIDs ?
+                      options.filters?.excludeHosts ? {
+                        geneIDToPMID: {
+                          some: {},
+                          none: {
+                            geneIDToTaxInfoAccNumb: {
+                              OR: [
+                                {taxPath: {lineagePath: {contains: '7742'}}},
+                                {
+                                  taxPath:
+                                      {orgLineage: {contains: 'Vertebrata'}},
+                                },
+                              ],
+                            },
+                          },
+                        },
+                      } :
+                                                      {
+                                                        geneIDToPMID:
+                                                            {some: {}},
+                                                      } :
+                      options.filters?.excludeHosts && {
+                        geneIDToPMID: {
+                          none: {
+                            geneIDToTaxInfoAccNumb: {
+                              OR: [
+                                {taxPath: {lineagePath: {contains: '7742'}}},
+                                {
+                                  taxPath:
+                                      {orgLineage: {contains: 'Vertebrata'}},
+                                },
+                              ],
+                            },
+                          },
+                        },
+                      }),
+            },
+            {
+              ...(options.terms &&
+                  (Array.isArray(options.terms) ?
+                       {
+                         OR: options.terms.map((term) => ({
+                                                 OR: [
+                                                   {title: {contains: term}},
+                                                   {abstract: {contains: term}},
+                                                 ],
+                                               })),
+                       } :
+                       {
+                         OR: [
+                           {title: {contains: options.terms}},
+                           {abstract: {contains: options.terms}},
+                         ],
+                       })),
+            },
+            {
+              ...(options.lastAuthor &&
+                  (Array.isArray(options.lastAuthor) ?
+                       {
+                         OR: options.lastAuthor.map(
+                             (author) => ({
+                               lastAuthor: {contains: author},
+                             })),
+                       } :
+                       {lastAuthor: {contains: options.lastAuthor}})),
+            },
+            {
+              ...(options.language && {
+                languagePub: {contains: options.language},
+              }),
+            },
+            {
+              ...(options.journal && {
+                journal: options.journal,
+              }),
+            },
+            {
+              ...(!options.allDates && options.dateRange &&
+                  options.dateRange.min && options.dateRange.max && {
+                    AND: [
+                      {yearPub: {gte: options.dateRange.min}},
+                      {yearPub: {lte: options.dateRange.max}},
+                    ],
+                  }),
+            },
+            {
+              ...(options.citations && {
+                OR: options.citations.map(
+                    (citationRange) => ({
+                      AND: [
+                        {citations: {gte: citationRange[0]}},
+                        {citations: {lte: citationRange[1]}},
+                      ],
+                    })),
+              }),
+            },
+          ],
         },
-      },
-      classification2ndLay: {
-        probability: {
-          gte: options.secondLayerRange.min / 100,
-          lte: options.secondLayerRange.max / 100,
-        },
-      },
-      ...(options.taxonID && {
-        geneIDToPMID: {
-          some: {geneIDToTaxInfoAccNumb: {taxID: options.taxonID}},
-        },
-      }),
-      //...(options.geneIDs &&
-      //(Array.isArray(options.geneIDs) ?
-      //{
-      // OR: options.geneIDs.map(
-      //(geneID) => typeof geneID === 'string' ? {
-      // geneIDToPMID: {
-      // some: {
-      // geneIDToTaxInfoAccNumb: {
-      // accNumb: {contains: geneID},
-      //},
-      //},
-      //},
-      //} :
-      //{
-      // geneIDToPMID: {
-      // some:
-      //{geneID},
-      //},
-      //}),
-      //} :
-      // typeof options.geneIDs === 'string' ? {
-      // geneIDToPMID: {
-      // some: {
-      // geneIDToTaxInfoAccNumb: {
-      // accNumb: {contains: options.geneIDs},
-      //},
-      //},
-      //},
-      //} :
-      //{
-      // geneIDToPMID: {
-      // some: {
-      // geneID:
-      // options.geneIDs,
-      //},
-      //},
-      //})),
-      //...(options.filters?.forceGeneIDs ?
-      // options.filters?.excludeHosts ? {
-      // geneIDToPMID: {
-      // some: {},
-      // none: {
-      // geneIDToTaxInfoAccNumb: {
-      // OR: [
-      //{taxPath: {lineagePath: {contains: '7742'}}},
-      //{taxPath: {orgLineage: {contains: 'Vertebrata'}}},
-      //],
-      //},
-      //},
-      //},
-      //} :
-      //{geneIDToPMID: {some: {}}} :
-      // options.filters?.excludeHosts && {
-      // geneIDToPMID: {
-      // none: {
-      // geneIDToTaxInfoAccNumb: {
-      // OR: [
-      //{taxPath: {lineagePath: {contains: '7742'}}},
-      //{taxPath: {orgLineage: {contains: 'Vertebrata'}}},
-      //],
-      //},
-      //},
-      //},
-      //}),
-      ...(options.terms &&
-          (Array.isArray(options.terms) ?
-               {
-                 OR: options.terms.map((term) => ({
-                                         OR: [
-                                           {title: {contains: term}},
-                                           {abstract: {contains: term}},
-                                         ],
-                                       })),
-               } :
-               {
-                 OR: [
-                   {title: {contains: options.terms}},
-                   {abstract: {contains: options.terms}},
-                 ],
-               })),
-      ...(options.lastAuthor &&
-          (Array.isArray(options.lastAuthor) ?
-               {
-                 OR: options.lastAuthor.map((author) => ({
-                                              lastAuthor: {contains: author},
-                                            })),
-               } :
-               {lastAuthor: {contains: options.lastAuthor}})),
-      ...(options.language && {languagePub: {contains: options.language}}),
-      ...(options.journal && {
-        journal: options.journal,
-      }),
-      ...(!options.allDates && options.dateRange && options.dateRange.min &&
-          options.dateRange.max && {
-            AND: [
-              {yearPub: {gte: options.dateRange.min}},
-              {yearPub: {lte: options.dateRange.max}},
-            ],
-          }),
-      //...(options.citations && {
-      // OR: options.citations.map((citationRange) => ({
-      // AND: [
-      //{citations: {gte: citationRange[0]}},
-      //{citations: {lte: citationRange[1]}},
-      //],
-      //})),
-      //}),
-    },
-    select: {
-      pmid: true,
-      title: true,
-      yearPub: true,
-      lastAuthor: true,
-      citations: true,
-      classification1stLay: {
         select: {
-          probability: true,
+          pmid: true,
+          title: true,
+          yearPub: true,
+          lastAuthor: true,
+          citations: true,
+          classification1stLay: {
+            select: {
+              probability: true,
+            },
+          },
+          classification2ndLay: {
+            select: {
+              probability: true,
+            },
+          },
         },
-      },
-      classification2ndLay: {
-        select: {
-          probability: true,
-        },
-      },
-    },
-    // orderBy: [
-    //{classification2ndLay: {probability: 'desc'}},
-    //{classification1stLay: {probability: 'asc'}},
-    //],
-    take: 20,
-    skip: offset,
-  });
+        orderBy: [
+          {classification2ndLay: {probability: 'desc'}},
+          {classification1stLay: {probability: 'desc'}},
+        ],
+        take: 20,
+        skip: offset,
+      });
 
   // const test: TablePaperInfo[] = await prisma.$queryRaw`SELECT i0. PMID,
   // i0.Titles,
@@ -191,7 +236,8 @@ export async function getPapers(
   // ON (j0.PMID) = (i0.PMID)
   // INNER JOIN igor2.classification_2ndLay AS k0
   // ON (k0.PMID) = (j0.PMID)
-  // WHERE (j0.probability >= 0.77 AND j0.probability <= 1 AND k0.probability >=
+  // WHERE (j0.probability >= ${
+  // options.firstLayerRange.min} AND j0.probability <= 1 AND k0.probability >=
   // 0 AND k0.probability <= 1) ORDER BY k0.probability DESC LIMIT 20 OFFSET
   // 0;`;
 

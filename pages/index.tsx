@@ -290,7 +290,7 @@ function Home({
   ) => {
     console.log(errors);
     console.log(data);
-    const taxon = data.taxon ? `&taxon=${data.taxon}` : '';
+    const taxon = data.taxon ? `&taxonID=${data.taxon}` : '';
     const geneIDs = data.geneIDs
       ? '&geneIDs=' +
         data.geneIDs

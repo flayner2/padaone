@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useRouter } from 'next/router';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import type {
   AsyncListDataDebouncedReturn,
   TablePaperInfo,
@@ -16,7 +16,7 @@ import {
   TableBody,
   TableHeader,
 } from '@react-stately/table';
-import { Flex, Box } from '@chakra-ui/react';
+import { Flex, Box, Link, Text } from '@chakra-ui/react';
 import { convertToFloatOrDefault } from '../lib/helpers';
 import Head from 'next/head';
 
@@ -122,6 +122,8 @@ function Papers() {
   let ward = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    console.log(ward.current);
+
     if (!ward.current) {
       return;
     }
@@ -177,32 +179,56 @@ function Papers() {
           <TableBody
             items={paperList.items}
             loadingState={paperList.loadingState}
-            onLoadMore={paperList.loadMore}
+            //onLoadMore={paperList.loadMore}
           >
             {(item) => (
               <Row key={item.pmid}>
-                <Cell>{item.pmid}</Cell>
-                <Cell>{item.title}</Cell>
-                <Cell>{item.yearPub || 'NA'}</Cell>
-                <Cell>{item.lastAuthor || 'NA'}</Cell>
-                <Cell>{item.citations}</Cell>
                 <Cell>
-                  {convertToFloatOrDefault(
-                    item.classification1stLay?.probability,
-                    0,
-                    100,
-                    0
-                  )}
-                  %
+                  <Link
+                    href={`/paper/${item.pmid}`}
+                    color="protBlue.400"
+                    isExternal
+                    _hover={{
+                      textDecoration: 'none',
+                      color: 'protBlue.lightHover',
+                    }}
+                  >
+                    {item.pmid}
+                  </Link>
                 </Cell>
                 <Cell>
-                  {convertToFloatOrDefault(
-                    item.classification2ndLay?.probability,
-                    0,
-                    100,
-                    0
-                  )}
-                  %
+                  <Text>{item.title}</Text>
+                </Cell>
+                <Cell>
+                  <Text>{item.yearPub || 'NA'}</Text>
+                </Cell>
+                <Cell>
+                  <Text>{item.lastAuthor || 'NA'}</Text>
+                </Cell>
+                <Cell>
+                  <Text>{item.citations}</Text>
+                </Cell>
+                <Cell>
+                  <Text>
+                    {convertToFloatOrDefault(
+                      item.classification1stLay?.probability,
+                      0,
+                      100,
+                      0
+                    )}
+                    %
+                  </Text>
+                </Cell>
+                <Cell>
+                  <Text>
+                    {convertToFloatOrDefault(
+                      item.classification2ndLay?.probability,
+                      0,
+                      100,
+                      0
+                    )}
+                    %
+                  </Text>
                 </Cell>
                 <Cell>{item.taxIDs?.join(', ') || 'NA'}</Cell>
               </Row>
@@ -210,12 +236,14 @@ function Papers() {
           </TableBody>
         </Table>
 
-        <Box
-          ref={ward}
-          background="red"
-          width="10px"
-          height="10px"
-        ></Box>
+        {!paperList.isLoading && paperList.items.length ? (
+          <Box
+            ref={ward}
+            background="red"
+            width="10px"
+            height="10px"
+          ></Box>
+        ) : null}
       </Flex>
     </>
   );
