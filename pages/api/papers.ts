@@ -29,12 +29,12 @@ export async function getPapers(
     options: PapersFiltersOptions, offset: number): Promise<TablePaperInfo[]> {
   const papers = await prisma.metadataPub.findMany({
     where: {
-      // classification1stLay: {
-      // probability: {
-      // gte: options.firstLayerRange.min / 100,
-      // lte: options.firstLayerRange.max / 100,
-      //},
-      //},
+      classification1stLay: {
+        probability: {
+          gte: options.firstLayerRange.min / 100,
+          lte: options.firstLayerRange.max / 100,
+        },
+      },
       classification2ndLay: {
         probability: {
           gte: options.secondLayerRange.min / 100,
@@ -172,12 +172,30 @@ export async function getPapers(
       },
     },
     // orderBy: [
-    //{classification2ndLay: {probability: 'asc'}},
+    //{classification2ndLay: {probability: 'desc'}},
     //{classification1stLay: {probability: 'asc'}},
     //],
     take: 20,
     skip: offset,
   });
+
+  // const test: TablePaperInfo[] = await prisma.$queryRaw`SELECT i0. PMID,
+  // i0.Titles,
+  // i0.YearPub,
+  // i0.LastAuthor,
+  // i0.Citations ,
+  // j0.probability,
+  // k0.probability
+  // FROM igor2.metadataPub as i0
+  // INNER JOIN igor2.classifications_1stLay AS j0
+  // ON (j0.PMID) = (i0.PMID)
+  // INNER JOIN igor2.classification_2ndLay AS k0
+  // ON (k0.PMID) = (j0.PMID)
+  // WHERE (j0.probability >= 0.77 AND j0.probability <= 1 AND k0.probability >=
+  // 0 AND k0.probability <= 1) ORDER BY k0.probability DESC LIMIT 20 OFFSET
+  // 0;`;
+
+  // return test;
 
   return papers;
 }
