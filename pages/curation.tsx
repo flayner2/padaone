@@ -1,3 +1,5 @@
+import * as Fs from 'node:fs/promises';
+import path from 'path';
 import axios from 'axios';
 import { useState } from 'react';
 import type { TablePaperInfo, ColumnName } from '../lib/types';
@@ -16,10 +18,13 @@ import {
   Button,
   Text,
   Box,
+  FormControl,
+  FormErrorMessage,
 } from '@chakra-ui/react';
 import { ArrowDownIcon } from '@chakra-ui/icons';
 import { convertToFloatOrDefault } from '../lib/helpers';
 import Head from 'next/head';
+import { InferGetServerSidePropsType } from 'next';
 
 const OFFSET_VALUE: number = 20;
 const COLUMNS: ColumnName[] = [
@@ -32,23 +37,34 @@ const COLUMNS: ColumnName[] = [
   { name: 'Submit', key: 'submit' },
 ];
 
-function Papers() {
+function Papers({
+  files,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const [offset, setOffset] = useState(0);
+  const [papersStatus, setPaperStatus] = useState<{ [pmid: number]: string }>(
+    {}
+  );
+  const [errorState, setErrorState] = useState<{ [pmid: number]: string }>({});
+
   const queryUrl = '/api/papers';
   const filterText =
     'firstLayerMin=80&firstLayerMax=100&secondLayerMin=90&secondLayerMax=100';
 
   let paperList = useAsyncList<TablePaperInfo>({
     async load({ signal, cursor }) {
-      let res = await axios.get(
+      let { data } = await axios.get(
         cursor || `${queryUrl}?${filterText}&offset=${offset}`,
         {
           signal,
         }
       );
 
+      const finalPapers = data.filter((paper: TablePaperInfo) =>
+        files.includes(paper.pmid.toString()) ? false : true
+      );
+
       return {
-        items: res.data,
+        items: finalPapers,
         cursor: `${queryUrl}?${filterText}&offset=${offset + OFFSET_VALUE}`,
       };
     },
@@ -57,7 +73,26 @@ function Papers() {
     },
   });
 
-  const [papersStatus, setPaperStatus] = useState({});
+  async function handleSubmit(pmid: number, statusName: string) {
+    if (!statusName) {
+      setErrorState((old) => ({
+        ...old,
+        ...{ [pmid]: 'Please choose a status.' },
+      }));
+      return;
+    }
+
+    try {
+      await axios.post('/api/curation', { pmid, statusName });
+
+      paperList.remove(pmid);
+    } catch (error) {
+      setErrorState((old) => ({
+        ...old,
+        ...{ [pmid]: 'Something went wrong while submiting.' },
+      }));
+    }
+  }
 
   return (
     <>
@@ -130,29 +165,41 @@ function Papers() {
                   </Td>
                   <Td>{paper.taxIDs ? 'Yes' : 'No'}</Td>
                   <Td>
-                    <RadioGroup
-                      onChange={(v) => {
-                        setPaperStatus((old) => ({
-                          ...old,
-                          ...{ [paper.pmid]: v },
-                        }));
-                      }}
+                    <FormControl
+                      isInvalid={errorState[paper.pmid] ? true : false}
                     >
-                      <Radio
-                        value="positive"
-                        marginRight="0.5rem"
+                      <RadioGroup
+                        onChange={(v) => {
+                          setPaperStatus((old) => ({
+                            ...old,
+                            ...{ [paper.pmid]: v },
+                          }));
+                          setErrorState((old) => {
+                            delete old[paper.pmid];
+                            return old;
+                          });
+                        }}
                       >
-                        Positive
-                      </Radio>
-                      <Radio value="negative">Negative</Radio>
-                    </RadioGroup>
+                        <Radio
+                          value="positive"
+                          marginRight="0.5rem"
+                        >
+                          Positive
+                        </Radio>
+                        <Radio value="negative">Negative</Radio>
+                      </RadioGroup>
+                      {errorState[paper.pmid] && (
+                        <FormErrorMessage>
+                          {errorState[paper.pmid]}
+                        </FormErrorMessage>
+                      )}
+                    </FormControl>
                   </Td>
                   <Td>
                     <Button
                       type="submit"
                       onClick={() => {
-                        paperList.remove(paper.pmid);
-                        console.log(paperList.items);
+                        handleSubmit(paper.pmid, papersStatus[paper.pmid]);
                       }}
                     >
                       Submit
@@ -174,6 +221,27 @@ function Papers() {
       </Flex>
     </>
   );
+}
+
+export async function getServerSideProps() {
+  const dirPath = path.resolve(path.join(process.cwd(), '../curation'));
+  let files: string[] = [];
+
+  try {
+    const foundPositive = await Fs.readdir(
+      path.resolve(path.join(dirPath, 'positive'))
+    );
+    const foundNegative = await Fs.readdir(
+      path.resolve(path.join(dirPath, 'positive'))
+    );
+
+    files.push(...foundPositive, ...foundNegative);
+    files = files.map((file) => file.replace('.sql', ''));
+  } catch {
+    return { props: { files: [] } };
+  }
+
+  return { props: { files } };
 }
 
 export default Papers;
