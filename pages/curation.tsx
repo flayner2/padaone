@@ -52,6 +52,9 @@ function Papers() {
         cursor: `${queryUrl}?${filterText}&offset=${offset + OFFSET_VALUE}`,
       };
     },
+    getKey(item) {
+      return item.pmid;
+    },
   });
 
   const [papersStatus, setPaperStatus] = useState({});
@@ -129,7 +132,10 @@ function Papers() {
                   <Td>
                     <RadioGroup
                       onChange={(v) => {
-                        setPaperStatus((old) => ({ ...old }));
+                        setPaperStatus((old) => ({
+                          ...old,
+                          ...{ [paper.pmid]: v },
+                        }));
                       }}
                     >
                       <Radio
@@ -144,9 +150,10 @@ function Papers() {
                   <Td>
                     <Button
                       type="submit"
-                      onClick={() =>
-                        console.log(papersStatus[paper.pmid.toString()])
-                      }
+                      onClick={() => {
+                        paperList.remove(paper.pmid);
+                        console.log(paperList.items);
+                      }}
                     >
                       Submit
                     </Button>
