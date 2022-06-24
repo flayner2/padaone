@@ -8,9 +8,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   const pmid = req.body.pmid;
   const statusName = req.body.statusName;
 
-  if (statusName !== 'positive' || statusName !== 'negative') {
+  if (statusName !== 'positive' && statusName !== 'negative') {
     res.status(400).send(new Error(
         'The "statusName" parameter only accepts "positive" or "negative" as its values.'));
+    return;
   }
 
   const filePath = path.resolve(
@@ -56,6 +57,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
           message: `The file ${pmid}.sql with status ${
               statusName} was created successfuly and was written to.`,
         });
+
+        return;
       } catch (error) {
         res.status(500).send(error);
       }
