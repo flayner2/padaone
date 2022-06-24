@@ -47,10 +47,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       try {
         await Fs.writeFile(
             filePath,
-            `UPDATE paperStatus\nSET status = ${
+            `UPDATE curationStatus\nSET status = ${
                 statusName === 'positive' ?
-                    'curated positive' :
-                    'curated negative'}\nWHERE PMID = ${pmid};`,
+                    '"Curated Positive"' :
+                    '"Curated Negative"'}\nWHERE PMID = ${pmid};`,
             {flag: 'wx'});
 
         res.status(200).json({
