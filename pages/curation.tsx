@@ -83,7 +83,19 @@ function Papers({
     }
 
     try {
-      await axios.post('/api/curation', { pmid, statusName });
+      const res = await axios.post('/api/curation', { pmid, statusName });
+
+      if (res.data.found) {
+        if (res.data.sameStatus) {
+          alert(
+            'This paper was already reviewed with this same status, and the file was already created.'
+          );
+        } else {
+          alert(
+            'This paper was already reviewed with a different status, and the file was already created.'
+          );
+        }
+      }
 
       paperList.remove(pmid);
     } catch (error) {

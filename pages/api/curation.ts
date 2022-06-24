@@ -20,8 +20,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
     const handle = await Fs.open(filePath, 'r');
 
-    res.status(200).json(
-        {message: 'The file already exists and it was not modified.'});
+    res.status(200).json({
+      message: 'The file already exists and it was not modified.',
+      found: true,
+      sameStatus: true,
+    });
 
     handle.close();
 
@@ -38,6 +41,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       res.status(200).json({
         message:
             'The file already exists, but with another status, and it was not modified.',
+        found: true,
+        sameStatus: false,
       });
 
       handle.close();
