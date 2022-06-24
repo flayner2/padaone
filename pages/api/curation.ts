@@ -47,7 +47,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
       try {
         await Fs.writeFile(
             filePath,
-            `UPDATE curationStatus\nSET status = ${
+            `UPDATE curationStatus\nSET curationStatus = ${
                 statusName === 'positive' ?
                     '"Curated Positive"' :
                     '"Curated Negative"'}\nWHERE PMID = ${pmid};`,
