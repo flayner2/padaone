@@ -1,35 +1,17 @@
 import type {NextApiRequest, NextApiResponse} from 'next';
 import {prisma} from '../../lib/prisma';
-import type {TaxonNameAndID} from '../../lib/types';
+import type {TaxIDToTaxName} from '@prisma/client';
 
 export async function getTaxa(
-    query: string, offset: number = 0): Promise<TaxonNameAndID[]> {
-  const isID = !isNaN(parseInt(query));
-
-  const data = await prisma.geneIDToTaxInfoAccNumb.findMany({
-    distinct: ['taxID'],
+    query: string, offset: number = 0): Promise<TaxIDToTaxName[]> {
+  const data = await prisma.taxIDToTaxName.findMany({
     where: {
-      OR: [
-        {orgTaxName: {contains: query}},
-        {
-          taxPath: {
-            orgLineage: {contains: query},
-          },
-        },
-        {
-          ...(isID && {
-            taxPath: {
-              lineagePath: {contains: query},
-            },
-          }),
-        },
-        {...(isID && {taxID: parseInt(query)})},
-      ],
+      taxName: {contains: query},
     },
     take: 20,
     skip: offset,
     select: {
-      orgTaxName: true,
+      taxName: true,
       taxID: true,
     },
   });
@@ -37,16 +19,16 @@ export async function getTaxa(
   return data;
 }
 
-function parseTaxa(foundTaxa: TaxonNameAndID[]): TaxonNameAndID[] {
+function parseTaxa(foundTaxa: TaxIDToTaxName[]): TaxIDToTaxName[] {
   return foundTaxa.map(
       (taxonObject) => ({
-        orgTaxName: `${taxonObject.orgTaxName} (${taxonObject.taxID})`,
+        taxName: `${taxonObject.taxName} (${taxonObject.taxID})`,
         taxID: taxonObject.taxID,
       }));
 }
 
 async function handler(
-    req: NextApiRequest, res: NextApiResponse<TaxonNameAndID[]|Error>) {
+    req: NextApiRequest, res: NextApiResponse<TaxIDToTaxName[]|Error>) {
   if (req.method !== 'GET') {
     res.status(405).send(new Error(`Method ${req.method} is not allowed.`));
   } else if (Array.isArray(req.query.taxonName)) {

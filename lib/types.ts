@@ -31,11 +31,6 @@ export interface PaperTitlePMID {
   pmid: number;
 }
 
-export interface TaxonNameAndID {
-  orgTaxName: string|null;
-  taxID: number|null;
-}
-
 export interface AsyncListDataDebouncedReturn<T> {
   items: T[];
   cursor: string;

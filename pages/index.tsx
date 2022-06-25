@@ -51,7 +51,6 @@ import type {
   AsyncListDataDebouncedReturn,
   Journal,
   PaperTitlePMID,
-  TaxonNameAndID,
   PaperTitleFormValue,
   PaperPMIDFormValue,
   PaperFiltersFormValues,
@@ -59,6 +58,7 @@ import type {
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useRouter } from 'next/router';
+import type { TaxIDToTaxName } from '@prisma/client';
 
 const OFFSET_VALUE: number = 20;
 
@@ -143,7 +143,7 @@ function Home({
     },
   });
 
-  let taxaList = useAsyncList<TaxonNameAndID>({
+  let taxaList = useAsyncList<TaxIDToTaxName>({
     async load({ signal, cursor, filterText }) {
       return await getAsyncListDataDebounced(
         '/api/autocompleteTaxa?taxonName',
@@ -671,7 +671,7 @@ function Home({
                         fontSize="md"
                         htmlFor="taxonName"
                       >
-                        Taxon Name {'(or Taxon ID)'}
+                        Taxon Name
                       </FormLabel>
 
                       <Controller
@@ -704,8 +704,8 @@ function Home({
                               onChange(item);
                             }}
                           >
-                            {(item) => (
-                              <Item key={item.taxID}>{item.orgTaxName}</Item>
+                            {(item: TaxIDToTaxName) => (
+                              <Item key={item.taxID}>{item.taxName}</Item>
                             )}
                           </Autocomplete>
                         )}
