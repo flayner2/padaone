@@ -78,6 +78,22 @@ CREATE TABLE `taxPath` (
     PRIMARY KEY (`TaxID`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `curationStatus` (
+    `PMID` INTEGER NOT NULL,
+    `curationStatus` ENUM('Created', 'Curated Negative', 'Curated Positive') NULL,
+
+    UNIQUE INDEX `PMID`(`PMID`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `taxID_taxName` (
+    `TaxID` INTEGER NOT NULL,
+    `TaxName` VARCHAR(200) NOT NULL,
+
+    UNIQUE INDEX `TaxID`(`TaxID`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `classification_2ndLay` ADD CONSTRAINT `fkMetadataPubPMID2ndLay` FOREIGN KEY (`PMID`) REFERENCES `metadataPub`(`PMID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -92,4 +108,10 @@ ALTER TABLE `geneIDs_PMIDs` ADD CONSTRAINT `fkMetadataPubPMIDgeneIDs` FOREIGN KE
 
 -- AddForeignKey
 ALTER TABLE `geneIDs_taxInfo_AccNumb` ADD CONSTRAINT `taxIDsAccNumb_ibfk_1` FOREIGN KEY (`TaxID`) REFERENCES `taxPath`(`TaxID`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `curationStatus` ADD CONSTRAINT `fkMetadataPubPMIDcur` FOREIGN KEY (`PMID`) REFERENCES `metadataPub`(`PMID`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `taxID_taxName` ADD CONSTRAINT `taxIDsSplit_ibfk_1` FOREIGN KEY (`TaxID`) REFERENCES `taxPath`(`TaxID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
