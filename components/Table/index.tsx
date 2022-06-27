@@ -8,7 +8,7 @@ import {
 } from '@chakra-ui/react';
 import type { TableProps } from '@react-aria/table';
 import type { TableStateProps } from '@react-stately/table';
-import { useRef, useEffect, useState } from 'react';
+import { useRef } from 'react';
 import { useTable } from 'react-aria';
 import { useTableState } from 'react-stately';
 import TableCell from './TableCell';
@@ -35,6 +35,7 @@ function Table(props: TableStateProps<object> & TableProps<object>) {
     <Flex
       flexDirection="column"
       width="100%"
+      overflowX="auto"
     >
       <ChakraTable
         {...gridProps}

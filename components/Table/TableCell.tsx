@@ -12,8 +12,8 @@ function TableCell({ cell, state }: TableCellProps) {
     <Td
       {...mergeProps(gridCellProps, focusProps)}
       outline={isFocusVisible ? '2px solid orange' : 'none'}
-      cursor={'default'}
       ref={ref}
+      maxWidth="10vw"
     >
       {cell.rendered}
     </Td>

@@ -156,9 +156,7 @@ function Papers({
                       {paper.pmid}
                     </Link>
                   </Td>
-                  <Td maxWidth="20vw">
-                    <Text>{paper.title}</Text>
-                  </Td>
+                  <Td maxWidth="20vw">{paper.title}</Td>
                   <Td>
                     {convertToFloatOrDefault(
                       paper.classification1stLay?.probability,

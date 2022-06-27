@@ -6,17 +6,27 @@ import type {
   TablePaperInfo,
   ColumnName,
 } from '../lib/types';
+import type { SortDirection } from '@react-types/shared';
 import { debounce } from '../lib/debounce';
 import { useAsyncList } from 'react-stately';
-import Table from '../components/Table';
 import {
-  Cell,
-  Row,
-  Column,
-  TableBody,
-  TableHeader,
-} from '@react-stately/table';
-import { Flex, Box, Link, Text } from '@chakra-ui/react';
+  Flex,
+  Box,
+  Link,
+  Td,
+  Th,
+  Thead,
+  Tbody,
+  Tr,
+  Table,
+  Spinner,
+  Button,
+} from '@chakra-ui/react';
+import {
+  TriangleUpIcon,
+  TriangleDownIcon,
+  ArrowDownIcon,
+} from '@chakra-ui/icons';
 import { convertToFloatOrDefault } from '../lib/helpers';
 import Head from 'next/head';
 
@@ -38,6 +48,9 @@ function Papers() {
     router.asPath.replace(/^\/papers\?/, '')
   );
   const [offset, setOffset] = useState(0);
+  const [beingSorted, setBeingSorted] = useState('classification2ndLay');
+  const [sortDirection, setSortDirection] =
+    useState<SortDirection>('descending');
 
   async function getAsyncListDataDebounced<T>(
     queryUrl: string,
@@ -73,50 +86,64 @@ function Papers() {
         queryString
       );
     },
-    // async sort({ items, sortDescriptor }) {
-    //   return {
-    //     items: items.sort((a, b) => {
-    //       if (!sortDescriptor.column) {
-    //         return 0;
-    //       } else {
-    //         let first;
-    //         let second;
+    getKey(item) {
+      return item.pmid;
+    },
+    initialSortDescriptor: {
+      column: 'classification2ndLay',
+      direction: 'descending',
+    },
+    async sort({ items, sortDescriptor }) {
+      return {
+        items: items.sort((a, b) => {
+          if (!sortDescriptor.column) {
+            return 0;
+          } else {
+            let first;
+            let second;
 
-    //         const isTaxId = sortDescriptor.column === 'taxIDs';
+            const isTaxId = sortDescriptor.column === 'taxIDs';
 
-    //         if (isTaxId) {
-    //           first = Array.isArray(a[sortDescriptor.column])
-    //             ? a[sortDescriptor.column][0]
-    //             : -1;
-    //           second = Array.isArray(b[sortDescriptor.column])
-    //             ? b[sortDescriptor.column][0]
-    //             : -1;
-    //         }
+            if (isTaxId) {
+              first = Array.isArray(a[sortDescriptor.column])
+                ? a[sortDescriptor.column][0]
+                : -1;
+              second = Array.isArray(b[sortDescriptor.column])
+                ? b[sortDescriptor.column][0]
+                : -1;
+            }
 
-    //         const isProbability =
-    //           sortDescriptor.column === 'classification1stLay' ||
-    //           sortDescriptor.column === 'classification2ndLay';
-    //         first = isProbability
-    //           ? a[sortDescriptor.column]['probability']
-    //           : a[sortDescriptor.column];
-    //         second = isProbability
-    //           ? b[sortDescriptor.column]['probability']
-    //           : b[sortDescriptor.column];
-    //         let cmp =
-    //           (parseInt(first) || first) < (parseInt(second) || second)
-    //             ? -1
-    //             : 1;
+            const isProbability =
+              sortDescriptor.column === 'classification1stLay' ||
+              sortDescriptor.column === 'classification2ndLay';
+            first = isProbability
+              ? a[sortDescriptor.column]['probability']
+              : a[sortDescriptor.column];
+            second = isProbability
+              ? b[sortDescriptor.column]['probability']
+              : b[sortDescriptor.column];
+            let cmp =
+              (parseInt(first) || first) < (parseInt(second) || second)
+                ? -1
+                : 1;
 
-    //         if (sortDescriptor.direction === 'descending') {
-    //           cmp *= -1;
-    //         }
+            if (sortDescriptor.direction === 'descending') {
+              cmp *= -1;
+            }
 
-    //         return cmp;
-    //       }
-    //     }),
-    //   };
-    // },
+            return cmp;
+          }
+        }),
+      };
+    },
   });
+
+  function handleSortChange(column: string) {
+    setBeingSorted(column);
+    setSortDirection(
+      sortDirection === 'descending' ? 'ascending' : 'descending'
+    );
+  }
 
   // pagination
   let ward = useRef<HTMLDivElement>(null);
@@ -161,80 +188,105 @@ function Papers() {
         alignItems="center"
         flexDirection="column"
       >
-        <Table
-          sortDescriptor={paperList.sortDescriptor}
-          onSortChange={paperList.sort}
-          isVirtualized
+        <Box
+          width="100%"
+          overflowX="auto"
         >
-          <TableHeader columns={COLUMNS}>
-            {(column) => (
-              <Column
-                key={column.key}
-                allowsSorting
-              >
-                {column.name}
-              </Column>
-            )}
-          </TableHeader>
-          <TableBody
-            items={paperList.items}
-            loadingState={paperList.loadingState}
-            //onLoadMore={paperList.loadMore}
-          >
-            {(item) => (
-              <Row key={item.pmid}>
-                <Cell>
-                  <Link
-                    href={`/paper/${item.pmid}`}
-                    color="protBlue.400"
-                    isExternal
-                    _hover={{
-                      textDecoration: 'none',
-                      color: 'protBlue.lightHover',
+          <Table variant="simple">
+            <Thead>
+              <Tr>
+                {COLUMNS.map((column) => (
+                  <Th
+                    key={column.key}
+                    onClick={() => {
+                      handleSortChange(column.key);
+                      paperList.sort({
+                        column: beingSorted,
+                        direction: sortDirection,
+                      });
                     }}
                   >
-                    {item.pmid}
-                  </Link>
-                </Cell>
-                <Cell>
-                  <Text>{item.title}</Text>
-                </Cell>
-                <Cell>
-                  <Text>{item.yearPub || 'NA'}</Text>
-                </Cell>
-                <Cell>
-                  <Text>{item.lastAuthor || 'NA'}</Text>
-                </Cell>
-                <Cell>
-                  <Text>{item.citations}</Text>
-                </Cell>
-                <Cell>
-                  <Text>
-                    {convertToFloatOrDefault(
-                      item.classification1stLay?.probability,
-                      0,
-                      100,
-                      0
+                    {column.name}{' '}
+                    {sortDirection === 'ascending' ? (
+                      <TriangleUpIcon
+                        visibility={
+                          beingSorted === column.key ? 'visible' : 'hidden'
+                        }
+                      />
+                    ) : (
+                      <TriangleDownIcon
+                        visibility={
+                          beingSorted === column.key ? 'visible' : 'hidden'
+                        }
+                      />
                     )}
-                    %
-                  </Text>
-                </Cell>
-                <Cell>
-                  <Text>
-                    {convertToFloatOrDefault(
-                      item.classification2ndLay?.probability,
-                      0,
-                      100,
-                      0
-                    )}
-                    %
-                  </Text>
-                </Cell>
-                <Cell>{item.taxIDs?.join(', ') || 'NA'}</Cell>
-              </Row>
-            )}
-          </TableBody>
-        </Table>
+                  </Th>
+                ))}
+              </Tr>
+            </Thead>
+            <Tbody>
+              {paperList.isLoading ? (
+                <Box
+                  role="cell"
+                  pt="4"
+                  display="flex"
+                  pb="2"
+                  justifyContent="center"
+                  position="absolute"
+                  left="50%"
+                >
+                  <Spinner
+                    color="blue.400"
+                    size="md"
+                  />
+                </Box>
+              ) : (
+                paperList.items.map((paper) => (
+                  <Tr key={paper.pmid}>
+                    <Td>
+                      <Link
+                        href={`/paper/${paper.pmid}`}
+                        color="protBlue.400"
+                        isExternal
+                        _hover={{
+                          textDecoration: 'none',
+                          color: 'protBlue.lightHover',
+                        }}
+                      >
+                        {paper.pmid}
+                      </Link>
+                    </Td>
+                    <Td maxWidth="20vw">{paper.title}</Td>
+                    <Td>{paper.yearPub}</Td>
+                    <Td>{paper.lastAuthor}</Td>
+                    <Td>{paper.citations}</Td>
+                    <Td>
+                      {convertToFloatOrDefault(
+                        paper.classification1stLay?.probability,
+                        0,
+                        100,
+                        0
+                      )}
+                      %
+                    </Td>
+                    <Td>
+                      {convertToFloatOrDefault(
+                        paper.classification2ndLay?.probability,
+                        0,
+                        100,
+                        0
+                      )}
+                      %
+                    </Td>
+                    <Td maxWidth="15vw">
+                      {paper.taxIDs ? paper.taxIDs.join(',') : 'N/A'}
+                    </Td>
+                  </Tr>
+                ))
+              )}
+            </Tbody>
+          </Table>
+        </Box>
 
         {!paperList.isLoading && paperList.items.length ? (
           <Box
