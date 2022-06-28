@@ -46,12 +46,8 @@ const COLUMNS: ColumnName[] = [
   { name: 'Taxon Name', key: 'taxNames' },
 ];
 
-function Papers() {
+function Browse() {
   // Data and state
-  const router = useRouter();
-  const queryString = decodeURIComponent(
-    router.asPath.replace(/^\/papers\?/, '')
-  );
   const [offset, setOffset] = useState(0);
   const [beingSorted, setBeingSorted] = useState('classification2ndLay');
   const [sortDirection, setSortDirection] =
@@ -69,36 +65,27 @@ function Papers() {
   async function getAsyncListDataDebounced<T>(
     queryUrl: string,
     signal: AbortSignal,
-    cursor: string | undefined,
-    filterText: string | undefined
+    cursor: string | undefined
   ): Promise<AsyncListDataDebouncedReturn<T>> {
-    const [debouncedRequest] = debounce(async (signal, cursor, filterText) => {
-      let res = await axios.get(
-        cursor || `${queryUrl}?${filterText}&offset=${offset}`,
-        {
-          signal,
-        }
-      );
+    const [debouncedRequest] = debounce(async (signal, cursor) => {
+      let res = await axios.get(cursor || `${queryUrl}?offset=${offset}`, {
+        signal,
+      });
 
       return res.data;
     }, 0);
 
-    let data = await debouncedRequest(signal, cursor, filterText);
+    let data = await debouncedRequest(signal, cursor);
 
     return {
       items: data,
-      cursor: `${queryUrl}?${filterText}&offset=${offset + OFFSET_VALUE}`,
+      cursor: `${queryUrl}?offset=${offset + OFFSET_VALUE}`,
     };
   }
 
   let paperList = useAsyncList<TablePaperInfo>({
     async load({ signal, cursor }) {
-      return await getAsyncListDataDebounced(
-        '/api/papers',
-        signal,
-        cursor,
-        queryString
-      );
+      return await getAsyncListDataDebounced('/api/allPapers', signal, cursor);
     },
     getKey(item) {
       return item.pmid;
@@ -212,7 +199,7 @@ function Papers() {
   return (
     <>
       <Head>
-        <title>Prot DB | Search Results</title>
+        <title>Padaone | Browse the Database</title>
         <meta
           name="description"
           content="A database that hosts scientific papers predicted to describe protective antigens (PAgs) from a variety of organisms."
@@ -390,4 +377,4 @@ function Papers() {
   );
 }
 
-export default Papers;
+export default Browse;

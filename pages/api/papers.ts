@@ -3,7 +3,7 @@ import {parseCitations} from '../../lib/helpers';
 import {prisma} from '../../lib/prisma';
 import type {PapersFiltersOptions, TablePaperInfo} from '../../lib/types';
 
-async function getAssociatedTaxNames(pmid: number):
+export async function getAssociatedTaxNames(pmid: number):
     Promise<string[]|undefined> {
   const queryResult = await prisma.geneIDToTaxInfoAccNumb.findMany({
     where: {geneIDToPMID: {some: {pmid}}},
@@ -18,7 +18,7 @@ async function getAssociatedTaxNames(pmid: number):
                            undefined;
 }
 
-async function includeTaxonNames(papers: TablePaperInfo[]):
+export async function includeTaxonNames(papers: TablePaperInfo[]):
     Promise<TablePaperInfo[]> {
   const papersWithNames = Promise.all(papers.map(async (paper) => {
     const associatedTaxNames = await getAssociatedTaxNames(paper.pmid);
