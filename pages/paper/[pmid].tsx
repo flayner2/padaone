@@ -27,7 +27,7 @@ function Paper({
   return (
     <Flex justifyContent="center">
       <Head>
-        <title>Prot DB | {paper?.title}</title>
+        <title>PADA-One | {paper?.title}</title>
         <meta
           name="description"
           content={`Paper title: ${paper?.title}`}
@@ -187,7 +187,7 @@ function Paper({
           </HStack>
         </VStack>
 
-        {taxonomicData.length && (
+        {taxonomicData.length ? (
           <>
             <Divider
               width="80%"
@@ -212,135 +212,138 @@ function Paper({
                 Taxonomic information
               </Heading>
 
-              {taxonomicData &&
-                taxonomicData.map((taxon) =>
-                  taxon && taxon.orgTaxName !== 'Nan' ? (
-                    <VStack
-                      background="protGray.100"
-                      padding="1.5rem"
-                      justifyContent="space-between"
-                      spacing="1.5rem"
-                      borderRadius="20px"
-                      width="100%"
-                      alignItems="flex-start"
-                      key={taxon.taxID}
-                      marginBottom="1rem"
-                    >
-                      <HStack
-                        width="100%"
+              {taxonomicData.length
+                ? taxonomicData.map((taxon) =>
+                    taxon && taxon.orgTaxName !== 'Nan' ? (
+                      <VStack
+                        background="protGray.100"
+                        padding="1.5rem"
                         justifyContent="space-between"
+                        spacing="1.5rem"
+                        borderRadius="20px"
+                        width="100%"
+                        alignItems="flex-start"
+                        key={taxon.taxID}
+                        marginBottom="1rem"
                       >
-                        <Text
-                          fontWeight="semibold"
-                          fontStyle="italic"
-                          color="protBlack.800"
-                        >
-                          {taxon.orgTaxName}
-                        </Text>
-
-                        <Text color="protBlack.800">
-                          Taxon ID:{' '}
-                          <Link
-                            href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=${taxon.taxID}`}
-                            color="protBlue.400"
-                            isExternal
-                            _hover={{
-                              textDecoration: 'none',
-                              color: 'protBlue.lightHover',
-                            }}
-                          >
-                            {taxon.taxID} <ExternalLinkIcon />
-                          </Link>
-                        </Text>
-                      </HStack>
-
-                      {taxon.taxPath && (
-                        <Text color="protBlack.800">
-                          <chakra.span fontWeight="semibold">
-                            Lineage:{' '}
-                          </chakra.span>
-                          {taxon.taxPath.orgLineage}
-                        </Text>
-                      )}
-
-                      {(taxon.accNumb || taxon.geneIDs) && (
-                        <VStack
+                        <HStack
                           width="100%"
-                          alignItems="flex-start"
-                          spacing="1.5rem"
+                          justifyContent="space-between"
                         >
-                          <Text color="protBlack.800">
-                            <chakra.span fontWeight="semibold">
-                              Gene IDs:{' '}
-                            </chakra.span>
-                            {taxon.geneIDs &&
-                              taxon.geneIDs.map((geneID, index, allIDs) => (
-                                <>
-                                  <Link
-                                    key={geneID}
-                                    href={`https://www.ncbi.nlm.nih.gov/gene/${geneID}`}
-                                    color="protBlue.400"
-                                    isExternal
-                                    _hover={{
-                                      textDecoration: 'none',
-                                      color: 'protBlue.lightHover',
-                                    }}
-                                  >
-                                    {geneID}
-                                    <ExternalLinkIcon />
-                                  </Link>
-                                  {index < allIDs.length - 1 && '; '}
-                                </>
-                              ))}
-                          </Text>
-
-                          <Text color="protBlack.800">
-                            <chakra.span fontWeight="semibold">
-                              Accession numbers:{' '}
-                            </chakra.span>
-                            {taxon.accNumb &&
-                              taxon.accNumb
-                                .split(',')
-                                .map((accession, index, allNumbs) => (
-                                  <>
-                                    <Link
-                                      key={accession}
-                                      href={`https://www.ncbi.nlm.nih.gov/protein/${accession}`}
-                                      color="protBlue.400"
-                                      isExternal
-                                      _hover={{
-                                        textDecoration: 'none',
-                                        color: 'protBlue.lightHover',
-                                      }}
-                                    >
-                                      {accession}
-                                      <ExternalLinkIcon />
-                                    </Link>
-                                    {index < allNumbs.length - 1 && '; '}
-                                  </>
-                                ))}
-                          </Text>
-
-                          <Button
+                          <Text
+                            fontWeight="semibold"
+                            fontStyle="italic"
                             color="protBlack.800"
-                            background="protBlue.300"
-                            borderRadius="8px"
-                            alignSelf="flex-end"
-                            fontWeight="regular"
-                            _hover={{
-                              background: 'protBlue.veryLightHover',
-                            }}
                           >
-                            Download list
-                          </Button>
-                        </VStack>
-                      )}
-                    </VStack>
-                  ) : null
-                )}
+                            {taxon.orgTaxName}
+                          </Text>
+
+                          <Text color="protBlack.800">
+                            Taxon ID:{' '}
+                            <Link
+                              href={`https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=${taxon.taxID}`}
+                              color="protBlue.400"
+                              isExternal
+                              _hover={{
+                                textDecoration: 'none',
+                                color: 'protBlue.lightHover',
+                              }}
+                            >
+                              {taxon.taxID} <ExternalLinkIcon />
+                            </Link>
+                          </Text>
+                        </HStack>
+
+                        {taxon.taxPath && (
+                          <Text color="protBlack.800">
+                            <chakra.span fontWeight="semibold">
+                              Lineage:{' '}
+                            </chakra.span>
+                            {taxon.taxPath.orgLineage}
+                          </Text>
+                        )}
+
+                        {taxon.accNumb || taxon.geneIDs.length ? (
+                          <VStack
+                            width="100%"
+                            alignItems="flex-start"
+                            spacing="1.5rem"
+                          >
+                            <Text color="protBlack.800">
+                              <chakra.span fontWeight="semibold">
+                                Gene IDs:{' '}
+                              </chakra.span>
+                              {taxon.geneIDs.length
+                                ? taxon.geneIDs.map((geneID, index, allIDs) => (
+                                    <>
+                                      <Link
+                                        key={geneID}
+                                        href={`https://www.ncbi.nlm.nih.gov/gene/${geneID}`}
+                                        color="protBlue.400"
+                                        isExternal
+                                        _hover={{
+                                          textDecoration: 'none',
+                                          color: 'protBlue.lightHover',
+                                        }}
+                                      >
+                                        {geneID}
+                                        <ExternalLinkIcon />
+                                      </Link>
+                                      {index < allIDs.length - 1 && '; '}
+                                    </>
+                                  ))
+                                : null}
+                            </Text>
+
+                            <Text color="protBlack.800">
+                              <chakra.span fontWeight="semibold">
+                                Accession numbers:{' '}
+                              </chakra.span>
+                              {taxon.accNumb
+                                ? taxon.accNumb
+                                    .split(',')
+                                    .map((accession, index, allNumbs) => (
+                                      <>
+                                        <Link
+                                          key={accession}
+                                          href={`https://www.ncbi.nlm.nih.gov/protein/${accession}`}
+                                          color="protBlue.400"
+                                          isExternal
+                                          _hover={{
+                                            textDecoration: 'none',
+                                            color: 'protBlue.lightHover',
+                                          }}
+                                        >
+                                          {accession}
+                                          <ExternalLinkIcon />
+                                        </Link>
+                                        {index < allNumbs.length - 1 && '; '}
+                                      </>
+                                    ))
+                                : null}
+                            </Text>
+
+                            <Button
+                              color="protBlack.800"
+                              background="protBlue.300"
+                              borderRadius="8px"
+                              alignSelf="flex-end"
+                              fontWeight="regular"
+                              _hover={{
+                                background: 'protBlue.veryLightHover',
+                              }}
+                            >
+                              Download list
+                            </Button>
+                          </VStack>
+                        ) : null}
+                      </VStack>
+                    ) : null
+                  )
+                : null}
             </Flex>
           </>
-        )}
+        ) : null}
       </Flex>
     </Flex>
   );
