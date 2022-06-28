@@ -9,6 +9,7 @@ const theme = extendTheme({
   colors: {
     protBlue: {
       100: '#87b7fe',
+      200: '#bed4f4',
       300: '#a2c5fa',
       400: '#0b57ee',
       900: '#4a5568',

@@ -26,23 +26,29 @@ import {
   TriangleUpIcon,
   TriangleDownIcon,
   ArrowDownIcon,
+  ArrowUpIcon,
 } from '@chakra-ui/icons';
 import { convertToFloatOrDefault } from '../lib/helpers';
 import Head from 'next/head';
+import { useCollator } from 'react-aria';
 
 const OFFSET_VALUE: number = 20;
+const MAX_TAX_NAMES: number = 5;
 const COLUMNS: ColumnName[] = [
   { name: 'PMID', key: 'pmid' },
   { name: 'Title', key: 'title' },
-  { name: 'Year', key: 'year' },
+  { name: 'Year', key: 'yearPub' },
   { name: 'Last Author', key: 'lastAuthor' },
   { name: 'Citations', key: 'citations' },
   { name: '1st Layer', key: 'classification1stLay' },
   { name: '2nd Layer', key: 'classification2ndLay' },
-  { name: 'Taxon Name', key: 'taxIDs' },
+  { name: 'Taxon Name', key: 'taxNames' },
 ];
 
+type TablePaperInfoKey = keyof TablePaperInfo;
+
 function Papers() {
+  // Data and state
   const router = useRouter();
   const queryString = decodeURIComponent(
     router.asPath.replace(/^\/papers\?/, '')
@@ -51,6 +57,15 @@ function Papers() {
   const [beingSorted, setBeingSorted] = useState('classification2ndLay');
   const [sortDirection, setSortDirection] =
     useState<SortDirection>('descending');
+  const [showGoTop, setShowGoTop] = useState(false);
+  const collator = useCollator({ numeric: true });
+
+  // Async List
+
+  // Key validation for type sanity
+  function isValidColumn(value: React.Key): value is TablePaperInfoKey {
+    return COLUMNS.map((column) => column['key']).includes(value as string);
+  }
 
   async function getAsyncListDataDebounced<T>(
     queryUrl: string,
@@ -96,75 +111,104 @@ function Papers() {
     async sort({ items, sortDescriptor }) {
       return {
         items: items.sort((a, b) => {
-          if (!sortDescriptor.column) {
-            return 0;
-          } else {
+          if (sortDescriptor.column && isValidColumn(sortDescriptor.column)) {
             let first;
             let second;
 
-            const isTaxId = sortDescriptor.column === 'taxIDs';
-
-            if (isTaxId) {
-              first = Array.isArray(a[sortDescriptor.column])
-                ? a[sortDescriptor.column][0]
-                : -1;
-              second = Array.isArray(b[sortDescriptor.column])
-                ? b[sortDescriptor.column][0]
-                : -1;
-            }
-
-            const isProbability =
+            if (
               sortDescriptor.column === 'classification1stLay' ||
-              sortDescriptor.column === 'classification2ndLay';
-            first = isProbability
-              ? a[sortDescriptor.column]['probability']
-              : a[sortDescriptor.column];
-            second = isProbability
-              ? b[sortDescriptor.column]['probability']
-              : b[sortDescriptor.column];
-            let cmp =
-              (parseInt(first) || first) < (parseInt(second) || second)
-                ? -1
-                : 1;
+              sortDescriptor.column === 'classification2ndLay'
+            ) {
+              let layerA = a[sortDescriptor.column];
+              let layerB = b[sortDescriptor.column];
 
-            if (sortDescriptor.direction === 'descending') {
-              cmp *= -1;
+              if (layerA && layerB) {
+                first = layerA.probability;
+                second = layerB.probability;
+              }
+            } else if (sortDescriptor.column === 'taxNames') {
+              let taxA = a[sortDescriptor.column];
+              let taxB = b[sortDescriptor.column];
+
+              if (taxA) {
+                if (taxB) {
+                  first = taxA[0];
+                  second = taxB[0];
+                } else {
+                  return -1;
+                }
+              } else if (taxB) {
+                return 1;
+              } else {
+                return 0;
+              }
+            } else {
+              first = a[sortDescriptor.column];
+              second = b[sortDescriptor.column];
             }
 
-            return cmp;
+            if (first && second) {
+              let cmp = collator.compare(first.toString(), second.toString());
+
+              if (sortDescriptor.direction === 'descending') {
+                cmp *= -1;
+              }
+
+              return cmp;
+            }
           }
+          return 0;
         }),
       };
     },
   });
 
+  // Sort
   function handleSortChange(column: string) {
-    setBeingSorted(column);
-    setSortDirection(
-      sortDirection === 'descending' ? 'ascending' : 'descending'
-    );
-  }
-
-  // pagination
-  let ward = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    console.log(ward.current);
-
-    if (!ward.current) {
-      return;
+    if (beingSorted === column) {
+      setSortDirection(
+        sortDirection === 'descending' ? 'ascending' : 'descending'
+      );
+    } else {
+      if (sortDirection === 'ascending') {
+        setSortDirection('descending');
+      }
     }
 
-    const observer = new IntersectionObserver(() => {
-      setOffset((previousOffset) => previousOffset + OFFSET_VALUE);
+    setBeingSorted(column);
+  }
+
+  useEffect(() => {
+    if (!paperList.isLoading && paperList.items.length) {
+      paperList.sort({
+        column: beingSorted,
+        direction: sortDirection,
+      });
+    }
+  }, [beingSorted, sortDirection]);
+
+  // Scroll to top
+  useEffect(() => {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 400) {
+        setShowGoTop(true);
+      } else {
+        setShowGoTop(false);
+      }
     });
+  }, []);
 
-    observer.observe(ward.current);
+  function goToTop() {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }
 
-    return () => observer.disconnect();
-  }, [ward]);
-
-  useEffect(() => paperList.loadMore(), [offset]);
+  // Utils
+  function maxTaxaNames(list: Array<any>): number {
+    return list.length < MAX_TAX_NAMES ? list.length + 1 : MAX_TAX_NAMES + 1;
+  }
 
   return (
     <>
@@ -191,6 +235,7 @@ function Papers() {
         <Box
           width="100%"
           overflowX="auto"
+          marginBottom="1rem"
         >
           <Table variant="simple">
             <Thead>
@@ -200,10 +245,6 @@ function Papers() {
                     key={column.key}
                     onClick={() => {
                       handleSortChange(column.key);
-                      paperList.sort({
-                        column: beingSorted,
-                        direction: sortDirection,
-                      });
                     }}
                   >
                     {column.name}{' '}
@@ -225,12 +266,80 @@ function Papers() {
               </Tr>
             </Thead>
             <Tbody>
-              {paperList.isLoading ? (
+              {paperList.items.map((paper) => (
+                <Tr key={paper.pmid}>
+                  <Td>
+                    <Link
+                      href={`/paper/${paper.pmid}`}
+                      color="protBlue.400"
+                      isExternal
+                      _hover={{
+                        textDecoration: 'none',
+                        color: 'protBlue.lightHover',
+                      }}
+                    >
+                      {paper.pmid}
+                    </Link>
+                  </Td>
+                  <Td maxWidth="20vw">{paper.title}</Td>
+                  <Td>{paper.yearPub}</Td>
+                  <Td>{paper.lastAuthor}</Td>
+                  <Td>{paper.citations}</Td>
+                  <Td>
+                    {convertToFloatOrDefault(
+                      paper.classification1stLay?.probability,
+                      0,
+                      100,
+                      0
+                    )}
+                    %
+                  </Td>
+                  <Td>
+                    {convertToFloatOrDefault(
+                      paper.classification2ndLay?.probability,
+                      0,
+                      100,
+                      0
+                    )}
+                    %
+                  </Td>
+                  <Td maxWidth="15vw">
+                    {paper.taxNames
+                      ? paper.taxNames
+                          .slice(0, maxTaxaNames(paper.taxNames))
+                          .map((taxName, index, allNames) => (
+                            <>
+                              <Link
+                                key={taxName}
+                                href={`https://www.ncbi.nlm.nih.gov/taxonomy/?term=${encodeURIComponent(
+                                  taxName
+                                )}`}
+                                color="protBlue.400"
+                                fontStyle="italic"
+                                isExternal
+                                _hover={{
+                                  textDecoration: 'none',
+                                  color: 'protBlue.lightHover',
+                                }}
+                              >
+                                {taxName}
+                              </Link>
+                              {index < allNames.length - 1 && '; '}
+                            </>
+                          ))
+                      : 'N/A'}
+                    {paper.taxNames?.length > MAX_TAX_NAMES && '...'}
+                  </Td>
+                </Tr>
+              ))}
+              {paperList.isLoading && (
                 <Box
                   role="cell"
-                  pt="4"
+                  paddingTop="4"
+                  paddingBottom="2"
+                  marginTop="0.5rem"
+                  marginBottom="0.5rem"
                   display="flex"
-                  pb="2"
                   justifyContent="center"
                   position="absolute"
                   left="50%"
@@ -240,63 +349,42 @@ function Papers() {
                     size="md"
                   />
                 </Box>
-              ) : (
-                paperList.items.map((paper) => (
-                  <Tr key={paper.pmid}>
-                    <Td>
-                      <Link
-                        href={`/paper/${paper.pmid}`}
-                        color="protBlue.400"
-                        isExternal
-                        _hover={{
-                          textDecoration: 'none',
-                          color: 'protBlue.lightHover',
-                        }}
-                      >
-                        {paper.pmid}
-                      </Link>
-                    </Td>
-                    <Td maxWidth="20vw">{paper.title}</Td>
-                    <Td>{paper.yearPub}</Td>
-                    <Td>{paper.lastAuthor}</Td>
-                    <Td>{paper.citations}</Td>
-                    <Td>
-                      {convertToFloatOrDefault(
-                        paper.classification1stLay?.probability,
-                        0,
-                        100,
-                        0
-                      )}
-                      %
-                    </Td>
-                    <Td>
-                      {convertToFloatOrDefault(
-                        paper.classification2ndLay?.probability,
-                        0,
-                        100,
-                        0
-                      )}
-                      %
-                    </Td>
-                    <Td maxWidth="15vw">
-                      {paper.taxIDs ? paper.taxIDs.join(',') : 'N/A'}
-                    </Td>
-                  </Tr>
-                ))
               )}
             </Tbody>
           </Table>
         </Box>
-
         {!paperList.isLoading && paperList.items.length ? (
-          <Box
-            ref={ward}
-            background="red"
-            width="10px"
-            height="10px"
-          ></Box>
+          <Button
+            width="100%"
+            background="protBlue.300"
+            _hover={{
+              background: 'protBlue.veryLightHover',
+            }}
+            onClick={() => {
+              setOffset((old) => old + OFFSET_VALUE);
+              paperList.loadMore();
+            }}
+          >
+            <ArrowDownIcon />
+          </Button>
         ) : null}
       </Flex>
+
+      {showGoTop && (
+        <Button
+          position="fixed"
+          bottom="15px"
+          right="10px"
+          onClick={goToTop}
+          size="md"
+          background="protBlue.200"
+          _hover={{
+            background: 'protBlue.veryLightHover',
+          }}
+        >
+          <ArrowUpIcon />
+        </Button>
+      )}
     </>
   );
 }

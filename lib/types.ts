@@ -125,7 +125,7 @@ export interface TablePaperInfo {
   citations?: number|null;
   classification1stLay?: {probability: Prisma.Decimal}|null;
   classification2ndLay?: {probability: Prisma.Decimal}|null;
-  taxIDs?: number[];
+  taxNames?: string[];
 }
 
 export interface TableRowGroupProps {
