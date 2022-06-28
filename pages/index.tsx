@@ -348,7 +348,7 @@ function Home({
   return (
     <Flex justifyContent="center">
       <Head>
-        <title>Prot DB</title>
+        <title>PADA-One</title>
         <meta
           name="description"
           content="A database that hosts scientific papers predicted to describe protective antigens (PAgs) from a variety of organisms."
@@ -376,7 +376,7 @@ function Home({
             fontWeight="semibold"
             marginBottom="1rem"
           >
-            Prot-DB
+            PADA-One
           </Heading>
 
           <Text

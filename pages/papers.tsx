@@ -212,7 +212,7 @@ function Papers() {
   return (
     <>
       <Head>
-        <title>Prot DB | Search Results</title>
+        <title>PADA-One | Search Results</title>
         <meta
           name="description"
           content="A database that hosts scientific papers predicted to describe protective antigens (PAgs) from a variety of organisms."

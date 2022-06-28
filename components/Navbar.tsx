@@ -72,7 +72,7 @@ function WithSubnavigation() {
             href="/"
             _hover={{ textDecoration: 'none' }}
           >
-            Prot-DB
+            PADA-One
           </Link>
 
           <Flex

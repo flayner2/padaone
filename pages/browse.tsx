@@ -199,7 +199,7 @@ function Browse() {
   return (
     <>
       <Head>
-        <title>Padaone | Browse the Database</title>
+        <title>PADA-One | Browse the Database</title>
         <meta
           name="description"
           content="A database that hosts scientific papers predicted to describe protective antigens (PAgs) from a variety of organisms."
