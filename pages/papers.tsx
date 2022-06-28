@@ -1,36 +1,37 @@
-import axios from 'axios';
-import { useRouter } from 'next/router';
-import { useState, useRef, useEffect, useCallback } from 'react';
-import type {
-  AsyncListDataDebouncedReturn,
-  TablePaperInfo,
-  ColumnName,
-} from '../lib/types';
-import type { SortDirection } from '@react-types/shared';
-import { debounce } from '../lib/debounce';
-import { useAsyncList } from 'react-stately';
 import {
-  Flex,
+  ArrowDownIcon,
+  ArrowUpIcon,
+  TriangleDownIcon,
+  TriangleUpIcon,
+} from '@chakra-ui/icons';
+import {
   Box,
+  Button,
+  Flex,
   Link,
+  Spinner,
+  Table,
+  Tbody,
   Td,
   Th,
   Thead,
-  Tbody,
   Tr,
-  Table,
-  Spinner,
-  Button,
 } from '@chakra-ui/react';
-import {
-  TriangleUpIcon,
-  TriangleDownIcon,
-  ArrowDownIcon,
-  ArrowUpIcon,
-} from '@chakra-ui/icons';
-import { convertToFloatOrDefault } from '../lib/helpers';
+import type { SortDirection } from '@react-types/shared';
+import axios from 'axios';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
 import { useCollator } from 'react-aria';
+import { useAsyncList } from 'react-stately';
+import { debounce } from '../lib/debounce';
+import { convertToFloatOrDefault } from '../lib/helpers';
+import type {
+  AsyncListDataDebouncedReturn,
+  ColumnName,
+  TablePaperInfo,
+  TablePaperInfoKey,
+} from '../lib/types';
 
 const OFFSET_VALUE: number = 20;
 const MAX_TAX_NAMES: number = 5;
@@ -44,8 +45,6 @@ const COLUMNS: ColumnName[] = [
   { name: '2nd Layer', key: 'classification2ndLay' },
   { name: 'Taxon Name', key: 'taxNames' },
 ];
-
-type TablePaperInfoKey = keyof TablePaperInfo;
 
 function Papers() {
   // Data and state
@@ -85,10 +84,10 @@ function Papers() {
     }, 0);
 
     let data = await debouncedRequest(signal, cursor, filterText);
-    console.log(`${queryUrl}?${filterText}&offset=${offset}`);
+
     return {
       items: data,
-      cursor: `${queryUrl}?${filterText}&offset=${offset}`,
+      cursor: `${queryUrl}?${filterText}&offset=${offset + OFFSET_VALUE}`,
     };
   }
 
@@ -328,7 +327,9 @@ function Papers() {
                             </>
                           ))
                       : 'N/A'}
-                    {paper.taxNames?.length > MAX_TAX_NAMES && '...'}
+                    {paper.taxNames && paper.taxNames?.length > MAX_TAX_NAMES
+                      ? '...'
+                      : null}
                   </Td>
                 </Tr>
               ))}
@@ -377,9 +378,9 @@ function Papers() {
           right="10px"
           onClick={goToTop}
           size="md"
-          background="protBlue.200"
+          background="protGray.100"
           _hover={{
-            background: 'protBlue.veryLightHover',
+            background: 'protGray.300',
           }}
         >
           <ArrowUpIcon />

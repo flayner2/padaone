@@ -172,7 +172,7 @@ function Papers({
                       0
                     )}
                   </Td>
-                  <Td>{paper.taxIDs ? 'Yes' : 'No'}</Td>
+                  <Td>{paper.taxNames ? 'Yes' : 'No'}</Td>
                   <Td>
                     <FormControl
                       isInvalid={errorState[paper.pmid] ? true : false}

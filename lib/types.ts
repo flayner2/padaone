@@ -154,3 +154,5 @@ export interface ColumnName {
   name: string;
   key: string;
 }
+
+export type TablePaperInfoKey = keyof TablePaperInfo;
