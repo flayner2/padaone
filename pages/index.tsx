@@ -1,18 +1,20 @@
 import {
   Search2Icon,
-  TriangleDownIcon,
   SmallAddIcon,
   SmallCloseIcon,
+  TriangleDownIcon,
+  QuestionIcon,
 } from '@chakra-ui/icons';
 import {
   Box,
   Button,
   Checkbox,
   CheckboxGroup,
+  Collapse,
   Flex,
   FormControl,
-  FormLabel,
   FormErrorMessage,
+  FormLabel,
   GridItem,
   Heading,
   HStack,
@@ -28,17 +30,20 @@ import {
   SimpleGrid,
   Text,
   Tooltip,
-  VStack,
-  Collapse,
   useDisclosure,
+  VStack,
 } from '@chakra-ui/react';
+import { yupResolver } from '@hookform/resolvers/yup';
+import type { TaxIDToTaxName } from '@prisma/client';
 import axios from 'axios';
 import type { InferGetStaticPropsType } from 'next';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import { useState } from 'react';
-import { useAsyncList } from 'react-stately';
-import { useForm, Controller } from 'react-hook-form';
 import type { SubmitHandler } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
+import { useAsyncList } from 'react-stately';
+import * as yup from 'yup';
 import { Autocomplete, Item } from '../components/Autocomplete';
 import DatePicker from '../components/DatePicker';
 import { debounce } from '../lib/debounce';
@@ -50,15 +55,11 @@ import {
 import type {
   AsyncListDataDebouncedReturn,
   Journal,
-  PaperTitlePMID,
-  PaperTitleFormValue,
-  PaperPMIDFormValue,
   PaperFiltersFormValues,
+  PaperPMIDFormValue,
+  PaperTitleFormValue,
+  PaperTitlePMID,
 } from '../lib/types';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
-import { useRouter } from 'next/router';
-import type { TaxIDToTaxName } from '@prisma/client';
 
 const OFFSET_VALUE: number = 20;
 
@@ -384,13 +385,14 @@ function Home({
             textAlign="justify"
             color="protBlack.800"
           >
-            XXX (database’s name) is a database that hosts scientific papers
-            predicted to describe protective antigens (PAgs) from a variety of
-            organisms. This web tool enables the user to mine PAgs in the
-            biomedical literature based on some pieces of information associated
-            to every article, such as probabilities of describing PAgs, number
-            of citations, year of publication, as well as taxa and genes
-            involved in the study. Also, the user can find links to official{' '}
+            PADA-One (Protective Antigen DAtabase - OnliNe Explorer) is a
+            database that hosts scientific papers predicted to describe
+            protective antigens (PAgs) from a variety of organisms. This web
+            tool enables the user to mine PAgs in the biomedical literature
+            based on some pieces of information associated to every article,
+            such as probabilities of describing PAgs, number of citations, year
+            of publication, as well as taxa and genes involved in the study.
+            Also, the user can find links to official{' '}
             <Link
               href="https://www.ncbi.nlm.nih.gov/"
               color="protBlue.400"
@@ -490,7 +492,13 @@ function Home({
                           color="protBlack.800"
                           htmlFor="firstLayer"
                         >
-                          1st Layer Probability
+                          1st Layer Probability{' '}
+                          <Tooltip
+                            label="Placeholder"
+                            aria-label="Placeholder"
+                          >
+                            <QuestionIcon color="gray.500" />
+                          </Tooltip>
                         </FormLabel>
                         <Controller
                           control={control}
@@ -573,7 +581,13 @@ function Home({
                           color="protBlack.800"
                           htmlFor="secondLayer"
                         >
-                          2nd Layer Probability
+                          2nd Layer Probability{' '}
+                          <Tooltip
+                            label="Placeholder"
+                            aria-label="Placeholder"
+                          >
+                            <QuestionIcon color="gray.500" />
+                          </Tooltip>
                         </FormLabel>
                         <Controller
                           control={control}
@@ -670,8 +684,15 @@ function Home({
                         color="protBlack.800"
                         fontSize="md"
                         htmlFor="taxonName"
+                        marginBottom="1rem"
                       >
-                        Taxon Name
+                        Taxon Name{' '}
+                        <Tooltip
+                          label="Placeholder"
+                          aria-label="Placeholder"
+                        >
+                          <QuestionIcon color="gray.500" />
+                        </Tooltip>
                       </FormLabel>
 
                       <Controller
@@ -759,7 +780,13 @@ function Home({
                                 onBlur={onBlur}
                                 onChange={() => onChange(!value)}
                               >
-                                Exclude hosts
+                                Exclude hosts{' '}
+                                <Tooltip
+                                  label="Placeholder"
+                                  aria-label="Placeholder"
+                                >
+                                  <QuestionIcon color="gray.500" />
+                                </Tooltip>
                               </Checkbox>
                             )}
                           />
@@ -779,7 +806,13 @@ function Home({
                                 onBlur={onBlur}
                                 onChange={() => onChange(!value)}
                               >
-                                Only papers with associated gene IDs
+                                Only papers with associated gene IDs{' '}
+                                <Tooltip
+                                  label="Placeholder"
+                                  aria-label="Placeholder"
+                                >
+                                  <QuestionIcon color="gray.500" />
+                                </Tooltip>
                               </Checkbox>
                             )}
                           />
@@ -821,7 +854,13 @@ function Home({
                         color="protBlack.800"
                         htmlFor="paperTerms"
                       >
-                        Terms
+                        Terms{' '}
+                        <Tooltip
+                          label="Placeholder"
+                          aria-label="Placeholder"
+                        >
+                          <QuestionIcon color="gray.500" />
+                        </Tooltip>
                       </FormLabel>
                       <Input
                         placeholder="E.g.: gene, insulin"
@@ -853,7 +892,13 @@ function Home({
                           color="protBlack.800"
                           htmlFor="lastAuthor"
                         >
-                          Last author
+                          Last author{' '}
+                          <Tooltip
+                            label="Placeholder"
+                            aria-label="Placeholder"
+                          >
+                            <QuestionIcon color="gray.500" />
+                          </Tooltip>
                         </FormLabel>
                         <Input
                           placeholder="E.g.: Doe, J."
@@ -880,7 +925,13 @@ function Home({
                           htmlFor="language"
                           color="protBlack.800"
                         >
-                          Language
+                          Language{' '}
+                          <Tooltip
+                            label="Placeholder"
+                            aria-label="Placeholder"
+                          >
+                            <QuestionIcon color="gray.500" />
+                          </Tooltip>
                         </FormLabel>
                         <Select
                           id="language"
@@ -918,7 +969,13 @@ function Home({
                         fontSize="md"
                         htmlFor="journalName"
                       >
-                        Journal
+                        Journal{' '}
+                        <Tooltip
+                          label="Placeholder"
+                          aria-label="Placeholder"
+                        >
+                          <QuestionIcon color="gray.500" />
+                        </Tooltip>
                       </FormLabel>
                       <Controller
                         control={control}
@@ -975,7 +1032,13 @@ function Home({
                         color="protBlack.800"
                         htmlFor="geneID"
                       >
-                        Gene IDs
+                        Gene IDs{' '}
+                        <Tooltip
+                          label="Placeholder"
+                          aria-label="Placeholder"
+                        >
+                          <QuestionIcon color="gray.500" />
+                        </Tooltip>
                       </FormLabel>
                       <Input
                         placeholder="E.g.: NP_001191615"
@@ -1003,7 +1066,13 @@ function Home({
                           marginBottom="1rem"
                           htmlFor="startDate"
                         >
-                          Publication date
+                          Publication date{' '}
+                          <Tooltip
+                            label="Placeholder"
+                            aria-label="Placeholder"
+                          >
+                            <QuestionIcon color="gray.500" />
+                          </Tooltip>
                         </FormLabel>
 
                         <VStack alignItems="flex-start">
@@ -1100,7 +1169,13 @@ function Home({
 
                       <FormControl alignSelf="center">
                         <FormLabel htmlFor="citations-1">
-                          Number of citations
+                          Number of citations{' '}
+                          <Tooltip
+                            label="Placeholder"
+                            aria-label="Placeholder"
+                          >
+                            <QuestionIcon color="gray.500" />
+                          </Tooltip>
                         </FormLabel>
                         <CheckboxGroup
                           colorScheme="blue"
@@ -1283,7 +1358,13 @@ function Home({
                           fontSize="md"
                           htmlFor="paperTitle"
                         >
-                          Title
+                          Title{' '}
+                          <Tooltip
+                            label="Placeholder"
+                            aria-label="Placeholder"
+                          >
+                            <QuestionIcon color="gray.500" />
+                          </Tooltip>
                         </FormLabel>
                         <Controller
                           control={paperTitleControl}
@@ -1350,7 +1431,13 @@ function Home({
                           fontSize="md"
                           color="protBlack.800"
                         >
-                          PMID
+                          PMID{' '}
+                          <Tooltip
+                            label="Placeholder"
+                            aria-label="Placeholder"
+                          >
+                            <QuestionIcon color="gray.500" />
+                          </Tooltip>
                         </FormLabel>
                         <InputGroup>
                           <InputRightElement>
