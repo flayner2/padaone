@@ -1,12 +1,12 @@
+import type {TaxIDToTaxName} from '@prisma/client';
 import type {NextApiRequest, NextApiResponse} from 'next';
 import {prisma} from '../../lib/prisma';
-import type {TaxonNameAndID} from '../../lib/types';
 
-export async function getTaxon(query: number): Promise<TaxonNameAndID> {
-  const taxon = await prisma.geneIDToTaxInfoAccNumb.findFirst({
+export async function getTaxon(query: number): Promise<TaxIDToTaxName> {
+  const taxon = await prisma.taxIDToTaxName.findFirst({
     where: {taxID: query},
     select: {
-      orgTaxName: true,
+      taxName: true,
       taxID: true,
     },
   });
@@ -20,7 +20,7 @@ export async function getTaxon(query: number): Promise<TaxonNameAndID> {
 }
 
 async function handler(
-    req: NextApiRequest, res: NextApiResponse<TaxonNameAndID|Error>) {
+    req: NextApiRequest, res: NextApiResponse<TaxIDToTaxName|Error>) {
   if (req.method !== 'GET') {
     res.status(405).send(new Error(`Method ${req.method} is not allowed.`));
   } else if (Array.isArray(req.query.taxonID)) {

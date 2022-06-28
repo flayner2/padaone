@@ -329,7 +329,6 @@ async function handler(
         res.status(404).send(
             new Error(`No papers were found with the selected filters.`));
       } else {
-        // res.status(200).send(papers);
         try {
           const papersWithIDs = await includeTaxonNames(papers);
           res.status(200).send(papersWithIDs);

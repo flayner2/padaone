@@ -1,6 +1,6 @@
+import type {NextApiRequest, NextApiResponse} from 'next';
 import * as Fs from 'node:fs/promises';
 import path from 'path';
-import type {NextApiRequest, NextApiResponse} from 'next';
 
 const ROOT_PATH: string = '../curation';
 

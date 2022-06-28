@@ -20,7 +20,6 @@ import {
 import type { SortDirection } from '@react-types/shared';
 import axios from 'axios';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useCollator } from 'react-aria';
 import { useAsyncList } from 'react-stately';

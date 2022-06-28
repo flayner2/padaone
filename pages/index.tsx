@@ -1,9 +1,9 @@
 import {
+  QuestionIcon,
   Search2Icon,
   SmallAddIcon,
   SmallCloseIcon,
   TriangleDownIcon,
-  QuestionIcon,
 } from '@chakra-ui/icons';
 import {
   Box,

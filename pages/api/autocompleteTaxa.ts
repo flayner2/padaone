@@ -1,6 +1,6 @@
+import type {TaxIDToTaxName} from '@prisma/client';
 import type {NextApiRequest, NextApiResponse} from 'next';
 import {prisma} from '../../lib/prisma';
-import type {TaxIDToTaxName} from '@prisma/client';
 
 export async function getTaxa(
     query: string, offset: number = 0): Promise<TaxIDToTaxName[]> {
