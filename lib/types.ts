@@ -1,7 +1,11 @@
-import type {InputProps} from '@chakra-ui/react';
+import type {BoxProps, CSSObject, InputProps} from '@chakra-ui/react';
 import type {MetadataPub} from '@prisma/client';
 import {Prisma} from '@prisma/client';
+import type {AriaListBoxOptions} from '@react-aria/listbox';
+import type {ComboBoxProps} from '@react-types/combobox';
+import type {LoadingState, Node, SelectionMode} from '@react-types/shared';
 import type {ReactDatePickerProps} from 'react-datepicker';
+import type {ListState} from 'react-stately';
 
 export interface FunctionWithArguments {
   (...args: any): any;
@@ -15,6 +19,43 @@ export interface DebounceReturn<F extends FunctionWithArguments> extends
     Array<DebouncedFunction<F>|(() => void)> {
   0: (...args: Parameters<F>) => Promise<ReturnType<F>>;
   1: () => void;
+}
+
+export interface AutocompleteProps<T> extends ComboBoxProps<T> {
+  loadingState?: LoadingState;
+  onLoadMore?: () => void;
+  button?: React.ReactNode;
+  placeholderProps?: CSSObject;
+  boxProps?: BoxProps;
+  inputProps?: InputProps;
+  selectedKeys?: Iterable<React.Key>|'all'|undefined;
+  selectionMode?: SelectionMode;
+}
+
+export interface ListBoxProps extends AriaListBoxOptions<unknown> {
+  listBoxRef?: React.RefObject<HTMLUListElement>;
+  state: ListState<unknown>;
+  loadingState?: LoadingState;
+  onLoadMore?: () => void;
+}
+
+export interface OptionProps {
+  item: Node<unknown>;
+  state: ListState<unknown>;
+}
+
+export interface PopoverProps {
+  popoverRef?: React.RefObject<HTMLDivElement>;
+  children: React.ReactNode;
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export interface NavItem {
+  label: string;
+  subLabel?: string;
+  children?: Array<NavItem>;
+  href?: string;
 }
 
 export type LanguagePub = string|null;

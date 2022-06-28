@@ -1,24 +1,25 @@
 import {
+  ChevronDownIcon,
+  ChevronRightIcon,
+  CloseIcon,
+  HamburgerIcon,
+} from '@chakra-ui/icons';
+import {
   Box,
-  Flex,
-  Text,
-  IconButton,
-  Stack,
   Collapse,
+  Flex,
   Icon,
+  IconButton,
   Link,
   Popover,
   PopoverContent,
-  useColorModeValue,
+  Stack,
+  Text,
   useBreakpointValue,
+  useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react';
-import {
-  HamburgerIcon,
-  CloseIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
-} from '@chakra-ui/icons';
+import type { NavItem } from '../lib/types';
 import { PopoverTrigger } from './PopoverTrigger';
 
 function WithSubnavigation() {
@@ -302,13 +303,6 @@ const MobileNavItem = ({ label, children, href }: NavItem) => {
     </Stack>
   );
 };
-
-interface NavItem {
-  label: string;
-  subLabel?: string;
-  children?: Array<NavItem>;
-  href?: string;
-}
 
 const NAV_ITEMS: Array<NavItem> = [
   {

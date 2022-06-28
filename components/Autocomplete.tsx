@@ -6,27 +6,14 @@ import {
   List,
   Spinner,
 } from '@chakra-ui/react';
-import type { CSSObject, BoxProps, InputProps } from '@chakra-ui/react';
-import type { ComboBoxProps } from '@react-types/combobox';
-import type { LoadingState, SelectionMode } from '@react-types/shared';
 import * as React from 'react';
 import { useComboBox, useFilter } from 'react-aria';
 import { useComboBoxState } from 'react-stately';
+import type { AutocompleteProps } from '../lib/types';
 import { ListBox } from './ListBox';
 import { Popover } from './Popover';
 
 export { Item, Section } from 'react-stately';
-
-interface AutocompleteProps<T> extends ComboBoxProps<T> {
-  loadingState?: LoadingState;
-  onLoadMore?: () => void;
-  button?: React.ReactNode;
-  placeholderProps?: CSSObject;
-  boxProps?: BoxProps;
-  inputProps?: InputProps;
-  selectedKeys?: Iterable<React.Key> | 'all' | undefined;
-  selectionMode?: SelectionMode;
-}
 
 export function Autocomplete(props: AutocompleteProps<any>) {
   let { contains } = useFilter({ sensitivity: 'base' });

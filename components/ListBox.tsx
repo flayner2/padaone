@@ -1,22 +1,8 @@
-import * as React from 'react';
-import type { AriaListBoxOptions } from '@react-aria/listbox';
-import type { Node, LoadingState } from '@react-types/shared';
-import type { ListState } from 'react-stately';
-import { useListBox, useOption } from 'react-aria';
 import { CheckIcon } from '@chakra-ui/icons';
 import { Box, List, ListItem, Spinner } from '@chakra-ui/react';
-
-interface ListBoxProps extends AriaListBoxOptions<unknown> {
-  listBoxRef?: React.RefObject<HTMLUListElement>;
-  state: ListState<unknown>;
-  loadingState?: LoadingState;
-  onLoadMore?: () => void;
-}
-
-interface OptionProps {
-  item: Node<unknown>;
-  state: ListState<unknown>;
-}
+import * as React from 'react';
+import { useListBox, useOption } from 'react-aria';
+import type { ListBoxProps, OptionProps } from '../lib/types';
 
 export function ListBox(props: ListBoxProps) {
   let ref = React.useRef<HTMLUListElement>(null);

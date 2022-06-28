@@ -1,13 +1,7 @@
 import * as React from 'react';
 import { useOverlay, DismissButton, FocusScope } from 'react-aria';
 import { Box } from '@chakra-ui/react';
-
-interface PopoverProps {
-  popoverRef?: React.RefObject<HTMLDivElement>;
-  children: React.ReactNode;
-  isOpen?: boolean;
-  onClose?: () => void;
-}
+import type { PopoverProps } from '../lib/types';
 
 export function Popover(props: PopoverProps) {
   let ref = React.useRef<HTMLDivElement>(null);
