@@ -1,5 +1,5 @@
+import { Flex, Heading, Text } from '@chakra-ui/react';
 import Head from 'next/head';
-import { Flex, Box, Text, Heading } from '@chakra-ui/react';
 
 function Help() {
   return (
