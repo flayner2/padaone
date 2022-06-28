@@ -320,8 +320,8 @@ const NAV_ITEMS: Array<NavItem> = [
     href: '/browse',
   },
   {
-    label: 'API',
-    href: '/api-info',
+    label: 'Help',
+    href: '/help',
   },
 ];
 
