@@ -460,6 +460,7 @@ function Home({
                   width="100%"
                   height="90%"
                   marginBottom={advancedIsOpen ? '0.5rem' : '1.5rem'}
+                  columns={2}
                 >
                   <GridItem
                     background="protGray.100"
@@ -467,7 +468,7 @@ function Home({
                     display="flex"
                     flexDirection="column"
                     padding="1rem 0.5rem 1.5rem"
-                    gridColumn="1 / 3"
+                    rowSpan={2}
                   >
                     <Text
                       fontSize="lg"
@@ -651,7 +652,6 @@ function Home({
                     display="flex"
                     flexDirection="column"
                     padding="1rem 0.5rem 1.5rem"
-                    gridColumn="3 / 5"
                   >
                     <Text
                       fontSize="lg"
@@ -663,7 +663,7 @@ function Home({
                     </Text>
 
                     <FormControl
-                      marginBottom="3rem"
+                      marginBottom="1rem"
                       isInvalid={errors.taxon ? true : false}
                     >
                       <FormLabel
@@ -712,31 +712,6 @@ function Home({
                       />
                       <FormErrorMessage>
                         {errors.taxon?.message}
-                      </FormErrorMessage>
-                    </FormControl>
-
-                    <FormControl isInvalid={errors.geneIDs ? true : false}>
-                      <FormLabel
-                        fontSize="md"
-                        color="protBlack.800"
-                        htmlFor="geneID"
-                      >
-                        Gene IDs
-                      </FormLabel>
-                      <Input
-                        placeholder="E.g.: NP_001191615"
-                        _placeholder={{
-                          color: 'protBlue.900',
-                          fontSize: 'sm',
-                        }}
-                        background="protGray.500"
-                        color="protBlack.800"
-                        borderRadius="8px"
-                        id="geneIDs"
-                        {...register('geneIDs')}
-                      />
-                      <FormErrorMessage>
-                        {errors.geneIDs?.message}
                       </FormErrorMessage>
                     </FormControl>
                   </GridItem>
@@ -988,6 +963,34 @@ function Home({
                       />
                       <FormErrorMessage>
                         {errors.journal?.message}
+                      </FormErrorMessage>
+                    </FormControl>
+
+                    <FormControl
+                      isInvalid={errors.geneIDs ? true : false}
+                      marginBottom="1.5rem"
+                    >
+                      <FormLabel
+                        fontSize="md"
+                        color="protBlack.800"
+                        htmlFor="geneID"
+                      >
+                        Gene IDs
+                      </FormLabel>
+                      <Input
+                        placeholder="E.g.: NP_001191615"
+                        _placeholder={{
+                          color: 'protBlue.900',
+                          fontSize: 'sm',
+                        }}
+                        background="protGray.500"
+                        color="protBlack.800"
+                        borderRadius="8px"
+                        id="geneIDs"
+                        {...register('geneIDs')}
+                      />
+                      <FormErrorMessage>
+                        {errors.geneIDs?.message}
                       </FormErrorMessage>
                     </FormControl>
 
