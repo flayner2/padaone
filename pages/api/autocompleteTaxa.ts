@@ -6,7 +6,7 @@ export async function getTaxa(
     query: string, offset: number = 0): Promise<TaxIDToTaxName[]> {
   const data = await prisma.taxIDToTaxName.findMany({
     where: {
-      taxName: {contains: query},
+      AND: [{taxName: {contains: query}}, {NOT: {taxName: 'Nan'}}],
     },
     take: 20,
     skip: offset,
