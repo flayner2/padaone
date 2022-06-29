@@ -166,6 +166,17 @@ export interface TablePaperInfo {
   taxNames?: string[];
 }
 
+export interface TablePaperInfoRawQuery {
+  pmid: number;
+  title: string;
+  yearPub?: number|null;
+  lastAuthor?: string|null;
+  citations?: number|null;
+  probability1stLay?: Prisma.Decimal|null;
+  probability2ndLay?: Prisma.Decimal|null;
+  taxNames?: string[];
+}
+
 export interface ColumnName {
   name: string;
   key: string;

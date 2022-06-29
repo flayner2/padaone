@@ -1,7 +1,8 @@
+import {Prisma} from '@prisma/client';
 import type {NextApiRequest, NextApiResponse} from 'next';
 import {parseCitations} from '../../lib/helpers';
 import {prisma} from '../../lib/prisma';
-import type {PapersFiltersOptions, TablePaperInfo} from '../../lib/types';
+import type {PapersFiltersOptions, TablePaperInfoRawQuery,} from '../../lib/types';
 
 export async function getAssociatedTaxNames(pmid: number):
     Promise<string[]|undefined> {
@@ -11,15 +12,18 @@ export async function getAssociatedTaxNames(pmid: number):
     distinct: ['taxID'],
   });
 
-  const taxNames = queryResult.flatMap(
-      ({orgTaxName}) => orgTaxName && orgTaxName !== 'Nan' ? [orgTaxName] : []);
+  if (queryResult.length) {
+    const taxNames = queryResult.flatMap(
+        ({orgTaxName}) =>
+            orgTaxName && orgTaxName !== 'Nan' ? [orgTaxName] : []);
 
-  return taxNames.length ? taxNames.sort((a, b) => (a < b ? -1 : 1)) :
-                           undefined;
+    return taxNames.length ? taxNames.sort((a, b) => (a < b ? -1 : 1)) :
+                             undefined;
+  }
 }
 
-export async function includeTaxonNames(papers: TablePaperInfo[]):
-    Promise<TablePaperInfo[]> {
+export async function includeTaxonNames(papers: TablePaperInfoRawQuery[]):
+    Promise<TablePaperInfoRawQuery[]> {
   const papersWithNames = Promise.all(papers.map(async (paper) => {
     const associatedTaxNames = await getAssociatedTaxNames(paper.pmid);
     return {...paper, taxNames: associatedTaxNames};
@@ -28,232 +32,165 @@ export async function includeTaxonNames(papers: TablePaperInfo[]):
   return papersWithNames;
 }
 
-export async function getPapers(
-    options: PapersFiltersOptions, offset: number): Promise<TablePaperInfo[]> {
-  const papers =
-      await prisma.metadataPub.findMany({
-        where: {
-          AND: [
-            {
-              classification1stLay: {
-                probability: {
-                  gte: options.firstLayerRange.min / 100,
-                  lte: options.firstLayerRange.max / 100,
-                },
-              },
-            },
-            {
-              classification2ndLay: {
-                probability: {
-                  gte: options.secondLayerRange.min / 100,
-                  lte: options.secondLayerRange.max / 100,
-                },
-              },
-            },
-            {
-              ...(options.taxonID && {
-                geneIDToPMID: {
-                  every: {geneIDToTaxInfoAccNumb: {taxID: options.taxonID}},
-                },
-              }),
-            },
-            {
-              ...(options.geneIDs &&
-                  (Array.isArray(options.geneIDs) ?
-                       {
-                         OR: options.geneIDs
-                                 .map(
-                                     (geneID) => typeof geneID === 'string' ?
-                                         {
-                                           geneIDToPMID:
-                                               {
-                                                 some:
-                                                     {
-                                                       geneIDToTaxInfoAccNumb: {
-                                                         accNumb: {
-                                                           contains: geneID,
-                                                         },
-                                                       },
-                                                     },
-                                               },
-                                         } :
-                                         {
-                                           geneIDToPMID:
-                                               {
-                                                 some:
-                                                     {
-                                                       geneID,
-                                                     },
-                                               },
-                                         }),
-                       } :
-                       typeof options.geneIDs === 'string' ? {
-                         geneIDToPMID: {
-                           some: {
-                             geneIDToTaxInfoAccNumb: {
-                               accNumb: {contains: options.geneIDs},
-                             },
-                           },
-                         },
-                       } :
-                                                             {
-                                                               geneIDToPMID: {
-                                                                 some: {
-                                                                   geneID:
-                                                                       options
-                                                                           .geneIDs,
-                                                                 },
-                                                               },
-                                                             })),
-            },
-            {
-              ...(options.filters?.forceGeneIDs ?
-                      options.filters?.excludeHosts ? {
-                        geneIDToPMID: {
-                          some: {},
-                          none: {
-                            geneIDToTaxInfoAccNumb: {
-                              OR: [
-                                {taxPath: {lineagePath: {contains: '7742'}}},
-                                {
-                                  taxPath:
-                                      {orgLineage: {contains: 'Vertebrata'}},
-                                },
-                              ],
-                            },
-                          },
-                        },
-                      } :
-                                                      {
-                                                        geneIDToPMID:
-                                                            {some: {}},
-                                                      } :
-                      options.filters?.excludeHosts && {
-                        geneIDToPMID: {
-                          none: {
-                            geneIDToTaxInfoAccNumb: {
-                              OR: [
-                                {taxPath: {lineagePath: {contains: '7742'}}},
-                                {
-                                  taxPath:
-                                      {orgLineage: {contains: 'Vertebrata'}},
-                                },
-                              ],
-                            },
-                          },
-                        },
-                      }),
-            },
-            {
-              ...(options.terms &&
-                  (Array.isArray(options.terms) ?
-                       {
-                         OR: options.terms.map((term) => ({
-                                                 OR: [
-                                                   {title: {contains: term}},
-                                                   {abstract: {contains: term}},
-                                                 ],
-                                               })),
-                       } :
-                       {
-                         OR: [
-                           {title: {contains: options.terms}},
-                           {abstract: {contains: options.terms}},
-                         ],
-                       })),
-            },
-            {
-              ...(options.lastAuthor &&
-                  (Array.isArray(options.lastAuthor) ?
-                       {
-                         OR: options.lastAuthor.map(
-                             (author) => ({
-                               lastAuthor: {contains: author},
-                             })),
-                       } :
-                       {lastAuthor: {contains: options.lastAuthor}})),
-            },
-            {
-              ...(options.language && {
-                languagePub: {contains: options.language},
-              }),
-            },
-            {
-              ...(options.journal && {
-                journal: options.journal,
-              }),
-            },
-            {
-              ...(!options.allDates && options.dateRange &&
-                  options.dateRange.min && options.dateRange.max && {
-                    AND: [
-                      {yearPub: {gte: options.dateRange.min}},
-                      {yearPub: {lte: options.dateRange.max}},
-                    ],
-                  }),
-            },
-            {
-              ...(options.citations && {
-                OR: options.citations.map(
-                    (citationRange) => ({
-                      AND: [
-                        {citations: {gte: citationRange[0]}},
-                        {citations: {lte: citationRange[1]}},
-                      ],
-                    })),
-              }),
-            },
-          ],
-        },
-        select: {
-          pmid: true,
-          title: true,
-          yearPub: true,
-          lastAuthor: true,
-          citations: true,
-          classification1stLay: {
-            select: {
-              probability: true,
-            },
-          },
-          classification2ndLay: {
-            select: {
-              probability: true,
-            },
-          },
-        },
-        orderBy: [
-          {classification2ndLay: {probability: 'desc'}},
-          {classification1stLay: {probability: 'desc'}},
-        ],
-        take: 20,
-        skip: offset,
-      });
+function generateQueryString(
+    options: PapersFiltersOptions, offset: number): Prisma.Sql {
+  const dbName = Prisma.raw(`\`${process.env.DB_NAME}\``);
+  const terms = Array.isArray(options.terms) ?
+      options.terms
+          .flatMap(
+              (term) => term ?
+                  [
+                    `(\`i0\`.\`Titles\` LIKE ('%${
+                        term}%') OR \`i0\`.\`Abstract\` LIKE ('%${term}%'))`,
+                  ] :
+                  [])
+          .join(' OR ') :
+      options.terms != null ?
+      `\`i0\`.\`Titles\` LIKE ('%${
+          options.terms}%') OR \`i0\`.\`Abstract\` LIKE ('%${
+          options.terms}%')` :
+      null;
 
-  // const test: TablePaperInfo[] = await prisma.$queryRaw`SELECT i0. PMID,
-  // i0.Titles,
-  // i0.YearPub,
-  // i0.LastAuthor,
-  // i0.Citations ,
-  // j0.probability,
-  // k0.probability
-  // FROM igor2.metadataPub as i0
-  // INNER JOIN igor2.classifications_1stLay AS j0
-  // ON (j0.PMID) = (i0.PMID)
-  // INNER JOIN igor2.classification_2ndLay AS k0
-  // ON (k0.PMID) = (j0.PMID)
-  // WHERE (j0.probability >= ${
-  // options.firstLayerRange.min} AND j0.probability <= 1 AND k0.probability >=
-  // 0 AND k0.probability <= 1) ORDER BY k0.probability DESC LIMIT 20 OFFSET
-  // 0;`;
+  const authors = Array.isArray(options.lastAuthor) ?
+      options.lastAuthor
+          .flatMap(
+              (author) =>
+                  author ? [`\`i0\`.\`LastAuthor\` LIKE ('%${author}%')`] : [])
+          .join(' OR ') :
+      options.lastAuthor != null ?
+      `\`i0\`.\`LastAuthor\` LIKE ('%${options.lastAuthor}%')` :
+      null;
 
-  // return test;
+  const geneIDs = Array.isArray(options.geneIDs) ?
+      options.geneIDs
+          .flatMap(
+              (geneID) => !isNaN(parseInt(geneID.toString())) ?
+                  [`\`m0\`.\`geneIDs\` = ${geneID}`] :
+                  [
+                    `(\`m0\`.\`AccNumb\` LIKE ('${
+                        geneID},%') OR \`m0\`.\`AccNumb\` LIKE ('%,${
+                        geneID},%') OR \`m0\`.\`AccNumb\` LIKE ('%,${
+                        geneID}'))`,
+                  ])
+          .join(' OR ') :
+      options.geneIDs != null ?
+      !isNaN(parseInt(options.geneIDs.toString())) ?
+      `\`m0\`.\`geneIDs\` = ${options.geneIDs}` :
+      `\`m0\`.\`AccNumb\` LIKE ('${
+          options.geneIDs},%') OR \`m0\`.\`AccNumb\` LIKE ('%,${
+          options.geneIDs},%') OR \`m0\`.\`AccNumb\` LIKE ('%,${
+          options.geneIDs}')` :
+      null;
+
+  const citations = options.citations != null ?
+      options.citations
+          .flatMap(
+              (citationRange) => citationRange.length > 1 ?
+                  [
+                    `(\`i0\`.\`Citations\` >= ${
+                        citationRange[0]} AND \`i0\`.\`Citations\` <= ${
+                        citationRange[1]})`,
+                  ] :
+                  [`(\`i0\`.\`Citations\` >= ${citationRange[0]})`])
+          .join(' OR ') :
+      null;
+
+  return Prisma.sql`SELECT DISTINCT(\`i0\`.\`PMID\`) AS 'pmid',
+                \`i0\`.\`Titles\` AS 'title',
+                \`i0\`.\`YearPub\` AS 'yearPub',
+                \`i0\`.\`LastAuthor\` AS 'lastAuthor',
+                \`i0\`.\`Citations\` AS 'citations',
+                \`j0\`.\`probability\` AS 'probability1stLay',
+                \`k0\`.\`probability\` AS 'probability2ndLay'
+               FROM ${dbName}.\`metadataPub\` as \`i0\`
+               INNER JOIN ${dbName}.\`classifications_1stLay\` AS \`j0\`
+                ON (\`j0\`.\`PMID\`) = (\`i0\`.\`PMID\`)
+               INNER JOIN ${dbName}.\`classification_2ndLay\` AS \`k0\`
+                ON (\`k0\`.\`PMID\`) = (\`j0\`.\`PMID\`)\
+                 ${
+      (options.geneIDs != null || options.taxonID != null ||
+       options.filters?.excludeHosts) &&
+              !options.filters?.forceGeneIDs ?
+          Prisma.sql`\n               LEFT JOIN ${
+              dbName}.\`geneIDs_PMIDs\` AS \`l0\`
+                 ON (\`l0\`.\`PMID\`) = (\`i0\`.\`PMID\`)` :
+          Prisma.sql``}\
+                ${
+      options.filters?.forceGeneIDs ||
+              ((options.geneIDs != null || options.taxonID != null ||
+                options.filters?.excludeHosts) &&
+               options.filters?.forceGeneIDs) ?
+          Prisma.sql`\n               RIGHT JOIN ${
+              dbName}.\`geneIDs_PMIDs\` AS \`l0\`
+                 ON (\`l0\`.\`PMID\`) = (\`i0\`.\`PMID\`)` :
+          Prisma.sql``}\
+               ${
+      options.taxonID != null || options.filters?.excludeHosts ?
+          Prisma.sql`\n               LEFT JOIN ${
+              dbName}.\`geneIDs_taxInfo_AccNumb\` AS \`m0\`
+                 ON (\`l0\`.\`geneIDs\`) = (\`m0\`.\`geneIDs\`)
+               LEFT JOIN ${dbName}.\`taxPath\` AS \`n0\`
+                 ON (\`m0\`.\`TaxID\`) = (\`n0\`.\`TaxID\`)` :
+          Prisma.sql``}\ 
+          WHERE (\
+               ${
+      options.filters?.excludeHosts ?
+          Prisma.raw(`\n                 (\`n0\`.\`LineagePath\` NOT LIKE ('${
+              process.env.HOST_TAXID}-%') AND
+                  \`n0\`.\`LineagePath\` NOT LIKE ('%-${
+              process.env.HOST_TAXID}-%') AND
+                  \`n0\`.\`LineagePath\` NOT LIKE ('-%${
+              process.env.HOST_TAXID}')) AND`) :
+          Prisma.sql``}\
+              ${
+      options.taxonID != null ?
+          Prisma.raw(`\n                 (\`n0\`.\`LineagePath\` LIKE ('${
+              options.taxonID}-%') OR
+                  \`n0\`.\`LineagePath\` LIKE ('%-${options.taxonID}-%') OR
+                  \`n0\`.\`LineagePath\` LIKE ('-%${options.taxonID}')) AND`) :
+          Prisma.sql``}\
+             ${
+      terms != null ? Prisma.raw(`\n                 (${terms}) AND`) :
+                      Prisma.sql``}\
+             ${
+      authors != null ? Prisma.raw(`\n                 (${authors}) AND`) :
+                        Prisma.sql``}\
+             ${
+      geneIDs != null ? Prisma.raw(`\n                 (${geneIDs}) AND`) :
+                        Prisma.sql``}\
+             ${
+  !options.allDates && options.dateRange?.min && options.dateRange?.max ?
+      Prisma.raw(`\n                 (\`i0\`.\`YearPub\` >= ${
+          options.dateRange?.min} AND \`i0\`.\`YearPub\` <= ${
+          options.dateRange?.max}) AND`) :
+      Prisma.sql``}\
+             ${
+      citations !=
+      null ? Prisma.raw(`\n                 (${citations}) AND`) :
+             Prisma.sql``}\
+      
+                 (\`j0\`.\`probability\` >= ${
+      Prisma.raw(`${options.firstLayerRange.min / 100}`)} AND
+                  \`j0\`.\`probability\` <= ${
+      Prisma.raw(`${options.firstLayerRange.max / 100}`)}) AND 
+                 (\`k0\`.\`probability\` >= ${
+      Prisma.raw(`${options.secondLayerRange.min / 100}`)} AND
+                  \`k0\`.\`probability\` <= ${
+      Prisma.raw(`${options.secondLayerRange.max / 100}`)})
+                )
+          ORDER BY \`k0\`.\`probability\` DESC, \`j0\`.\`probability\` DESC LIMIT 20 OFFSET ${
+      Prisma.raw(`${offset}`)} `;
+}
+
+export async function getPapers(queryString: Prisma.Sql):
+    Promise<TablePaperInfoRawQuery[]> {
+  const papers: TablePaperInfoRawQuery[] = await prisma.$queryRaw(queryString);
 
   return papers;
 }
 
 async function handler(
-    req: NextApiRequest, res: NextApiResponse<TablePaperInfo[]|Error>) {
+    req: NextApiRequest, res: NextApiResponse<TablePaperInfoRawQuery[]|Error>) {
   if (req.method !== 'GET') {
     res.status(405).send(new Error(`Method ${req.method} is not allowed.`));
   } else {
@@ -324,7 +261,9 @@ async function handler(
         parseInt(req.query.offset);
 
     try {
-      const papers = await getPapers(options, isNaN(offset) ? 0 : offset);
+      const queryString =
+          generateQueryString(options, isNaN(offset) ? 0 : offset);
+      const papers = await getPapers(queryString);
       if (!papers) {
         res.status(404).send(
             new Error(`No papers were found with the selected filters.`));
