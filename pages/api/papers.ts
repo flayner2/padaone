@@ -156,6 +156,16 @@ function generateQueryString(
       authors != null ? Prisma.raw(`\n                 (${authors}) AND`) :
                         Prisma.sql``}\
              ${
+      options.language != null ?
+          Prisma.raw(`\n           (\`i0\`.\`LanguagePub\` LIKE ('%${
+              options.language}%')) AND`) :
+          Prisma.sql``}
+             ${
+      options.journal != null ?
+          Prisma.raw(`\n           (\`i0\`.\`Journal\` LIKE ('%${
+              options.journal}%')) AND`) :
+          Prisma.sql``}
+             ${
       geneIDs != null ? Prisma.raw(`\n                 (${geneIDs}) AND`) :
                         Prisma.sql``}\
              ${
