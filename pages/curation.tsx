@@ -8,6 +8,7 @@ import {
   Link,
   Radio,
   RadioGroup,
+  Spinner,
   Table,
   Tbody,
   Td,
@@ -18,12 +19,11 @@ import {
 import axios from 'axios';
 import { InferGetServerSidePropsType } from 'next';
 import Head from 'next/head';
-import * as Fs from 'node:fs/promises';
-import path from 'path';
 import { useState } from 'react';
 import { useAsyncList } from 'react-stately';
 import { convertToFloatOrDefault } from '../lib/helpers';
 import type { ColumnName, TablePaperInfo } from '../lib/types';
+import { findCuratedPapers } from './api/curationPapers';
 
 const OFFSET_VALUE: number = 20;
 const COLUMNS: ColumnName[] = [
@@ -45,18 +45,13 @@ function Papers({
   );
   const [errorState, setErrorState] = useState<{ [pmid: number]: string }>({});
 
-  const queryUrl = '/api/papers';
-  const filterText =
-    'firstLayerMin=80&firstLayerMax=100&secondLayerMin=90&secondLayerMax=100';
+  const queryUrl = '/api/curationPapers';
 
   let paperList = useAsyncList<TablePaperInfo>({
     async load({ signal, cursor }) {
-      let { data } = await axios.get(
-        cursor || `${queryUrl}?${filterText}&offset=${offset}`,
-        {
-          signal,
-        }
-      );
+      let { data } = await axios.get(cursor || `${queryUrl}?offset=${offset}`, {
+        signal,
+      });
 
       const finalPapers = data.filter((paper: TablePaperInfo) =>
         files.includes(paper.pmid.toString()) ? false : true
@@ -64,7 +59,7 @@ function Papers({
 
       return {
         items: finalPapers,
-        cursor: `${queryUrl}?${filterText}&offset=${offset + OFFSET_VALUE}`,
+        cursor: `${queryUrl}?offset=${offset + OFFSET_VALUE}`,
       };
     },
     getKey(item) {
@@ -130,6 +125,7 @@ function Papers({
         <Box
           overflowX="auto"
           width="100%"
+          marginBottom="1rem"
         >
           <Table variant="simple">
             <Thead>
@@ -216,41 +212,54 @@ function Papers({
                   </Td>
                 </Tr>
               ))}
+              {paperList.isLoading && (
+                <Box
+                  role="cell"
+                  paddingTop="4"
+                  paddingBottom="2"
+                  marginTop="0.5rem"
+                  marginBottom="0.5rem"
+                  display="flex"
+                  justifyContent="center"
+                  position="absolute"
+                  left="50%"
+                >
+                  <Spinner
+                    color="blue.400"
+                    size="md"
+                  />
+                </Box>
+              )}
             </Tbody>
           </Table>
         </Box>
-        <Button
-          onClick={() => {
-            setOffset((old) => old + OFFSET_VALUE);
-            paperList.loadMore();
-          }}
-        >
-          <ArrowDownIcon />
-        </Button>
+        {!paperList.isLoading && paperList.items.length ? (
+          <Button
+            width="100%"
+            background="protBlue.300"
+            _hover={{
+              background: 'protBlue.veryLightHover',
+            }}
+            onClick={() => {
+              setOffset((old) => old + OFFSET_VALUE);
+              paperList.loadMore();
+            }}
+          >
+            <ArrowDownIcon />
+          </Button>
+        ) : null}
       </Flex>
     </>
   );
 }
 
 export async function getServerSideProps() {
-  const dirPath = path.resolve(path.join(process.cwd(), '../curation'));
-  let files: string[] = [];
-
   try {
-    const foundPositive = await Fs.readdir(
-      path.resolve(path.join(dirPath, 'positive'))
-    );
-    const foundNegative = await Fs.readdir(
-      path.resolve(path.join(dirPath, 'positive'))
-    );
-
-    files.push(...foundPositive, ...foundNegative);
-    files = files.map((file) => file.replace('.sql', ''));
+    const files = await findCuratedPapers();
+    return { props: { files } };
   } catch {
     return { props: { files: [] } };
   }
-
-  return { props: { files } };
 }
 
 export default Papers;
