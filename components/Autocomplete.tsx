@@ -48,6 +48,7 @@ export function Autocomplete(props: AutocompleteProps<any>) {
           {...props.inputProps}
           ref={inputRef}
           size="md"
+          value={props.inputValue}
           _placeholder={props.placeholderProps}
         />
       </InputGroup>

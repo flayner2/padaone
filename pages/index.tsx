@@ -289,8 +289,6 @@ function Home({
   const onSubmitMultiFieldForm: SubmitHandler<PaperFiltersFormValues> = (
     data
   ) => {
-    console.log(errors);
-    console.log(data);
     const taxon = data.taxon ? `&taxonID=${data.taxon}` : '';
     const geneIDs = data.geneIDs
       ? '&geneIDs=' +
@@ -328,13 +326,15 @@ function Home({
       ? '&citations=' +
         data.citations
           .map((range) =>
-            range.every((value) => typeof value === 'undefined')
-              ? ''
-              : !range.some((value) => typeof value === 'undefined')
-              ? range.join(',')
-              : typeof range[0] === 'undefined'
-              ? `${range[1]}`
-              : `${range[0]}`
+            range
+              ? range.every((value) => typeof value === 'undefined')
+                ? ''
+                : !range.some((value) => typeof value === 'undefined')
+                ? range.join(',')
+                : typeof range[0] === 'undefined'
+                ? `${range[1]}`
+                : `${range[0]}`
+              : ''
           )
           .filter((range) => !!range.trim())
           .join('&citations=')
@@ -342,7 +342,6 @@ function Home({
 
     const queryString = `firstLayerMin=${data.firstLayerRange[0]}&firstLayerMax=${data.firstLayerRange[1]}&secondLayerMin=${data.secondLayerRange[0]}&secondLayerMax=${data.secondLayerRange[1]}${taxon}${geneIDs}${excludeHosts}${forceGeneIDs}${terms}${lastAuthor}${language}${journal}${allDates}${date}${citations}`;
 
-    console.log(queryString);
     router.push(`/papers?${encodeURIComponent(queryString)}`);
   };
 
@@ -719,6 +718,7 @@ function Home({
                               id: 'taxonName',
                             }}
                             boxProps={{ width: '100%' }}
+                            selectedKeys={taxaList.selectedKeys}
                             onBlur={onBlur}
                             onSelectionChange={(item) => {
                               taxaList.setSelectedKeys(new Set([item]));
