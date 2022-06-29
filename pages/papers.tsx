@@ -81,7 +81,7 @@ function Papers() {
       );
 
       return res.data;
-    }, 0);
+    }, 500);
 
     let data = await debouncedRequest(signal, cursor, filterText);
 

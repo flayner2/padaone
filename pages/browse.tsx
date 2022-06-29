@@ -72,7 +72,7 @@ function Browse() {
       });
 
       return res.data;
-    }, 0);
+    }, 500);
 
     let data = await debouncedRequest(signal, cursor);
 
