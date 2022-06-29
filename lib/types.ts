@@ -183,3 +183,4 @@ export interface ColumnName {
 }
 
 export type TablePaperInfoKey = keyof TablePaperInfo;
+export type TablePaperInfoRawQueryKey = keyof TablePaperInfoRawQuery;

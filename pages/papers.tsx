@@ -16,6 +16,7 @@ import {
   Th,
   Thead,
   Tr,
+  Text,
 } from '@chakra-ui/react';
 import type { SortDirection } from '@react-types/shared';
 import axios from 'axios';
@@ -29,8 +30,8 @@ import { convertToFloatOrDefault } from '../lib/helpers';
 import type {
   AsyncListDataDebouncedReturn,
   ColumnName,
-  TablePaperInfo,
-  TablePaperInfoKey,
+  TablePaperInfoRawQuery,
+  TablePaperInfoRawQueryKey,
 } from '../lib/types';
 
 const OFFSET_VALUE: number = 20;
@@ -41,8 +42,8 @@ const COLUMNS: ColumnName[] = [
   { name: 'Year', key: 'yearPub' },
   { name: 'Last Author', key: 'lastAuthor' },
   { name: 'Citations', key: 'citations' },
-  { name: '1st Layer', key: 'classification1stLay' },
-  { name: '2nd Layer', key: 'classification2ndLay' },
+  { name: '1st Layer', key: 'probability1stLay' },
+  { name: '2nd Layer', key: 'probability2ndLay' },
   { name: 'Taxon Name', key: 'taxNames' },
 ];
 
@@ -57,12 +58,13 @@ function Papers() {
   const [sortDirection, setSortDirection] =
     useState<SortDirection>('descending');
   const [showGoTop, setShowGoTop] = useState(false);
+  const [spinned, setSpinned] = useState(false);
   const collator = useCollator({ numeric: true });
 
   // Async List
 
   // Key validation for type sanity
-  function isValidColumn(value: React.Key): value is TablePaperInfoKey {
+  function isValidColumn(value: React.Key): value is TablePaperInfoRawQueryKey {
     return COLUMNS.map((column) => column['key']).includes(value as string);
   }
 
@@ -91,7 +93,7 @@ function Papers() {
     };
   }
 
-  let paperList = useAsyncList<TablePaperInfo>({
+  let paperList = useAsyncList<TablePaperInfoRawQuery>({
     async load({ signal, cursor }) {
       return await getAsyncListDataDebounced(
         '/api/papers',
@@ -114,18 +116,7 @@ function Papers() {
             let first;
             let second;
 
-            if (
-              sortDescriptor.column === 'classification1stLay' ||
-              sortDescriptor.column === 'classification2ndLay'
-            ) {
-              let layerA = a[sortDescriptor.column];
-              let layerB = b[sortDescriptor.column];
-
-              if (layerA && layerB) {
-                first = layerA.probability;
-                second = layerB.probability;
-              }
-            } else if (sortDescriptor.column === 'taxNames') {
+            if (sortDescriptor.column === 'taxNames') {
               let taxA = a[sortDescriptor.column];
               let taxB = b[sortDescriptor.column];
 
@@ -209,6 +200,12 @@ function Papers() {
     return list.length < MAX_TAX_NAMES ? list.length + 1 : MAX_TAX_NAMES + 1;
   }
 
+  useEffect(() => {
+    if (paperList.isLoading) {
+      setSpinned(true);
+    }
+  });
+
   return (
     <>
       <Head>
@@ -245,6 +242,7 @@ function Papers() {
                     onClick={() => {
                       handleSortChange(column.key);
                     }}
+                    cursor="default"
                   >
                     {column.name}{' '}
                     {sortDirection === 'ascending' ? (
@@ -286,7 +284,7 @@ function Papers() {
                   <Td>{paper.citations}</Td>
                   <Td>
                     {convertToFloatOrDefault(
-                      paper.classification1stLay?.probability,
+                      paper.probability1stLay,
                       0,
                       100,
                       0
@@ -295,7 +293,7 @@ function Papers() {
                   </Td>
                   <Td>
                     {convertToFloatOrDefault(
-                      paper.classification2ndLay?.probability,
+                      paper.probability2ndLay,
                       0,
                       100,
                       0
@@ -354,6 +352,11 @@ function Papers() {
             </Tbody>
           </Table>
         </Box>
+
+        {!paperList.isLoading && !paperList.items.length && spinned ? (
+          <Text alignSelf="center">No results found!</Text>
+        ) : null}
+
         {!paperList.isLoading && paperList.items.length ? (
           <Button
             width="100%"
