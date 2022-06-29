@@ -132,6 +132,13 @@ function generateQueryString(
                LEFT JOIN ${dbName}.\`taxPath\` AS \`n0\`
                  ON (\`m0\`.\`TaxID\`) = (\`n0\`.\`TaxID\`)` :
           Prisma.sql``}\ 
+               ${
+      options.filters?.onlyCuratedPositive ?
+          Prisma.sql`\n               LEFT JOIN ${
+              dbName}.\`curationStatus\` AS \`o0\`
+                 ON (\`i0\`.\`PMID\`) = (\`o0\`.\`PMID\`)` :
+          Prisma.sql``}\ 
+
           WHERE (\
                ${
       options.filters?.excludeHosts ?
@@ -141,6 +148,11 @@ function generateQueryString(
               process.env.HOST_TAXID}-%') AND
                   \`n0\`.\`LineagePath\` NOT LIKE ('-%${
               process.env.HOST_TAXID}')) AND`) :
+          Prisma.sql``}\
+              ${
+      options.filters?.onlyCuratedPositive ?
+          Prisma.raw(
+              `\n                 (\`o0\`.\`curationStatus\` = 'Curated Positive') AND`) :
           Prisma.sql``}\
               ${
       options.taxonID != null ?
@@ -240,6 +252,9 @@ async function handler(
         forceGeneIDs: Array.isArray(req.query.forceGeneIDs) ?
             req.query.forceGeneIDs[0] === 'true' :
             req.query.forceGeneIDs === 'true',
+        onlyCuratedPositive: Array.isArray(req.query.onlyCuratedPositive) ?
+            req.query.onlyCuratedPositive[0] === 'true' :
+            req.query.onlyCuratedPositive === 'true',
       },
       terms: req.query.terms,
       lastAuthor: req.query.lastAuthor,

@@ -131,7 +131,11 @@ export interface PaperFiltersFormValues {
   secondLayerRange: number[];
   taxon?: number;
   geneIDs?: string;
-  filters?: {excludeHosts?: boolean; forceGeneIDs?: boolean};
+  filters?: {
+    excludeHosts?: boolean;
+    forceGeneIDs?: boolean;
+    onlyCuratedPositive?: boolean;
+  };
   terms?: string;
   lastAuthor?: string;
   language?: string;
@@ -145,7 +149,11 @@ export interface PapersFiltersOptions {
   secondLayerRange: {min: number; max: number};
   taxonID?: number;
   geneIDs?: number|string|(number|string)[];
-  filters?: {excludeHosts?: boolean; forceGeneIDs?: boolean};
+  filters?: {
+    excludeHosts?: boolean;
+    forceGeneIDs?: boolean;
+    onlyCuratedPositive?: boolean;
+  };
   terms?: string|string[];
   lastAuthor?: string|string[];
   language?: string;

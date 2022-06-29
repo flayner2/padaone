@@ -222,6 +222,7 @@ function Home({
     filters: yup.object({
       excludeHosts: yup.boolean(),
       forceGeneIDs: yup.boolean(),
+      onlyCuratedPositive: yup.boolean(),
     }),
     terms: yup.string().ensure().lowercase(),
     lastAuthor: yup.string().ensure().lowercase(),
@@ -299,6 +300,9 @@ function Home({
       : '';
     const excludeHosts = data.filters?.excludeHosts ? '&excludeHosts=true' : '';
     const forceGeneIDs = data.filters?.forceGeneIDs ? '&forceGeneIDs=true' : '';
+    const onlyCuratedPositive = data.filters?.onlyCuratedPositive
+      ? '&onlyCuratedPositive=true'
+      : '';
     const terms = data.terms
       ? '&terms=' +
         data.terms
@@ -340,7 +344,7 @@ function Home({
           .join('&citations=')
       : '';
 
-    const queryString = `firstLayerMin=${data.firstLayerRange[0]}&firstLayerMax=${data.firstLayerRange[1]}&secondLayerMin=${data.secondLayerRange[0]}&secondLayerMax=${data.secondLayerRange[1]}${taxon}${geneIDs}${excludeHosts}${forceGeneIDs}${terms}${lastAuthor}${language}${journal}${allDates}${date}${citations}`;
+    const queryString = `firstLayerMin=${data.firstLayerRange[0]}&firstLayerMax=${data.firstLayerRange[1]}&secondLayerMin=${data.secondLayerRange[0]}&secondLayerMax=${data.secondLayerRange[1]}${taxon}${geneIDs}${excludeHosts}${forceGeneIDs}${onlyCuratedPositive}${terms}${lastAuthor}${language}${journal}${allDates}${date}${citations}`;
 
     router.push(`/papers?${encodeURIComponent(queryString)}`);
   };
@@ -495,6 +499,7 @@ function Home({
                           <Tooltip
                             label="Placeholder"
                             aria-label="Placeholder"
+                            placement="top-end"
                           >
                             <QuestionIcon color="gray.500" />
                           </Tooltip>
@@ -584,6 +589,7 @@ function Home({
                           <Tooltip
                             label="Placeholder"
                             aria-label="Placeholder"
+                            placement="top-end"
                           >
                             <QuestionIcon color="gray.500" />
                           </Tooltip>
@@ -689,6 +695,7 @@ function Home({
                         <Tooltip
                           label="Placeholder"
                           aria-label="Placeholder"
+                          placement="top-end"
                         >
                           <QuestionIcon color="gray.500" />
                         </Tooltip>
@@ -757,14 +764,19 @@ function Home({
                     <FormControl
                       isInvalid={
                         errors.filters?.excludeHosts ||
-                        errors.filters?.forceGeneIDs
+                        errors.filters?.forceGeneIDs ||
+                        errors.filters?.onlyCuratedPositive
                           ? true
                           : false
                       }
                     >
                       <CheckboxGroup
                         colorScheme="blue"
-                        defaultValue={['excludeHosts', 'forceGeneids']}
+                        defaultValue={[
+                          'excludeHosts',
+                          'forceGeneids',
+                          'onlyCuratedPositive',
+                        ]}
                       >
                         <VStack alignItems="flex-start">
                           <Controller
@@ -784,6 +796,7 @@ function Home({
                                 <Tooltip
                                   label="Placeholder"
                                   aria-label="Placeholder"
+                                  placement="top-end"
                                 >
                                   <QuestionIcon color="gray.500" />
                                 </Tooltip>
@@ -810,6 +823,7 @@ function Home({
                                 <Tooltip
                                   label="Placeholder"
                                   aria-label="Placeholder"
+                                  placement="top-end"
                                 >
                                   <QuestionIcon color="gray.500" />
                                 </Tooltip>
@@ -818,6 +832,33 @@ function Home({
                           />
                           <FormErrorMessage>
                             {errors.filters?.forceGeneIDs?.message}
+                          </FormErrorMessage>
+                          <Controller
+                            control={control}
+                            name="filters.onlyCuratedPositive"
+                            defaultValue={true}
+                            render={({
+                              field: { onChange, onBlur, value },
+                            }) => (
+                              <Checkbox
+                                iconColor="protGray.100"
+                                value="onlyCuratedPositive"
+                                onBlur={onBlur}
+                                onChange={() => onChange(!value)}
+                              >
+                                Only true positive papers{' '}
+                                <Tooltip
+                                  label="Placeholder"
+                                  aria-label="Placeholder"
+                                  placement="top-end"
+                                >
+                                  <QuestionIcon color="gray.500" />
+                                </Tooltip>
+                              </Checkbox>
+                            )}
+                          />
+                          <FormErrorMessage>
+                            {errors.filters?.onlyCuratedPositive?.message}
                           </FormErrorMessage>
                         </VStack>
                       </CheckboxGroup>
@@ -858,6 +899,7 @@ function Home({
                         <Tooltip
                           label="Placeholder"
                           aria-label="Placeholder"
+                          placement="top-end"
                         >
                           <QuestionIcon color="gray.500" />
                         </Tooltip>
@@ -896,6 +938,7 @@ function Home({
                           <Tooltip
                             label="Placeholder"
                             aria-label="Placeholder"
+                            placement="top-end"
                           >
                             <QuestionIcon color="gray.500" />
                           </Tooltip>
@@ -929,6 +972,7 @@ function Home({
                           <Tooltip
                             label="Placeholder"
                             aria-label="Placeholder"
+                            placement="top-end"
                           >
                             <QuestionIcon color="gray.500" />
                           </Tooltip>
@@ -973,6 +1017,7 @@ function Home({
                         <Tooltip
                           label="Placeholder"
                           aria-label="Placeholder"
+                          placement="top-end"
                         >
                           <QuestionIcon color="gray.500" />
                         </Tooltip>
@@ -1036,6 +1081,7 @@ function Home({
                         <Tooltip
                           label="Placeholder"
                           aria-label="Placeholder"
+                          placement="top-end"
                         >
                           <QuestionIcon color="gray.500" />
                         </Tooltip>
@@ -1070,6 +1116,7 @@ function Home({
                           <Tooltip
                             label="Placeholder"
                             aria-label="Placeholder"
+                            placement="top-end"
                           >
                             <QuestionIcon color="gray.500" />
                           </Tooltip>
@@ -1173,6 +1220,7 @@ function Home({
                           <Tooltip
                             label="Placeholder"
                             aria-label="Placeholder"
+                            placement="top-end"
                           >
                             <QuestionIcon color="gray.500" />
                           </Tooltip>
@@ -1362,6 +1410,7 @@ function Home({
                           <Tooltip
                             label="Placeholder"
                             aria-label="Placeholder"
+                            placement="top-end"
                           >
                             <QuestionIcon color="gray.500" />
                           </Tooltip>
@@ -1435,6 +1484,7 @@ function Home({
                           <Tooltip
                             label="Placeholder"
                             aria-label="Placeholder"
+                            placement="top-end"
                           >
                             <QuestionIcon color="gray.500" />
                           </Tooltip>
