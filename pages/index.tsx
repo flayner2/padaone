@@ -763,76 +763,14 @@ function Home({
 
                     <FormControl
                       isInvalid={
-                        errors.filters?.excludeHosts ||
-                        errors.filters?.forceGeneIDs ||
-                        errors.filters?.onlyCuratedPositive
-                          ? true
-                          : false
+                        errors.filters?.onlyCuratedPositive ? true : false
                       }
                     >
                       <CheckboxGroup
                         colorScheme="blue"
-                        defaultValue={[
-                          'excludeHosts',
-                          'forceGeneids',
-                          'onlyCuratedPositive',
-                        ]}
+                        defaultValue={['onlyCuratedPositive']}
                       >
                         <VStack alignItems="flex-start">
-                          <Controller
-                            control={control}
-                            name="filters.excludeHosts"
-                            defaultValue={true}
-                            render={({
-                              field: { onChange, onBlur, value },
-                            }) => (
-                              <Checkbox
-                                iconColor="protGray.100"
-                                value="excludeHosts"
-                                onBlur={onBlur}
-                                onChange={() => onChange(!value)}
-                              >
-                                Exclude hosts{' '}
-                                <Tooltip
-                                  label="Placeholder"
-                                  aria-label="Placeholder"
-                                  placement="top-end"
-                                >
-                                  <QuestionIcon color="gray.500" />
-                                </Tooltip>
-                              </Checkbox>
-                            )}
-                          />
-                          <FormErrorMessage>
-                            {errors.filters?.excludeHosts?.message}
-                          </FormErrorMessage>
-                          <Controller
-                            control={control}
-                            name="filters.forceGeneIDs"
-                            defaultValue={true}
-                            render={({
-                              field: { onChange, onBlur, value },
-                            }) => (
-                              <Checkbox
-                                iconColor="protGray.100"
-                                value="forceGeneids"
-                                onBlur={onBlur}
-                                onChange={() => onChange(!value)}
-                              >
-                                Only papers with associated gene IDs{' '}
-                                <Tooltip
-                                  label="Placeholder"
-                                  aria-label="Placeholder"
-                                  placement="top-end"
-                                >
-                                  <QuestionIcon color="gray.500" />
-                                </Tooltip>
-                              </Checkbox>
-                            )}
-                          />
-                          <FormErrorMessage>
-                            {errors.filters?.forceGeneIDs?.message}
-                          </FormErrorMessage>
                           <Controller
                             control={control}
                             name="filters.onlyCuratedPositive"
@@ -1103,7 +1041,10 @@ function Home({
                       </FormErrorMessage>
                     </FormControl>
 
-                    <HStack spacing="2rem">
+                    <HStack
+                      spacing="2rem"
+                      marginBottom="1.5rem"
+                    >
                       <FormControl
                         width="max-content"
                         isInvalid={errors.publicationDate ? true : false}
@@ -1374,6 +1315,81 @@ function Home({
                         </CheckboxGroup>
                       </FormControl>
                     </HStack>
+
+                    <FormControl
+                      isInvalid={
+                        errors.filters?.excludeHosts ||
+                        errors.filters?.forceGeneIDs
+                          ? true
+                          : false
+                      }
+                    >
+                      <FormLabel htmlFor="excludeHosts">
+                        Advanced Filters
+                      </FormLabel>
+                      <CheckboxGroup
+                        colorScheme="blue"
+                        defaultValue={['onlyCuratedPositive']}
+                      >
+                        <VStack alignItems="flex-start">
+                          <Controller
+                            control={control}
+                            name="filters.excludeHosts"
+                            defaultValue={false}
+                            render={({
+                              field: { onChange, onBlur, value },
+                            }) => (
+                              <Checkbox
+                                id="excludeHosts"
+                                iconColor="protGray.100"
+                                value="excludeHosts"
+                                onBlur={onBlur}
+                                onChange={() => onChange(!value)}
+                              >
+                                Exclude hosts{' '}
+                                <Tooltip
+                                  label="Placeholder"
+                                  aria-label="Placeholder"
+                                  placement="top-end"
+                                >
+                                  <QuestionIcon color="gray.500" />
+                                </Tooltip>
+                              </Checkbox>
+                            )}
+                          />
+                          <FormErrorMessage>
+                            {errors.filters?.excludeHosts?.message}
+                          </FormErrorMessage>
+                          <Controller
+                            control={control}
+                            name="filters.forceGeneIDs"
+                            defaultValue={false}
+                            render={({
+                              field: { onChange, onBlur, value },
+                            }) => (
+                              <Checkbox
+                                iconColor="protGray.100"
+                                value="forceGeneids"
+                                onBlur={onBlur}
+                                onChange={() => onChange(!value)}
+                              >
+                                Only papers with associated gene IDs{' '}
+                                <Tooltip
+                                  label="Placeholder"
+                                  aria-label="Placeholder"
+                                  placement="top-end"
+                                >
+                                  <QuestionIcon color="gray.500" />
+                                </Tooltip>
+                              </Checkbox>
+                            )}
+                          />
+                          <FormErrorMessage>
+                            {errors.filters?.forceGeneIDs?.message}
+                          </FormErrorMessage>
+                        </VStack>
+                      </CheckboxGroup>
+                    </FormControl>
                   </Flex>
 
                   <Flex
