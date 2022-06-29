@@ -13,10 +13,10 @@ import {
   Table,
   Tbody,
   Td,
+  Text,
   Th,
   Thead,
   Tr,
-  Text,
 } from '@chakra-ui/react';
 import type { SortDirection } from '@react-types/shared';
 import axios from 'axios';
