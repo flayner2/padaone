@@ -54,12 +54,31 @@ function Papers() {
     router.asPath.replace(/^\/papers\?/, '')
   );
   const [offset, setOffset] = useState(0);
-  const [beingSorted, setBeingSorted] = useState('classification2ndLay');
+  const [beingSorted, setBeingSorted] = useState('probability2ndLay');
   const [sortDirection, setSortDirection] =
     useState<SortDirection>('descending');
   const [showGoTop, setShowGoTop] = useState(false);
   const [spinned, setSpinned] = useState(false);
+  const [shadowList, setShadowList] = useState<TablePaperInfoRawQuery[]>([]);
   const collator = useCollator({ numeric: true });
+
+  // Scroll to top
+  useEffect(() => {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 400) {
+        setShowGoTop(true);
+      } else {
+        setShowGoTop(false);
+      }
+    });
+  }, []);
+
+  function goToTop() {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  }
 
   // Async List
 
@@ -109,91 +128,85 @@ function Papers() {
       column: 'classification2ndLay',
       direction: 'descending',
     },
-    async sort({ items, sortDescriptor }) {
-      return {
-        items: items.sort((a, b) => {
-          if (sortDescriptor.column && isValidColumn(sortDescriptor.column)) {
-            let first;
-            let second;
-
-            if (sortDescriptor.column === 'taxNames') {
-              let taxA = a[sortDescriptor.column];
-              let taxB = b[sortDescriptor.column];
-
-              if (taxA) {
-                if (taxB) {
-                  first = taxA[0];
-                  second = taxB[0];
-                } else {
-                  return -1;
-                }
-              } else if (taxB) {
-                return 1;
-              } else {
-                return 0;
-              }
-            } else {
-              first = a[sortDescriptor.column];
-              second = b[sortDescriptor.column];
-            }
-
-            if (first != null && second != null) {
-              let cmp = collator.compare(first.toString(), second.toString());
-
-              if (sortDescriptor.direction === 'descending') {
-                cmp *= -1;
-              }
-
-              return cmp;
-            }
-          }
-          return 0;
-        }),
-      };
-    },
   });
 
   // Sort
-  function handleSortChange(column: string) {
+  function sortList(
+    a: TablePaperInfoRawQuery,
+    b: TablePaperInfoRawQuery,
+    direction: string,
+    column: string
+  ) {
+    if (column && isValidColumn(column)) {
+      let first;
+      let second;
+
+      if (column === 'taxNames') {
+        let taxA = a[column];
+        let taxB = b[column];
+
+        if (taxA) {
+          if (taxB) {
+            first = taxA[0];
+            second = taxB[0];
+          } else {
+            return -1;
+          }
+        } else if (taxB) {
+          return 1;
+        } else {
+          return 0;
+        }
+      } else {
+        first = a[column];
+        second = b[column];
+      }
+
+      if (first != null && second != null) {
+        let cmp = collator.compare(first.toString(), second.toString());
+
+        if (direction === 'descending') {
+          cmp *= -1;
+        }
+
+        return cmp;
+      }
+    }
+    return 0;
+  }
+
+  function handleSortChange(column: string, direction: SortDirection) {
     if (beingSorted === column) {
-      setSortDirection(
-        sortDirection === 'descending' ? 'ascending' : 'descending'
-      );
+      direction = sortDirection === 'descending' ? 'ascending' : 'descending';
+      setSortDirection(direction);
     } else {
       if (sortDirection === 'ascending') {
-        setSortDirection('descending');
+        direction = 'descending';
+        setSortDirection(direction);
       }
     }
 
     setBeingSorted(column);
+
+    shadowList.sort((a, b) => sortList(a, b, direction, column));
   }
 
   useEffect(() => {
     if (!paperList.isLoading && paperList.items.length) {
-      paperList.sort({
-        column: beingSorted,
-        direction: sortDirection,
-      });
+      setShadowList((old) => [...old, ...paperList.items]);
+      paperList.remove(...paperList.items.map((item) => item.pmid));
     }
-  }, [beingSorted, sortDirection]);
+  }, [paperList.items, paperList.isLoading]);
 
-  // Scroll to top
   useEffect(() => {
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 400) {
-        setShowGoTop(true);
-      } else {
-        setShowGoTop(false);
-      }
-    });
-  }, []);
+    paperList.loadMore();
+  }, [offset]);
 
-  function goToTop() {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
-  }
+  useEffect(() => {
+    if (!paperList.isLoading && shadowList.length) {
+      shadowList.sort((a, b) => sortList(a, b, sortDirection, beingSorted));
+    }
+  }, [beingSorted, sortDirection, shadowList, paperList.isLoading]);
 
   // Utils
   function maxTaxaNames(list: Array<any>): number {
@@ -240,7 +253,7 @@ function Papers() {
                   <Th
                     key={column.key}
                     onClick={() => {
-                      handleSortChange(column.key);
+                      handleSortChange(column.key, sortDirection);
                     }}
                     cursor="default"
                   >
@@ -263,7 +276,7 @@ function Papers() {
               </Tr>
             </Thead>
             <Tbody>
-              {paperList.items.map((paper) => (
+              {shadowList.map((paper) => (
                 <Tr key={paper.pmid}>
                   <Td>
                     <Link
@@ -353,11 +366,11 @@ function Papers() {
           </Table>
         </Box>
 
-        {!paperList.isLoading && !paperList.items.length && spinned ? (
+        {!paperList.isLoading && !shadowList.length && spinned ? (
           <Text alignSelf="center">No results found!</Text>
         ) : null}
 
-        {!paperList.isLoading && paperList.items.length ? (
+        {!paperList.isLoading && shadowList.length ? (
           <Button
             width="100%"
             background="protBlue.300"
@@ -366,7 +379,6 @@ function Papers() {
             }}
             onClick={() => {
               setOffset((old) => old + OFFSET_VALUE);
-              paperList.loadMore();
             }}
           >
             <ArrowDownIcon />
