@@ -306,7 +306,7 @@ const MobileNavItem = ({ label, children, href }: NavItem) => {
 
 const NAV_ITEMS: Array<NavItem> = [
   {
-    label: 'Search',
+    label: 'Home',
     href: '/',
   },
   {
