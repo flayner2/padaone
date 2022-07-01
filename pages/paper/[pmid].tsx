@@ -4,25 +4,25 @@ import {
   chakra,
   Divider,
   Flex,
+  FormControl,
+  FormErrorMessage,
   Heading,
   HStack,
   Link,
   Text,
   VStack,
-  FormControl,
-  FormErrorMessage,
 } from '@chakra-ui/react';
+import axios from 'axios';
+import * as downloader from 'js-file-download';
 import type { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
+import { useState } from 'react';
 import type { PaperPageData } from '../../lib/types';
-import axios from 'axios';
 import {
   getPaper,
   getPaperProbability,
   getPaperTaxonomicData,
 } from '../api/paper';
-import { useState } from 'react';
-import * as downloader from 'js-file-download';
 
 function Paper({
   paper,
