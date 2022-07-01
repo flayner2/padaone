@@ -87,11 +87,11 @@ function Home({
     allDates: true,
   });
   const [firstLayerValue, setFirstLayerValue] = useState([
-    classificationScores.firstLayer.min,
+    90,
     classificationScores.firstLayer.max,
   ]);
   const [secondLayerValue, setSecondLayerValue] = useState([
-    classificationScores.secondLayer.min,
+    90,
     classificationScores.secondLayer.max,
   ]);
 
@@ -351,6 +351,14 @@ function Home({
     router.push(`/papers?${encodeURIComponent(queryString)}`);
   };
 
+  function handleExampleSearch() {
+    router.push(
+      `/papers?${encodeURIComponent(
+        `firstLayerMin=${classificationScores.firstLayer.min}&firstLayerMax=${classificationScores.firstLayer.max}&secondLayerMin=${classificationScores.secondLayer.min}&secondLayerMax=${classificationScores.secondLayer.max}&forceGeneIDs=true&taxonID=5794`
+      )}`
+    );
+  }
+
   return (
     <Flex justifyContent="center">
       <Head>
@@ -461,7 +469,18 @@ function Home({
               padding="1rem 0 1rem"
               color="protBlack.800"
             >
-              Use the filters below to find a set of papers that match:
+              Use the filters below to find a set of papers (or click{' '}
+              <Link
+                color="protBlue.400"
+                onClick={handleExampleSearch}
+                _hover={{
+                  textDecoration: 'none',
+                  color: 'protBlue.lightHover',
+                }}
+              >
+                here
+              </Link>{' '}
+              for a search example):
             </Text>
 
             <form onSubmit={handleSubmit(onSubmitMultiFieldForm)}>
@@ -519,7 +538,7 @@ function Home({
                           control={control}
                           name="firstLayerRange"
                           defaultValue={[
-                            classificationScores.firstLayer.min,
+                            90,
                             classificationScores.firstLayer.max,
                           ]}
                           render={({ field: { onChange, onBlur } }) => (
@@ -530,7 +549,7 @@ function Home({
                               min={classificationScores.firstLayer.min}
                               max={classificationScores.firstLayer.max}
                               defaultValue={[
-                                classificationScores.firstLayer.min,
+                                90,
                                 classificationScores.firstLayer.max,
                               ]}
                               onChange={([v1, v2]) => {
@@ -609,7 +628,7 @@ function Home({
                           control={control}
                           name="secondLayerRange"
                           defaultValue={[
-                            classificationScores.secondLayer.min,
+                            90,
                             classificationScores.secondLayer.max,
                           ]}
                           render={({ field: { onChange, onBlur } }) => (
@@ -620,7 +639,7 @@ function Home({
                               min={classificationScores.secondLayer.min}
                               max={classificationScores.secondLayer.max}
                               defaultValue={[
-                                classificationScores.secondLayer.min,
+                                90,
                                 classificationScores.secondLayer.max,
                               ]}
                               onChange={([v1, v2]) => {
