@@ -178,20 +178,17 @@ const DesktopSubNav = ({ label, href, subLabel }: NavItem) => {
       display={'block'}
       p={2}
       rounded={'md'}
-      _hover={{ bg: useColorModeValue('pink.50', 'gray.900') }}
+      _hover={{
+        textDecoration: 'none',
+        color: 'protBlue.darkHover',
+      }}
     >
       <Stack
         direction={'row'}
         align={'center'}
       >
         <Box>
-          <Text
-            transition={'all .3s ease'}
-            _groupHover={{ color: 'pink.400' }}
-            fontWeight={500}
-          >
-            {label}
-          </Text>
+          <Text fontSize="sm">{label}</Text>
           <Text fontSize={'sm'}>{subLabel}</Text>
         </Box>
         <Flex
@@ -204,7 +201,7 @@ const DesktopSubNav = ({ label, href, subLabel }: NavItem) => {
           flex={1}
         >
           <Icon
-            color={'pink.400'}
+            color={'protBlue.900'}
             w={5}
             h={5}
             as={ChevronRightIcon}
@@ -304,9 +301,9 @@ const NAV_ITEMS: Array<NavItem> = [
     label: 'Help',
     href: '/help',
     children: [
-      { label: 'Fora', href: '/fora' },
-      { label: 'Bolsonaro', href: '/fora' },
-      { label: 'Genocida', href: '/fora' },
+      { label: 'Home', href: '/help/home' },
+      { label: 'Results', href: '/help/results' },
+      { label: 'FAQs', href: '/help/faqs' },
     ],
   },
 ];
