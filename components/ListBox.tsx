@@ -29,7 +29,7 @@ export function ListBox(props: ListBoxProps) {
       flexDirection="column"
       onScroll={onScroll}
     >
-      {[...state.collection].map((item) => (
+      {[...(state.collection as any)].map((item) => (
         <Option
           key={item.key}
           item={item}
