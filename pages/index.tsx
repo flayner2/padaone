@@ -60,6 +60,8 @@ import type {
   PaperTitleFormValue,
   PaperTitlePMID,
 } from '../lib/types';
+import CustomImage from '../components/CustomImage';
+import padaoneLogo from '../public/padaone_logo_nobg.svg';
 
 const OFFSET_VALUE: number = 20;
 
@@ -373,15 +375,25 @@ function Home({
       >
         <Box>
           {/* Top text */}
-          <Heading
-            as="h1"
-            size="lg"
-            color="protBlack.800"
-            fontWeight="semibold"
-            marginBottom="1rem"
+          <HStack
+            spacing="1rem"
+            alignItems="center"
           >
-            PADA-One
-          </Heading>
+            <CustomImage
+              src={padaoneLogo}
+              width="100%"
+              height="100%"
+            />
+            <Heading
+              as="h1"
+              size="lg"
+              color="protBlack.800"
+              fontWeight="semibold"
+              marginBottom="1rem"
+            >
+              PADA-One
+            </Heading>
+          </HStack>
 
           <Text
             marginBottom="1rem"
@@ -496,8 +508,8 @@ function Home({
                         >
                           1st Layer Probability{' '}
                           <Tooltip
-                            label="Placeholder"
-                            aria-label="Placeholder"
+                            label="Probability of the first classification layer. Use the circles on the slider to define a minimum and a maximum value for the probability range."
+                            aria-label="Probability of the first classification layer. Use the circles on the slider to define a minimum and a maximum value for the probability range."
                             placement="top-end"
                           >
                             <QuestionIcon color="gray.500" />
@@ -586,8 +598,8 @@ function Home({
                         >
                           2nd Layer Probability{' '}
                           <Tooltip
-                            label="Placeholder"
-                            aria-label="Placeholder"
+                            label="Probability of the second classification layer. Use the circles on the slider to define a minimum and a maximum value for the probability range."
+                            aria-label="Probability of the second classification layer. Use the circles on the slider to define a minimum and a maximum value for the probability range."
                             placement="top-end"
                           >
                             <QuestionIcon color="gray.500" />
@@ -692,8 +704,8 @@ function Home({
                       >
                         Taxon Name{' '}
                         <Tooltip
-                          label="Placeholder"
-                          aria-label="Placeholder"
+                          label="Name of a taxonomic group to filter the results by. Start typing and chose one option from the suggestions. Only suggested options are valid."
+                          aria-label="Name of a taxonomic group to filter the results by. Start typing and chose one option from the suggestions. Only suggested options are valid."
                           placement="top-end"
                         >
                           <QuestionIcon color="gray.500" />
@@ -775,8 +787,8 @@ function Home({
                       >
                         Terms{' '}
                         <Tooltip
-                          label="Placeholder"
-                          aria-label="Placeholder"
+                          label="Terms used to filter the results. Those will be matched against each article's title and abstract. Terms are case-insensitive and multiple options must be separated by either comma (,) or semicolon (;)."
+                          aria-label="Terms used to filter the results. Those will be matched against each article's title and abstract. Terms are case-insensitive and multiple options must be separated by either comma (,) or semicolon (;)."
                           placement="top-end"
                         >
                           <QuestionIcon color="gray.500" />
@@ -814,8 +826,8 @@ function Home({
                         >
                           Last author{' '}
                           <Tooltip
-                            label="Placeholder"
-                            aria-label="Placeholder"
+                            label="Last author names used to filter the results. Those will be partially matched against each article's last author name, so partial terms such as 'joh' will match both 'Johnson' and 'John'. Names are case-insensitive and multiple options must be separated by either comma (,) or semicolon (;)."
+                            aria-label="Last author names used to filter the results. Those will be partially matched against each article's last author name, so partial terms such as 'joh' will match both 'Johnson' and 'John'. Names are case-insensitive and multiple options must be separated by either comma (,) or semicolon (;)."
                             placement="top-end"
                           >
                             <QuestionIcon color="gray.500" />
@@ -848,8 +860,8 @@ function Home({
                         >
                           Language{' '}
                           <Tooltip
-                            label="Placeholder"
-                            aria-label="Placeholder"
+                            label="Publication language used to filter the results. This is a dropdown list that contains all available publication languages as described in each paper's metadata. Only one option must be selected. The query is a partial match so if you select 'English', papers in which the publication language is 'English, Spanish' will also be matched."
+                            aria-label="Publication language used to filter the results. This is a dropdown list that contains all available publication languages as described in each paper's metadata. Only one option must be selected. The query is a partial match so if you select 'English', papers in which the publication language is 'English, Spanish' will also be matched."
                             placement="top-end"
                           >
                             <QuestionIcon color="gray.500" />
@@ -906,8 +918,8 @@ function Home({
                       >
                         Journal{' '}
                         <Tooltip
-                          label="Placeholder"
-                          aria-label="Placeholder"
+                          label="Journal name used to filter the results. Start typing to get suggestions of the available journals. The query is a partial match so 'Nature' will match 'Nature Genetics'. Only options among the suggestions are valid. Only one option can be selected."
+                          aria-label="Journal name used to filter the results. Start typing to get suggestions of the available journals. The query is a partial match so 'Nature' will match 'Nature Genetics'. Only options among the suggestions are valid. Only one option can be selected."
                           placement="top-end"
                         >
                           <QuestionIcon color="gray.500" />
@@ -970,8 +982,8 @@ function Home({
                       >
                         Gene IDs{' '}
                         <Tooltip
-                          label="Placeholder"
-                          aria-label="Placeholder"
+                          label="Gene IDs or Accession Numbers used to filter the results. Fully numeric Gene IDs such as '5571' will be exactly matched agains a paper's list of associated Gene IDs, while strings such as 'NP_001191615' will be partially matched against a paper's list of Acession Numbers. Gene IDs are case-insensitive and multiple options must be separated by either comma (,) or semicolon (;)."
+                          aria-label="Gene IDs or Accession Numbers used to filter the results. Fully numeric Gene IDs such as '5571' will be exactly matched agains a paper's list of associated Gene IDs, while strings such as 'NP_001191615' will be partially matched against a paper's list of Acession Numbers. Gene IDs are case-insensitive and multiple options must be separated by either comma (,) or semicolon (;)."
                           placement="top-end"
                         >
                           <QuestionIcon color="gray.500" />
@@ -1008,8 +1020,8 @@ function Home({
                         >
                           Publication date{' '}
                           <Tooltip
-                            label="Placeholder"
-                            aria-label="Placeholder"
+                            label="Publication year range used to filter the results. 'Any' is selected by default, which means paper's with any publication date will be matched and the date pickers will be disabled for selection. Unchecking 'Any' enables the selection of a specific date range. The 'From' date picker selects the lower end of the range will the 'To' date picker selects the upper end. This will only match an article's publication year."
+                            aria-label="Publication year range used to filter the results. 'Any' is selected by default, which means paper's with any publication date will be matched and the date pickers will be disabled for selection. Unchecking 'Any' enables the selection of a specific date range. The 'From' date picker selects the lower end of the range will the 'To' date picker selects the upper end. This will only match an article's publication year."
                             placement="top-end"
                           >
                             <QuestionIcon color="gray.500" />
@@ -1112,8 +1124,8 @@ function Home({
                         <FormLabel htmlFor="citations-1">
                           Number of citations{' '}
                           <Tooltip
-                            label="Placeholder"
-                            aria-label="Placeholder"
+                            label="Number of citation ranges used to filter the results. Each bin corresponds to a citation range. The last bin will match papers with more than 100 citations up to the maximum available in the database. Each bin is a self-contained range so, for example, if only the '0 - 10' and '21 - 30' bins are selected, only papers with 0 to 10 or 21 to 30 citations will match, while papers with 11 to 20 or more than 30 citations will not be matched. All ranges are selected by default, which includes all papers in the database."
+                            aria-label="Number of citation ranges used to filter the results. Each bin corresponds to a citation range. The last bin will match papers with more than 100 citations up to the maximum available in the database. Each bin is a self-contained range so, for example, if only the '0 - 10' and '21 - 30' bins are selected, only papers with 0 to 10 or 21 to 30 citations will match, while papers with 11 to 20 or more than 30 citations will not be matched. All ranges are selected by default, which includes all papers in the database."
                             placement="top-end"
                           >
                             <QuestionIcon color="gray.500" />
@@ -1299,8 +1311,8 @@ function Home({
                               >
                                 Exclude hosts{' '}
                                 <Tooltip
-                                  label="Placeholder"
-                                  aria-label="Placeholder"
+                                  label="Filter the results to only show articles which don't include associated Gene IDs or Accession Numbers from the clade Vertebrata (Metazoa, Taxon ID 7742). This will not hide papers that mention vertebrates in the title, abstract or text."
+                                  aria-label="Filter the results to only show articles which don't include associated Gene IDs or Accession Numbers from the clade Vertebrata (Metazoa, Taxon ID 7742). This will not hide papers that mention vertebrates in the title, abstract or text."
                                   placement="top-end"
                                 >
                                   <QuestionIcon color="gray.500" />
@@ -1326,8 +1338,8 @@ function Home({
                               >
                                 Only papers with associated gene IDs{' '}
                                 <Tooltip
-                                  label="Placeholder"
-                                  aria-label="Placeholder"
+                                  label="Filter the results to only show articles with at least one associated Gene ID or Accession Number."
+                                  aria-label="Filter the results to only show articles with at least one associated Gene ID or Accession Number."
                                   placement="top-end"
                                 >
                                   <QuestionIcon color="gray.500" />
@@ -1353,8 +1365,8 @@ function Home({
                               >
                                 Only true positive papers{' '}
                                 <Tooltip
-                                  label="Placeholder"
-                                  aria-label="Placeholder"
+                                  label="Filter the results to only show articles that were manually curated by our team and marked as 'True positives', i.e. meaning they were correctly predicted to describe a PAg."
+                                  aria-label="Filter the results to only show articles that were manually curated by our team and marked as 'True positives', i.e. meaning they were correctly predicted to describe a PAg."
                                   placement="top-end"
                                 >
                                   <QuestionIcon color="gray.500" />
@@ -1462,8 +1474,8 @@ function Home({
                         >
                           Title{' '}
                           <Tooltip
-                            label="Placeholder"
-                            aria-label="Placeholder"
+                            label="Find a specific article by title. Start typing to get suggestions. Only options among the suggestions are valid. Select one option and click the looking glass icon inside the input box to be redirected to the article page of the selected article."
+                            aria-label="Find a specific article by title. Start typing to get suggestions. Only options among the suggestions are valid. Select one option and click the looking glass icon inside the input box to be redirected to the article page of the selected article."
                             placement="top-end"
                           >
                             <QuestionIcon color="gray.500" />
@@ -1536,8 +1548,8 @@ function Home({
                         >
                           PMID{' '}
                           <Tooltip
-                            label="Placeholder"
-                            aria-label="Placeholder"
+                            label="Find a specific article by PMID. Enter a valid PMID and click the looking glass icon inside the input box to be redirected to the article page of the article. If no article with the chosen PMID exists in the database, an error will be shown."
+                            aria-label="Find a specific article by PMID. Enter a valid PMID and click the looking glass icon inside the input box to be redirected to the article page of the article. If no article with the chosen PMID exists in the database, an error will be shown."
                             placement="top-end"
                           >
                             <QuestionIcon color="gray.500" />
