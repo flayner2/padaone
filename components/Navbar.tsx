@@ -15,12 +15,13 @@ import {
   PopoverContent,
   Stack,
   Text,
-  useBreakpointValue,
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react';
 import type { NavItem } from '../lib/types';
 import { PopoverTrigger } from './PopoverTrigger';
+import CustomImage from './CustomImage';
+import padaoneLogo from '../public/padaone_logo_nobg.svg';
 
 function WithSubnavigation() {
   const { isOpen, onToggle } = useDisclosure();
@@ -66,19 +67,17 @@ function WithSubnavigation() {
           flex={{ base: 1 }}
           justify={{ base: 'center', md: 'start' }}
         >
-          <Link
-            textAlign={useBreakpointValue({ base: 'center', md: 'left' })}
-            fontFamily={'heading'}
-            color="protBlack.800"
-            href="/"
-            _hover={{ textDecoration: 'none' }}
-          >
-            PADA-One
+          <Link href="/">
+            <CustomImage
+              src={padaoneLogo}
+              width="90%"
+              height="30%"
+            />
           </Link>
 
           <Flex
             display={{ base: 'none', md: 'flex' }}
-            ml={10}
+            ml={5}
           >
             <DesktopNav />
           </Flex>
@@ -121,6 +120,7 @@ const DesktopNav = () => {
     <Stack
       direction={'row'}
       spacing={4}
+      alignItems="center"
     >
       {NAV_ITEMS.map((navItem) => (
         <Box key={navItem.label}>
@@ -301,7 +301,7 @@ const NAV_ITEMS: Array<NavItem> = [
     label: 'Help',
     href: '/help',
     children: [
-      { label: 'Home', href: '/help/home' },
+      { label: 'Home', href: '/help' },
       { label: 'Results', href: '/help/results' },
       { label: 'FAQs', href: '/help/faqs' },
     ],
