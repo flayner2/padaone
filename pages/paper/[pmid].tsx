@@ -9,21 +9,41 @@ import {
   Link,
   Text,
   VStack,
+  FormControl,
+  FormErrorMessage,
 } from '@chakra-ui/react';
 import type { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
 import type { PaperPageData } from '../../lib/types';
+import axios from 'axios';
 import {
   getPaper,
   getPaperProbability,
   getPaperTaxonomicData,
 } from '../api/paper';
+import { useState } from 'react';
+import * as downloader from 'js-file-download';
 
 function Paper({
   paper,
   paperProbability,
   taxonomicData,
 }: PaperPageData): JSX.Element {
+  const [downloadError, setDownloadError] = useState('');
+
+  async function handleDownload(accessions: string | null) {
+    try {
+      const res = await axios.post(
+        '/api/downloadGenes',
+        { accessions },
+        { responseType: 'blob' }
+      );
+      downloader.default(res.data, 'accessionlist.txt');
+    } catch (error) {
+      setDownloadError('Error while trying to download.');
+    }
+  }
+
   return (
     <Flex justifyContent="center">
       <Head>
@@ -323,18 +343,30 @@ function Paper({
                                 : null}
                             </Text>
 
-                            <Button
-                              color="protBlack.800"
-                              background="protBlue.300"
-                              borderRadius="8px"
+                            <FormControl
+                              isInvalid={downloadError ? true : false}
                               alignSelf="flex-end"
-                              fontWeight="regular"
-                              _hover={{
-                                background: 'protBlue.veryLightHover',
-                              }}
+                              display="flex"
+                              justifyContent="end"
                             >
-                              Download list
-                            </Button>
+                              <Button
+                                color="protBlack.800"
+                                background="protBlue.300"
+                                borderRadius="8px"
+                                fontWeight="regular"
+                                onClick={() => handleDownload(taxon.accNumb)}
+                                _hover={{
+                                  background: 'protBlue.veryLightHover',
+                                }}
+                              >
+                                Download list
+                              </Button>
+                              {downloadError && (
+                                <FormErrorMessage>
+                                  {downloadError}
+                                </FormErrorMessage>
+                              )}
+                            </FormControl>
                           </VStack>
                         ) : null}
                       </VStack>
