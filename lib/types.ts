@@ -144,6 +144,11 @@ export interface PaperFiltersFormValues {
   citations?: [number, number|undefined][];
 }
 
+export interface SortDescriptor {
+  column?: string;
+  direction?: string;
+}
+
 export interface PapersFiltersOptions {
   firstLayerRange: {min: number; max: number};
   secondLayerRange: {min: number; max: number};
@@ -161,6 +166,7 @@ export interface PapersFiltersOptions {
   allDates?: boolean;
   dateRange?: {min?: number; max?: number};
   citations?: number[][];
+  sortDescriptor?: SortDescriptor;
 }
 
 export interface TablePaperInfo {
@@ -174,7 +180,7 @@ export interface TablePaperInfo {
   taxNames?: string[];
 }
 
-export interface TablePaperInfoRawQuery {
+export interface TablePaperInfoRawQueryPre {
   pmid: number;
   title: string;
   yearPub?: number|null;
@@ -182,6 +188,11 @@ export interface TablePaperInfoRawQuery {
   citations?: number|null;
   probability1stLay?: Prisma.Decimal|null;
   probability2ndLay?: Prisma.Decimal|null;
+  taxNames?: string;
+}
+
+export interface TablePaperInfoRawQuery extends
+    Omit<TablePaperInfoRawQueryPre, 'taxNames'> {
   taxNames?: string[];
 }
 
@@ -189,6 +200,3 @@ export interface ColumnName {
   name: string;
   key: string;
 }
-
-export type TablePaperInfoKey = keyof TablePaperInfo;
-export type TablePaperInfoRawQueryKey = keyof TablePaperInfoRawQuery;
