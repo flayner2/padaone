@@ -370,25 +370,26 @@ function Home({
       >
         <Box>
           {/* Top text */}
-          <HStack
-            spacing="1rem"
+          <VStack
+            spacing="1.5rem"
             alignItems="center"
+            justifyContent="center"
+            marginBottom="1.5rem"
           >
             <CustomImage
               src={padaoneLogo}
-              width="100%"
-              height="100%"
+              width="300"
+              height="150"
             />
             <Heading
               as="h1"
               size="lg"
               color="protBlack.800"
               fontWeight="semibold"
-              marginBottom="1rem"
             >
               PADA-One
             </Heading>
-          </HStack>
+          </VStack>
 
           <Text
             marginBottom="1rem"
