@@ -36,7 +36,7 @@ const theme = extendTheme({
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <SSRProvider>
+    <>
       <Head>
         <title>PADA-One</title>
         <meta
@@ -48,11 +48,13 @@ function MyApp({ Component, pageProps }: AppProps) {
           href="/logo.png"
         />
       </Head>
-      <ChakraProvider theme={theme}>
-        <WithSubnavigation></WithSubnavigation>
-        <Component {...pageProps} />
-      </ChakraProvider>
-    </SSRProvider>
+      <SSRProvider>
+        <ChakraProvider theme={theme}>
+          <WithSubnavigation></WithSubnavigation>
+          <Component {...pageProps} />
+        </ChakraProvider>
+      </SSRProvider>
+    </>
   );
 }
 
