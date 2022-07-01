@@ -3,7 +3,7 @@ import {prisma} from '../../lib/prisma';
 import type {Journal} from '../../lib/types';
 
 export async function getJournalsByName(
-    query: string, offset: number = 0): Promise<Journal[]> {
+    query: string|undefined, offset: number = 0): Promise<Journal[]> {
   const data = await prisma.metadataPub.findMany({
     where: {
       journal: {contains: query},
@@ -35,7 +35,7 @@ async function handler(
           new Error('Query parameter "offset" may contain only one value.'));
     } else {
       const journal = req.query.journalName;
-      const offset = parseInt(req.query.offset);
+      const offset = parseInt(req.query.offset ? req.query.offset : '0');
 
       if (isNaN(offset) && req.query.offset) {
         res.status(400).send(new Error(

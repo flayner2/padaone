@@ -242,31 +242,31 @@ async function handler(
       firstLayerRange: {
         min: Array.isArray(req.query.firstLayerMin) ?
             parseInt(req.query.firstLayerMin[0]) :
-            parseInt(req.query.firstLayerMin),
+            parseInt(req.query.firstLayerMin ? req.query.firstLayerMin : '0'),
         max: Array.isArray(req.query.firstLayerMax) ?
             parseInt(req.query.firstLayerMax[0]) :
-            parseInt(req.query.firstLayerMax),
+            parseInt(req.query.firstLayerMax ? req.query.firstLayerMax : '100'),
       },
       secondLayerRange: {
         min: Array.isArray(req.query.secondLayerMin) ?
             parseInt(req.query.secondLayerMin[0]) :
-            parseInt(req.query.secondLayerMin),
+            parseInt(req.query.secondLayerMin ? req.query.secondLayerMin : '0'),
         max: Array.isArray(req.query.secondLayerMax) ?
             parseInt(req.query.secondLayerMax[0]) :
-            parseInt(req.query.secondLayerMax),
+            parseInt(req.query.secondLayerMax ? req.query.secondLayerMax : '100'),
       },
       taxonID: Array.isArray(req.query.taxonID) ?
           !isNaN(parseInt(req.query.taxonID[0])) ?
           parseInt(req.query.taxonID[0]) :
           undefined :
-          !isNaN(parseInt(req.query.taxonID)) ? parseInt(req.query.taxonID) :
-                                                undefined,
+          req.query.taxonID ? !isNaN(parseInt(req.query.taxonID)) ? parseInt(req.query.taxonID) :
+                                                undefined : undefined,
       geneIDs: Array.isArray(req.query.geneIDs) ?
           req.query.geneIDs.map(
               (geneID) =>
                   !isNaN(parseInt(geneID)) ? parseInt(geneID) : geneID) :
-          !isNaN(parseInt(req.query.geneIDs)) ? parseInt(req.query.geneIDs) :
-                                                req.query.geneIDs,
+          req.query.geneIDs ? !isNaN(parseInt(req.query.geneIDs)) ? parseInt(req.query.geneIDs) :
+                                                req.query.geneIDs : undefined,
       filters: {
         excludeHosts: Array.isArray(req.query.excludeHosts) ?
             req.query.excludeHosts[0] === 'true' :
@@ -292,14 +292,14 @@ async function handler(
             !isNaN(parseInt(req.query.minYear[0])) ?
             parseInt(req.query.minYear[0]) :
             undefined :
-            !isNaN(parseInt(req.query.minYear)) ? parseInt(req.query.minYear) :
-                                                  undefined,
+            req.query.minYear ? !isNaN(parseInt(req.query.minYear)) ? parseInt(req.query.minYear) :
+                                                  undefined : undefined,
         max: Array.isArray(req.query.maxYear) ?
             !isNaN(parseInt(req.query.maxYear[0])) ?
             parseInt(req.query.maxYear[0]) :
             undefined :
-            !isNaN(parseInt(req.query.maxYear)) ? parseInt(req.query.maxYear) :
-                                                  undefined,
+            req.query.maxYear ? !isNaN(parseInt(req.query.maxYear)) ? parseInt(req.query.maxYear) :
+                                                  undefined : undefined,
       },
       citations: parseCitations(req.query.citations),
       sortDescriptor: {
@@ -313,7 +313,7 @@ async function handler(
 
     const offset = Array.isArray(req.query.offset) ?
         parseInt(req.query.offset[0]) :
-        parseInt(req.query.offset);
+        parseInt(req.query.offset ? req.query.offset : '0');
 
     try {
       const queryString =

@@ -26,7 +26,7 @@ async function handler(
   } else if (Array.isArray(req.query.taxonID)) {
     res.status(400).send(
         new Error('Query parameter "taxonID" may contain only one value.'));
-  } else {
+  } else if (req.query.taxonID) {
     const taxonID = parseInt(req.query.taxonID);
 
     if (isNaN(taxonID)) {

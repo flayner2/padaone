@@ -4,6 +4,7 @@ import { SSRProvider } from 'react-aria';
 import 'react-datepicker/dist/react-datepicker.css';
 import WithSubnavigation from '../components/Navbar';
 import '../styles/globals.css';
+import React from 'react';
 import Head from 'next/head';
 
 const theme = extendTheme({
@@ -39,19 +40,6 @@ function MyApp({ Component, pageProps }: AppProps) {
     <>
       <Head>
         <title>PADA-One</title>
-        <meta
-          name="description"
-          content="A database that hosts scientific papers predicted to describe protective antigens (PAgs) from a variety of organisms."
-        />
-        <link
-          rel="icon"
-          href="/images/logo.png"
-        />
-        <meta
-          property="og:title"
-          content="PADA-One"
-          key="title"
-        />
       </Head>
       <SSRProvider>
         <ChakraProvider theme={theme}>

@@ -61,7 +61,7 @@ async function handler(
   } else {
     const offset = Array.isArray(req.query.offset) ?
         parseInt(req.query.offset[0]) :
-        parseInt(req.query.offset);
+        parseInt(req.query.offset ? req.query.offset : '0');
     const sortDescriptor = {
       column: Array.isArray(req.query.sortColumn) ? req.query.sortColumn[0] :
                                                     req.query.sortColumn,

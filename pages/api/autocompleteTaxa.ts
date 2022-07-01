@@ -3,7 +3,7 @@ import type {NextApiRequest, NextApiResponse} from 'next';
 import {prisma} from '../../lib/prisma';
 
 export async function getTaxa(
-    query: string, offset: number = 0): Promise<TaxIDToTaxName[]> {
+    query: string|undefined, offset: number = 0): Promise<TaxIDToTaxName[]> {
   const data = await prisma.taxIDToTaxName.findMany({
     where: {
       AND: [{taxName: {contains: query}}, {NOT: {taxName: 'Nan'}}],
@@ -40,7 +40,7 @@ async function handler(
           new Error('Query parameter "offset" may contain only one value.'));
     } else {
       const taxonName = req.query.taxonName;
-      const offset = parseInt(req.query.offset);
+      const offset = parseInt(req.query.offset ? req.query.offset : '0');
 
       if (isNaN(offset) && req.query.offset) {
         res.status(400).send(new Error(

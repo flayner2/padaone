@@ -151,10 +151,10 @@ async function handler(
       if (Array.isArray(req.query.pmid)) {
         pmid = req.query.pmid.map((pmid) => parseInt(pmid));
         paper = await getPapers(pmid);
-      } else if (req.query.pmid.includes(',')) {
+      } else if (req.query.pmid?.includes(',')) {
         pmid = req.query.pmid.split(',').map((pmid) => parseInt(pmid));
         paper = await getPapers(pmid);
-      } else {
+      } else if (req.query.pmid) {
         pmid = parseInt(req.query.pmid);
         paper = await getPaper(pmid);
       }
