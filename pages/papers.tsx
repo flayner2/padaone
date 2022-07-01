@@ -100,9 +100,6 @@ function Papers() {
         : ''
     }`;
 
-    console.log('search:', searchUrl);
-    console.log('cursor:', cursor);
-
     let data = await debouncedRequest(signal, cursor, searchUrl);
 
     return {
