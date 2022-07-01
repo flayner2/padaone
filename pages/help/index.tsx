@@ -1,5 +1,4 @@
-import { Flex, Heading, Divider } from '@chakra-ui/react';
-import Head from 'next/head';
+import { Divider, Flex, Heading } from '@chakra-ui/react';
 import CustomImage from '../../components/CustomImage';
 import home1 from '../../public/help/home_1.svg';
 import home2 from '../../public/help/home_2.svg';
@@ -8,18 +7,6 @@ import home3 from '../../public/help/home_3.svg';
 function Help() {
   return (
     <>
-      <Head>
-        <title>PADA-One | Help - Home Page</title>
-        <meta
-          name="description"
-          content="A database that hosts scientific papers predicted to describe protective antigens (PAgs) from a variety of organisms."
-        />
-        <link
-          rel="icon"
-          href="/logo.png"
-        />
-      </Head>
-
       <Flex justifyContent="center">
         <Flex
           minHeight="100vh"

@@ -15,7 +15,6 @@ import {
 import axios from 'axios';
 import * as downloader from 'js-file-download';
 import type { GetServerSidePropsContext } from 'next';
-import Head from 'next/head';
 import { useState } from 'react';
 import type { PaperPageData } from '../../lib/types';
 import {
@@ -46,18 +45,6 @@ function Paper({
 
   return (
     <Flex justifyContent="center">
-      <Head>
-        <title>PADA-One | {paper?.title}</title>
-        <meta
-          name="description"
-          content={`Paper title: ${paper?.title}`}
-        />
-        <link
-          rel="icon"
-          href="/logo.png"
-        />
-      </Head>
-
       {/* Main wrapper */}
       <Flex
         minHeight="100vh"

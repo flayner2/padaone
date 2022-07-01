@@ -19,7 +19,6 @@ import {
 } from '@chakra-ui/react';
 import type { SortDirection, SortDescriptor } from '@react-types/shared';
 import axios from 'axios';
-import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import { useAsyncList } from 'react-stately';
 import { debounce } from '../lib/debounce';
@@ -156,18 +155,6 @@ function Browse() {
 
   return (
     <>
-      <Head>
-        <title>PADA-One | Browse the Database</title>
-        <meta
-          name="description"
-          content="A database that hosts scientific papers predicted to describe protective antigens (PAgs) from a variety of organisms."
-        />
-        <link
-          rel="icon"
-          href="/logo.png"
-        />
-      </Head>
-
       <Flex
         minHeight="100vh"
         width="100%"

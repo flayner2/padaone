@@ -37,7 +37,6 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import type { TaxIDToTaxName } from '@prisma/client';
 import axios from 'axios';
 import type { InferGetStaticPropsType } from 'next';
-import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
@@ -361,18 +360,6 @@ function Home({
 
   return (
     <Flex justifyContent="center">
-      <Head>
-        <title>PADA-One</title>
-        <meta
-          name="description"
-          content="A database that hosts scientific papers predicted to describe protective antigens (PAgs) from a variety of organisms."
-        />
-        <link
-          rel="icon"
-          href="/logo.png"
-        />
-      </Head>
-
       <Flex
         minHeight="100vh"
         width="100vw"

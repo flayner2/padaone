@@ -1,21 +1,8 @@
 import { Flex, Heading, Divider, Text, Link } from '@chakra-ui/react';
-import Head from 'next/head';
 
 function ResultsHelp() {
   return (
     <>
-      <Head>
-        <title>PADA-One | Help - FAQs</title>
-        <meta
-          name="description"
-          content="A database that hosts scientific papers predicted to describe protective antigens (PAgs) from a variety of organisms."
-        />
-        <link
-          rel="icon"
-          href="/logo.png"
-        />
-      </Head>
-
       <Flex justifyContent="center">
         <Flex
           minHeight="100vh"

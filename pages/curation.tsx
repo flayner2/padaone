@@ -18,7 +18,6 @@ import {
 } from '@chakra-ui/react';
 import axios from 'axios';
 import { InferGetServerSidePropsType } from 'next';
-import Head from 'next/head';
 import { useState } from 'react';
 import { useAsyncList } from 'react-stately';
 import { convertToFloatOrDefault } from '../lib/helpers';
@@ -102,18 +101,6 @@ function Papers({
 
   return (
     <>
-      <Head>
-        <title>PADA-One | Search Results</title>
-        <meta
-          name="description"
-          content="A database that hosts scientific papers predicted to describe protective antigens (PAgs) from a variety of organisms."
-        />
-        <link
-          rel="icon"
-          href="/logo.png"
-        />
-      </Head>
-
       <Flex
         minHeight="100vh"
         width="100%"

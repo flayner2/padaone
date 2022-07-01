@@ -20,7 +20,6 @@ import {
 } from '@chakra-ui/react';
 import type { SortDescriptor, SortDirection } from '@react-types/shared';
 import axios from 'axios';
-import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useAsyncList } from 'react-stately';
@@ -171,18 +170,6 @@ function Papers() {
 
   return (
     <>
-      <Head>
-        <title>PADA-One | Search Results</title>
-        <meta
-          name="description"
-          content="A database that hosts scientific papers predicted to describe protective antigens (PAgs) from a variety of organisms."
-        />
-        <link
-          rel="icon"
-          href="/logo.png"
-        />
-      </Head>
-
       <Flex
         minHeight="100vh"
         width="100%"
