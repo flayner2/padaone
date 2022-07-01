@@ -465,7 +465,7 @@ function Home({
                   width="100%"
                   height="90%"
                   marginBottom={advancedIsOpen ? '0.5rem' : '1.5rem'}
-                  columns={2}
+                  columns={1}
                 >
                   <GridItem
                     background="protGray.100"
@@ -473,7 +473,6 @@ function Home({
                     display="flex"
                     flexDirection="column"
                     padding="1rem 0.5rem 1.5rem"
-                    rowSpan={2}
                   >
                     <Text
                       fontSize="lg"
@@ -741,65 +740,6 @@ function Home({
                       <FormErrorMessage>
                         {errors.taxon?.message}
                       </FormErrorMessage>
-                    </FormControl>
-                  </GridItem>
-
-                  <GridItem
-                    background="protGray.100"
-                    borderRadius="8px"
-                    display="flex"
-                    flexDirection="column"
-                    padding="1rem 0.5rem 1.5rem"
-                    gridColumn="2 / 4"
-                  >
-                    <Text
-                      fontSize="lg"
-                      color="protBlack.800"
-                      alignSelf="center"
-                      marginBottom="1.5rem"
-                    >
-                      Filters
-                    </Text>
-
-                    <FormControl
-                      isInvalid={
-                        errors.filters?.onlyCuratedPositive ? true : false
-                      }
-                    >
-                      <CheckboxGroup
-                        colorScheme="blue"
-                        defaultValue={['onlyCuratedPositive']}
-                      >
-                        <VStack alignItems="flex-start">
-                          <Controller
-                            control={control}
-                            name="filters.onlyCuratedPositive"
-                            defaultValue={true}
-                            render={({
-                              field: { onChange, onBlur, value },
-                            }) => (
-                              <Checkbox
-                                iconColor="protGray.100"
-                                value="onlyCuratedPositive"
-                                onBlur={onBlur}
-                                onChange={() => onChange(!value)}
-                              >
-                                Only true positive papers{' '}
-                                <Tooltip
-                                  label="Placeholder"
-                                  aria-label="Placeholder"
-                                  placement="top-end"
-                                >
-                                  <QuestionIcon color="gray.500" />
-                                </Tooltip>
-                              </Checkbox>
-                            )}
-                          />
-                          <FormErrorMessage>
-                            {errors.filters?.onlyCuratedPositive?.message}
-                          </FormErrorMessage>
-                        </VStack>
-                      </CheckboxGroup>
                     </FormControl>
                   </GridItem>
                 </SimpleGrid>
@@ -1319,7 +1259,8 @@ function Home({
                     <FormControl
                       isInvalid={
                         errors.filters?.excludeHosts ||
-                        errors.filters?.forceGeneIDs
+                        errors.filters?.forceGeneIDs ||
+                        errors.filters?.onlyCuratedPositive
                           ? true
                           : false
                       }
@@ -1327,10 +1268,7 @@ function Home({
                       <FormLabel htmlFor="excludeHosts">
                         Advanced Filters
                       </FormLabel>
-                      <CheckboxGroup
-                        colorScheme="blue"
-                        defaultValue={['onlyCuratedPositive']}
-                      >
+                      <CheckboxGroup colorScheme="blue">
                         <VStack alignItems="flex-start">
                           <Controller
                             control={control}
@@ -1386,6 +1324,33 @@ function Home({
                           />
                           <FormErrorMessage>
                             {errors.filters?.forceGeneIDs?.message}
+                          </FormErrorMessage>
+                          <Controller
+                            control={control}
+                            name="filters.onlyCuratedPositive"
+                            defaultValue={false}
+                            render={({
+                              field: { onChange, onBlur, value },
+                            }) => (
+                              <Checkbox
+                                iconColor="protGray.100"
+                                value="onlyCuratedPositive"
+                                onBlur={onBlur}
+                                onChange={() => onChange(!value)}
+                              >
+                                Only true positive papers{' '}
+                                <Tooltip
+                                  label="Placeholder"
+                                  aria-label="Placeholder"
+                                  placement="top-end"
+                                >
+                                  <QuestionIcon color="gray.500" />
+                                </Tooltip>
+                              </Checkbox>
+                            )}
+                          />
+                          <FormErrorMessage>
+                            {errors.filters?.onlyCuratedPositive?.message}
                           </FormErrorMessage>
                         </VStack>
                       </CheckboxGroup>
