@@ -103,19 +103,6 @@ function WithSubnavigation() {
           >
             Contact
           </Link>
-          <Link
-            p={2}
-            href={'/about'}
-            fontSize={'sm'}
-            fontWeight={500}
-            color="protBlue.900"
-            _hover={{
-              textDecoration: 'none',
-              color: 'protBlue.darkHover',
-            }}
-          >
-            About
-          </Link>
         </Stack>
       </Flex>
 
