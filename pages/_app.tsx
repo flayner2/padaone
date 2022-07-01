@@ -39,7 +39,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>PADA-One</title>
+        <title>PADA-ONE</title>
 	<link rel="shortcut icon" href="/images/logo.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/images/logo.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/images/logo.png"/>

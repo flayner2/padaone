@@ -105,7 +105,7 @@ function ResultsHelp() {
             fontWeight="semibold"
             textAlign="justify"
           >
-            Is PADA-One periodically updated? What is the current version?
+            Is PADA-ONE periodically updated? What is the current version?
           </Text>
           <Text
             color="protBlack.800"
@@ -124,7 +124,7 @@ function ResultsHelp() {
             fontWeight="semibold"
             textAlign="justify"
           >
-            Are all articles on PADA-One from PubMed? Can I use PADA-One to
+            Are all articles on PADA-ONE from PubMed? Can I use PADA-ONE to
             classify my own list of papers?
           </Text>
           <Text
@@ -133,7 +133,7 @@ function ResultsHelp() {
             textAlign="justify"
             marginBottom="2rem"
           >
-            All papers hosted on PADA-One are from PubMed. The database is
+            All papers hosted on PADA-ONE are from PubMed. The database is
             totally based on tools provided to search NCBI databases.
             Unfortunately, it is not possible to use our two-layers model to
             classify other articles yet.

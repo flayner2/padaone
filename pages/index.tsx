@@ -387,7 +387,7 @@ function Home({
               color="protBlack.800"
               fontWeight="semibold"
             >
-              PADA-One
+              PADA-ONE
             </Heading>
           </VStack>
 
@@ -396,7 +396,7 @@ function Home({
             textAlign="justify"
             color="protBlack.800"
           >
-            PADA-One (Protective Antigen DAtabase - OnliNe Explorer) is a
+            PADA-ONE (Protective Antigen DAtabase - OnliNe Explorer) is a
             database that hosts scientific papers predicted to describe
             protective antigens (PAgs) from a variety of organisms. This web
             tool enables the user to mine PAgs in the biomedical literature
