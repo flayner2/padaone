@@ -867,14 +867,27 @@ function Home({
                           iconSize="md"
                           {...register('language')}
                         >
-                          {languages.map((language) => (
-                            <option
-                              value={language?.toLowerCase()}
-                              key={language?.toLowerCase()}
-                            >
-                              {language}
-                            </option>
-                          ))}
+                          {languages
+                            .filter(
+                              (language) =>
+                                !language?.includes('hrv') &&
+                                !language?.includes('srp')
+                            )
+                            .map((language) => (
+                              <option
+                                value={language?.toLowerCase()}
+                                key={language?.toLowerCase()}
+                              >
+                                {!language?.toLowerCase().includes('multiple')
+                                  ? language
+                                      ?.replace(/([a-z\d])([A-Z])/g, '$1, $2')
+                                      .trim()
+                                  : language.replace(
+                                      'MultipleLanguages',
+                                      ', Multiple Languages'
+                                    )}
+                              </option>
+                            ))}
                         </Select>
                         <FormErrorMessage>
                           {errors.language?.message}
