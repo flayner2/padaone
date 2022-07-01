@@ -783,7 +783,7 @@ function Home({
                         </Tooltip>
                       </FormLabel>
                       <Input
-                        placeholder="E.g.: gene, insulin"
+                        placeholder="E.g.: vaccine, protection, immunization"
                         _placeholder={{
                           color: 'protBlue.900',
                           fontSize: 'sm',
@@ -965,7 +965,7 @@ function Home({
                         </Tooltip>
                       </FormLabel>
                       <Input
-                        placeholder="E.g.: NP_001191615"
+                        placeholder="E.g.: NP_001191615, 5571, AAA64745.1"
                         _placeholder={{
                           color: 'protBlue.900',
                           fontSize: 'sm',
@@ -1356,13 +1356,73 @@ function Home({
                       </CheckboxGroup>
                     </FormControl>
                   </Flex>
+                </Collapse>
 
+                <HStack
+                  alignSelf="center"
+                  width="100%"
+                  justifyContent="center"
+                  marginBottom={advancedIsOpen ? '2rem' : ''}
+                  marginTop={advancedIsOpen ? '1rem' : ''}
+                >
+                  <Button
+                    onClick={onAdvancedToggle}
+                    width="10%"
+                    alignSelf="center"
+                    fontWeight="regular"
+                    fontSize="sm"
+                    background="protBlue.900"
+                    color="protGray.100"
+                    borderRadius="8px"
+                    _hover={{
+                      background: 'protBlue.mediumHover',
+                    }}
+                  >
+                    Advanced{' '}
+                    {advancedIsOpen ? (
+                      <SmallCloseIcon
+                        color="protGray.100"
+                        boxSize="1.2rem"
+                        marginLeft="0.2rem"
+                      />
+                    ) : (
+                      <SmallAddIcon
+                        color="protGray.100"
+                        boxSize="1.2rem"
+                        marginLeft="0.2rem"
+                      />
+                    )}
+                  </Button>
+                  <Button
+                    type="submit"
+                    width="10%"
+                    alignSelf="center"
+                    color="protBlue.900"
+                    borderRadius="8px"
+                    fontWeight="regular"
+                    background="protBlue.300"
+                    _hover={{
+                      background: 'protBlue.veryLightHover',
+                    }}
+                  >
+                    Search{' '}
+                    <Search2Icon
+                      color="protBlue.900"
+                      marginLeft="0.5rem"
+                      boxSize="0.9rem"
+                    />
+                  </Button>
+                </HStack>
+
+                <Collapse
+                  in={advancedIsOpen}
+                  animateOpacity
+                >
                   <Flex
                     background="protGray.100"
                     borderRadius="8px"
                     flexDirection="column"
                     padding="1rem 0.5rem"
-                    marginBottom="2rem"
                   >
                     <Text
                       fontSize="lg"
@@ -1505,60 +1565,6 @@ function Home({
                     </HStack>
                   </Flex>
                 </Collapse>
-
-                <HStack
-                  alignSelf="center"
-                  width="100%"
-                  justifyContent="center"
-                >
-                  <Button
-                    onClick={onAdvancedToggle}
-                    width="10%"
-                    alignSelf="center"
-                    fontWeight="regular"
-                    fontSize="sm"
-                    background="protBlue.900"
-                    color="protGray.100"
-                    borderRadius="8px"
-                    _hover={{
-                      background: 'protBlue.mediumHover',
-                    }}
-                  >
-                    Advanced{' '}
-                    {advancedIsOpen ? (
-                      <SmallCloseIcon
-                        color="protGray.100"
-                        boxSize="1.2rem"
-                        marginLeft="0.2rem"
-                      />
-                    ) : (
-                      <SmallAddIcon
-                        color="protGray.100"
-                        boxSize="1.2rem"
-                        marginLeft="0.2rem"
-                      />
-                    )}
-                  </Button>
-                  <Button
-                    type="submit"
-                    width="10%"
-                    alignSelf="center"
-                    color="protBlue.900"
-                    borderRadius="8px"
-                    fontWeight="regular"
-                    background="protBlue.300"
-                    _hover={{
-                      background: 'protBlue.veryLightHover',
-                    }}
-                  >
-                    Search{' '}
-                    <Search2Icon
-                      color="protBlue.900"
-                      marginLeft="0.5rem"
-                      boxSize="0.9rem"
-                    />
-                  </Button>
-                </HStack>
               </Flex>
             </form>
           </Flex>
