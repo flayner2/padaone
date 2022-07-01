@@ -45,9 +45,13 @@ function MyApp({ Component, pageProps }: AppProps) {
         />
         <link
           rel="icon"
-          href="/logo.png"
+          href="/images/logo.png"
         />
-	<meta property="og:title" content="PADA-One" key="title" />
+        <meta
+          property="og:title"
+          content="PADA-One"
+          key="title"
+        />
       </Head>
       <SSRProvider>
         <ChakraProvider theme={theme}>
