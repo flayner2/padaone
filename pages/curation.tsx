@@ -110,7 +110,7 @@ function Papers({
         />
         <link
           rel="icon"
-          href="/favicon.ico"
+          href="/logo.png"
         />
       </Head>
 

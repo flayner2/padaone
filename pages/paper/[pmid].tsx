@@ -54,7 +54,7 @@ function Paper({
         />
         <link
           rel="icon"
-          href="/favicon.ico"
+          href="/logo.png"
         />
       </Head>
 
