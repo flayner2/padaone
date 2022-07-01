@@ -18,12 +18,11 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react';
-import type { SortDirection } from '@react-types/shared';
+import type { SortDescriptor, SortDirection } from '@react-types/shared';
 import axios from 'axios';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { useCollator } from 'react-aria';
 import { useAsyncList } from 'react-stately';
 import { debounce } from '../lib/debounce';
 import { convertToFloatOrDefault } from '../lib/helpers';
@@ -31,7 +30,6 @@ import type {
   AsyncListDataDebouncedReturn,
   ColumnName,
   TablePaperInfoRawQuery,
-  TablePaperInfoRawQueryKey,
 } from '../lib/types';
 
 const OFFSET_VALUE: number = 20;
@@ -54,13 +52,11 @@ function Papers() {
     router.asPath.replace(/^\/papers\?/, '')
   );
   const [offset, setOffset] = useState(0);
-  const [beingSorted, setBeingSorted] = useState('probability2ndLay');
+  const [sortColumn, setSortColumn] = useState('probability2ndLay');
   const [sortDirection, setSortDirection] =
     useState<SortDirection>('descending');
   const [showGoTop, setShowGoTop] = useState(false);
   const [spinned, setSpinned] = useState(false);
-  const [shadowList, setShadowList] = useState<TablePaperInfoRawQuery[]>([]);
-  const collator = useCollator({ numeric: true });
 
   // Scroll to top
   useEffect(() => {
@@ -81,44 +77,52 @@ function Papers() {
   }
 
   // Async List
-
-  // Key validation for type sanity
-  function isValidColumn(value: React.Key): value is TablePaperInfoRawQueryKey {
-    return COLUMNS.map((column) => column['key']).includes(value as string);
-  }
-
   async function getAsyncListDataDebounced<T>(
     queryUrl: string,
     signal: AbortSignal,
     cursor: string | undefined,
-    filterText: string | undefined
+    filterText: string | undefined,
+    sortDescriptor: SortDescriptor | undefined
   ): Promise<AsyncListDataDebouncedReturn<T>> {
-    const [debouncedRequest] = debounce(async (signal, cursor, filterText) => {
-      let res = await axios.get(
-        cursor || `${queryUrl}?${filterText}&offset=${offset}`,
-        {
-          signal,
-        }
-      );
+    const [debouncedRequest] = debounce(async (signal, cursor, searchUrl) => {
+      let res = await axios.get(cursor || searchUrl, {
+        signal,
+      });
 
       return res.data;
     }, 500);
 
-    let data = await debouncedRequest(signal, cursor, filterText);
+    const actualOffset = cursor ? offset : 0;
+
+    const searchUrl = `${queryUrl}?${filterText}&offset=${actualOffset}${
+      sortDescriptor
+        ? `&sortColumn=${sortDescriptor.column}&sortDirection=${sortDescriptor.direction}`
+        : ''
+    }`;
+
+    console.log('search:', searchUrl);
+    console.log('cursor:', cursor);
+
+    let data = await debouncedRequest(signal, cursor, searchUrl);
 
     return {
       items: data,
-      cursor: `${queryUrl}?${filterText}&offset=${offset + OFFSET_VALUE}`,
+      cursor: `${queryUrl}?${filterText}&offset=${actualOffset + OFFSET_VALUE}${
+        sortDescriptor
+          ? `&sortColumn=${sortDescriptor.column}&sortDirection=${sortDescriptor.direction}`
+          : ''
+      }`,
     };
   }
 
   let paperList = useAsyncList<TablePaperInfoRawQuery>({
-    async load({ signal, cursor }) {
+    async load({ signal, cursor, sortDescriptor }) {
       return await getAsyncListDataDebounced(
         '/api/papers',
         signal,
         cursor,
-        queryString
+        queryString,
+        sortDescriptor
       );
     },
     getKey(item) {
@@ -130,83 +134,32 @@ function Papers() {
     },
   });
 
-  // Sort
-  function sortList(
-    a: TablePaperInfoRawQuery,
-    b: TablePaperInfoRawQuery,
-    direction: string,
-    column: string
-  ) {
-    if (column && isValidColumn(column)) {
-      let first;
-      let second;
-
-      if (column === 'taxNames') {
-        let taxA = a[column];
-        let taxB = b[column];
-
-        if (taxA) {
-          if (taxB) {
-            first = taxA[0];
-            second = taxB[0];
-          } else {
-            return -1;
-          }
-        } else if (taxB) {
-          return 1;
-        } else {
-          return 0;
-        }
-      } else {
-        first = a[column];
-        second = b[column];
-      }
-
-      if (first != null && second != null) {
-        let cmp = collator.compare(first.toString(), second.toString());
-
-        if (direction === 'descending') {
-          cmp *= -1;
-        }
-
-        return cmp;
-      }
-    }
-    return 0;
-  }
-
-  function handleSortChange(column: string, direction: SortDirection) {
-    if (beingSorted === column) {
-      direction = sortDirection === 'descending' ? 'ascending' : 'descending';
-      setSortDirection(direction);
+  function handleSortChange(column: string) {
+    if (sortColumn === column) {
+      setSortDirection(
+        sortDirection === 'descending' ? 'ascending' : 'descending'
+      );
     } else {
       if (sortDirection === 'ascending') {
-        direction = 'descending';
-        setSortDirection(direction);
+        setSortDirection('descending');
       }
     }
 
-    setBeingSorted(column);
-
-    shadowList.sort((a, b) => sortList(a, b, direction, column));
+    setSortColumn(column);
   }
 
   useEffect(() => {
-    if (!paperList.isLoading && paperList.items.length) {
-      setShadowList((old) => [...old, ...paperList.items]);
-      paperList.remove(...paperList.items.map((item) => item.pmid));
+    if (!(paperList.loadingState === 'sorting')) {
+      paperList.loadMore();
     }
-  }, [paperList.items, paperList.isLoading]);
-
-  useEffect(() => {
-    paperList.loadMore();
   }, [offset]);
 
   useEffect(() => {
-    if (!paperList.isLoading && shadowList.length) {
-      shadowList.sort((a, b) => sortList(a, b, sortDirection, beingSorted));
+    if (!paperList.isLoading && paperList.items.length) {
+      setOffset(0);
+      paperList.sort({ column: sortColumn, direction: sortDirection });
     }
-  }, [beingSorted, sortDirection, shadowList, paperList.isLoading]);
+  }, [sortColumn, sortDirection]);
 
   // Utils
   function maxTaxaNames(list: Array<any>): number {
@@ -253,7 +206,7 @@ function Papers() {
                   <Th
                     key={column.key}
                     onClick={() => {
-                      handleSortChange(column.key, sortDirection);
+                      handleSortChange(column.key);
                     }}
                     cursor="default"
                   >
@@ -261,13 +214,13 @@ function Papers() {
                     {sortDirection === 'ascending' ? (
                       <TriangleUpIcon
                         visibility={
-                          beingSorted === column.key ? 'visible' : 'hidden'
+                          sortColumn === column.key ? 'visible' : 'hidden'
                         }
                       />
                     ) : (
                       <TriangleDownIcon
                         visibility={
-                          beingSorted === column.key ? 'visible' : 'hidden'
+                          sortColumn === column.key ? 'visible' : 'hidden'
                         }
                       />
                     )}
@@ -276,75 +229,79 @@ function Papers() {
               </Tr>
             </Thead>
             <Tbody>
-              {shadowList.map((paper) => (
-                <Tr key={paper.pmid}>
-                  <Td>
-                    <Link
-                      href={`/paper/${paper.pmid}`}
-                      color="protBlue.400"
-                      isExternal
-                      _hover={{
-                        textDecoration: 'none',
-                        color: 'protBlue.lightHover',
-                      }}
-                    >
-                      {paper.pmid}
-                    </Link>
-                  </Td>
-                  <Td maxWidth="20vw">{paper.title}</Td>
-                  <Td>{paper.yearPub}</Td>
-                  <Td>{paper.lastAuthor}</Td>
-                  <Td>{paper.citations}</Td>
-                  <Td>
-                    {convertToFloatOrDefault(
-                      paper.probability1stLay,
-                      0,
-                      100,
-                      0
-                    )}
-                    %
-                  </Td>
-                  <Td>
-                    {convertToFloatOrDefault(
-                      paper.probability2ndLay,
-                      0,
-                      100,
-                      0
-                    )}
-                    %
-                  </Td>
-                  <Td maxWidth="15vw">
-                    {paper.taxNames
-                      ? paper.taxNames
-                          .slice(0, maxTaxaNames(paper.taxNames))
-                          .map((taxName, index, allNames) => (
-                            <>
-                              <Link
-                                key={taxName}
-                                href={`https://www.ncbi.nlm.nih.gov/taxonomy/?term=${encodeURIComponent(
-                                  taxName
-                                )}`}
-                                color="protBlue.400"
-                                fontStyle="italic"
-                                isExternal
-                                _hover={{
-                                  textDecoration: 'none',
-                                  color: 'protBlue.lightHover',
-                                }}
-                              >
-                                {taxName}
-                              </Link>
-                              {index < allNames.length - 1 && '; '}
-                            </>
-                          ))
-                      : 'N/A'}
-                    {paper.taxNames && paper.taxNames?.length > MAX_TAX_NAMES
-                      ? '...'
-                      : null}
-                  </Td>
-                </Tr>
-              ))}
-              {paperList.isLoading && (
+              {!(paperList.loadingState === 'sorting')
+                ? paperList.items.map((paper) => (
+                    <Tr key={paper.pmid}>
+                      <Td>
+                        <Link
+                          href={`/paper/${paper.pmid}`}
+                          color="protBlue.400"
+                          isExternal
+                          _hover={{
+                            textDecoration: 'none',
+                            color: 'protBlue.lightHover',
+                          }}
+                        >
+                          {paper.pmid}
+                        </Link>
+                      </Td>
+                      <Td maxWidth="20vw">{paper.title}</Td>
+                      <Td>{paper.yearPub}</Td>
+                      <Td>{paper.lastAuthor}</Td>
+                      <Td>{paper.citations}</Td>
+                      <Td>
+                        {convertToFloatOrDefault(
+                          paper.probability1stLay,
+                          0,
+                          100,
+                          0
+                        )}
+                        %
+                      </Td>
+                      <Td>
+                        {convertToFloatOrDefault(
+                          paper.probability2ndLay,
+                          0,
+                          100,
+                          0
+                        )}
+                        %
+                      </Td>
+                      <Td maxWidth="15vw">
+                        {paper.taxNames
+                          ? paper.taxNames
+                              .slice(0, maxTaxaNames(paper.taxNames))
+                              .map((taxName, index, allNames) => (
+                                <>
+                                  <Link
+                                    key={taxName}
+                                    href={`https://www.ncbi.nlm.nih.gov/taxonomy/?term=${encodeURIComponent(
+                                      taxName
+                                    )}`}
+                                    color="protBlue.400"
+                                    fontStyle="italic"
+                                    isExternal
+                                    _hover={{
+                                      textDecoration: 'none',
+                                      color: 'protBlue.lightHover',
+                                    }}
+                                  >
+                                    {taxName}
+                                  </Link>
+                                  {index < allNames.length - 1 && '; '}
+                                </>
+                              ))
+                          : 'N/A'}
+                        {paper.taxNames &&
+                        paper.taxNames?.length > MAX_TAX_NAMES
+                          ? '...'
+                          : null}
+                      </Td>
+                    </Tr>
+                  ))
+                : null}
+              {(paperList.isLoading ||
+                paperList.loadingState === 'sorting') && (
                 <Box
                   role="cell"
                   paddingTop="4"
@@ -366,11 +323,11 @@ function Papers() {
           </Table>
         </Box>
 
-        {!paperList.isLoading && !shadowList.length && spinned ? (
+        {!paperList.isLoading && !paperList.items.length && spinned ? (
           <Text alignSelf="center">No results found!</Text>
         ) : null}
 
-        {!paperList.isLoading && shadowList.length ? (
+        {!paperList.isLoading && paperList.items.length ? (
           <Button
             width="100%"
             background="protBlue.300"

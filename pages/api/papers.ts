@@ -2,7 +2,7 @@ import {Prisma} from '@prisma/client';
 import type {NextApiRequest, NextApiResponse} from 'next';
 import {parseCitations} from '../../lib/helpers';
 import {prisma} from '../../lib/prisma';
-import type {PapersFiltersOptions, TablePaperInfoRawQuery,} from '../../lib/types';
+import type {PapersFiltersOptions, TablePaperInfoRawQuery, SortDescriptor, TablePaperInfoRawQueryPre,} from '../../lib/types';
 
 export async function getAssociatedTaxNames(pmid: number):
     Promise<string[]|undefined> {
@@ -30,6 +30,34 @@ export async function includeTaxonNames(papers: TablePaperInfoRawQuery[]):
   }));
 
   return papersWithNames;
+}
+
+function getSortColumn(sortDescriptor: SortDescriptor|undefined): Prisma.Sql {
+  const direction = sortDescriptor?.direction === 'ascending' ? 'ASC' : 'DESC';
+  const defaultSort = Prisma.raw(`\`k0\`.\`probability\` DESC`);
+
+  if (sortDescriptor?.column != null) {
+    switch (sortDescriptor.column) {
+      case 'pmid':
+        return Prisma.raw(`\`i0\`.\`PMID\` ${direction}`);
+      case 'title':
+        return Prisma.raw(`\`i0\`.\`Titles\` ${direction}`);
+      case 'yearPub':
+        return Prisma.raw(`\`i0\`.\`YearPub\` ${direction}`);
+      case 'lastAuthor':
+        return Prisma.raw(`\`i0\`.\`LastAuthor\` ${direction}`);
+      case 'citations':
+        return Prisma.raw(`\`i0\`.\`Citations\` ${direction}`);
+      case 'probability1stLay':
+        return Prisma.raw(`\`j0\`.\`probability\` ${direction}`);
+      case 'taxNames':
+        return Prisma.raw(`\`taxNames\` IS NULL, \`taxNames\` ${direction}`);
+      default:
+        return defaultSort;
+    }
+  }
+
+  return defaultSort;
 }
 
 function generateQueryString(
@@ -95,43 +123,32 @@ function generateQueryString(
           .join(' OR ') :
       null;
 
-  return Prisma.sql`SELECT DISTINCT(\`i0\`.\`PMID\`) AS 'pmid',
+  const sortColumn = getSortColumn(options.sortDescriptor);
+
+  return Prisma.sql`SELECT \`i0\`.\`PMID\` AS 'pmid',
                 \`i0\`.\`Titles\` AS 'title',
                 \`i0\`.\`YearPub\` AS 'yearPub',
                 \`i0\`.\`LastAuthor\` AS 'lastAuthor',
                 \`i0\`.\`Citations\` AS 'citations',
                 \`j0\`.\`probability\` AS 'probability1stLay',
-                \`k0\`.\`probability\` AS 'probability2ndLay'
-               FROM ${dbName}.\`metadataPub\` as \`i0\`
+                \`k0\`.\`probability\` AS 'probability2ndLay',
+                GROUP_CONCAT(DISTINCT \`m0\`.\`OrgTaxName\` ORDER BY \`m0\`.\`OrgTaxName\` SEPARATOR ',') AS 'taxNames'
+               FROM ${dbName}.\`metadataPub\` AS \`i0\`
                INNER JOIN ${dbName}.\`classifications_1stLay\` AS \`j0\`
                 ON (\`j0\`.\`PMID\`) = (\`i0\`.\`PMID\`)
                INNER JOIN ${dbName}.\`classification_2ndLay\` AS \`k0\`
                 ON (\`k0\`.\`PMID\`) = (\`j0\`.\`PMID\`)\
-                 ${
-      (options.geneIDs != null || options.taxonID != null ||
-       options.filters?.excludeHosts) &&
-              !options.filters?.forceGeneIDs ?
-          Prisma.sql`\n               LEFT JOIN ${
-              dbName}.\`geneIDs_PMIDs\` AS \`l0\`
-                 ON (\`l0\`.\`PMID\`) = (\`i0\`.\`PMID\`)` :
+              ${
+      options.filters?.forceGeneIDs ? Prisma.sql`RIGHT` :
+                                      Prisma.sql`LEFT`} JOIN ${
+      dbName}.\`geneIDs_PMIDs\` AS \`l0\` ON (\`l0\`.\`PMID\`) = (\`i0\`.\`PMID\`)\
+      LEFT JOIN ${dbName}.\`geneIDs_taxInfo_AccNumb\` AS \`m0\`
+        ON (\`l0\`.\`geneIDs\`) = (\`m0\`.\`geneIDs\`)
+      ${
+      options.filters?.excludeHosts || options.taxonID != null ?
+          Prisma.sql`LEFT JOIN ${dbName}.\`taxPath\` AS \`n0\`
+        ON (\`m0\`.\`TaxID\`) = (\`n0\`.\`TaxID\`)` :
           Prisma.sql``}\
-                ${
-      options.filters?.forceGeneIDs ||
-              ((options.geneIDs != null || options.taxonID != null ||
-                options.filters?.excludeHosts) &&
-               options.filters?.forceGeneIDs) ?
-          Prisma.sql`\n               RIGHT JOIN ${
-              dbName}.\`geneIDs_PMIDs\` AS \`l0\`
-                 ON (\`l0\`.\`PMID\`) = (\`i0\`.\`PMID\`)` :
-          Prisma.sql``}\
-               ${
-      options.taxonID != null || options.filters?.excludeHosts ?
-          Prisma.sql`\n               LEFT JOIN ${
-              dbName}.\`geneIDs_taxInfo_AccNumb\` AS \`m0\`
-                 ON (\`l0\`.\`geneIDs\`) = (\`m0\`.\`geneIDs\`)
-               LEFT JOIN ${dbName}.\`taxPath\` AS \`n0\`
-                 ON (\`m0\`.\`TaxID\`) = (\`n0\`.\`TaxID\`)` :
-          Prisma.sql``}\ 
                ${
       options.filters?.onlyCuratedPositive ?
           Prisma.sql`\n               LEFT JOIN ${
@@ -200,15 +217,20 @@ function generateQueryString(
                   \`k0\`.\`probability\` <= ${
       Prisma.raw(`${options.secondLayerRange.max / 100}`)})
                 )
-          ORDER BY \`k0\`.\`probability\` DESC, \`j0\`.\`probability\` DESC LIMIT 20 OFFSET ${
+          GROUP BY \`i0\`.\`PMID\` ORDER BY ${sortColumn} LIMIT 20 OFFSET ${
       Prisma.raw(`${offset}`)} `;
 }
 
 export async function getPapers(queryString: Prisma.Sql):
     Promise<TablePaperInfoRawQuery[]> {
-  const papers: TablePaperInfoRawQuery[] = await prisma.$queryRaw(queryString);
+  const papers: TablePaperInfoRawQueryPre[] =
+      await prisma.$queryRaw(queryString);
+  const processedPapers = papers.map((paper) => ({
+                                       ...paper,
+                                       taxNames: paper.taxNames?.split(','),
+                                     }));
 
-  return papers;
+  return processedPapers;
 }
 
 async function handler(
@@ -280,7 +302,15 @@ async function handler(
                                                   undefined,
       },
       citations: parseCitations(req.query.citations),
+      sortDescriptor: {
+        column: Array.isArray(req.query.sortColumn) ? req.query.sortColumn[0] :
+                                                      req.query.sortColumn,
+        direction: Array.isArray(req.query.sortDirection) ?
+            req.query.sortDirection[0] :
+            req.query.sortDirection,
+      },
     };
+
     const offset = Array.isArray(req.query.offset) ?
         parseInt(req.query.offset[0]) :
         parseInt(req.query.offset);
@@ -293,21 +323,7 @@ async function handler(
         res.status(404).send(
             new Error(`No papers were found with the selected filters.`));
       } else {
-        try {
-          const papersWithIDs = await includeTaxonNames(papers);
-          res.status(200).send(papersWithIDs);
-        } catch (error) {
-          if (error instanceof Error) {
-            if (error.name == 'NotFoundError') {
-              res.status(404).send({
-                ...error,
-                message: 'No papers were found with the selected filters.',
-              });
-            } else {
-              res.status(500).send(error);
-            }
-          }
-        }
+        res.status(200).send(papers);
       }
     } catch (error) {
       if (error instanceof Error) {
