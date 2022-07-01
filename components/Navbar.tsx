@@ -316,6 +316,11 @@ const NAV_ITEMS: Array<NavItem> = [
   {
     label: 'Help',
     href: '/help',
+    children: [
+      { label: 'Fora', href: '/fora' },
+      { label: 'Bolsonaro', href: '/fora' },
+      { label: 'Genocida', href: '/fora' },
+    ],
   },
 ];
 
