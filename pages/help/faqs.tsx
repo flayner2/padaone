@@ -1,4 +1,4 @@
-import { Flex, Heading, Divider, Text } from '@chakra-ui/react';
+import { Flex, Heading, Divider, Text, Link } from '@chakra-ui/react';
 import Head from 'next/head';
 
 function ResultsHelp() {
@@ -77,7 +77,18 @@ function ResultsHelp() {
             marginBottom="2rem"
           >
             We recommend the following range of probabilities: {'>='}80% for 1st
-            layer and {'>='}90% for 2nd layer (see why here - LINK).
+            layer and {'>='}90% for 2nd layer (see why{' '}
+            <Link
+              href="/about"
+              color="protBlue.400"
+              _hover={{
+                textDecoration: 'none',
+                color: 'protBlue.lightHover',
+              }}
+            >
+              here
+            </Link>
+            ).
           </Text>
           <Text
             color="protBlack.800"

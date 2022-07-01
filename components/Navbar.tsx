@@ -91,6 +91,19 @@ function WithSubnavigation() {
         >
           <Link
             p={2}
+            href={'/about'}
+            fontSize={'sm'}
+            fontWeight={500}
+            color="protBlue.900"
+            _hover={{
+              textDecoration: 'none',
+              color: 'protBlue.darkHover',
+            }}
+          >
+            About
+          </Link>
+          <Link
+            p={2}
             href={'/contact'}
             fontSize={'sm'}
             fontWeight={500}
