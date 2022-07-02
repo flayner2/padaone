@@ -350,12 +350,20 @@ function Home({
     router.push(`/papers?${encodeURIComponent(queryString)}`);
   };
 
-  function handleExampleSearch() {
-    router.push(
-      `/papers?${encodeURIComponent(
-        `firstLayerMin=${classificationScores.firstLayer.min}&firstLayerMax=${classificationScores.firstLayer.max}&secondLayerMin=${classificationScores.secondLayer.min}&secondLayerMax=${classificationScores.secondLayer.max}&forceGeneIDs=true&taxonID=5794`
-      )}`
-    );
+  function handleExampleSearch(example: string) {
+    if (example === 'apicomplexa') {
+      router.push(
+        `/papers?${encodeURIComponent(
+          `firstLayerMin=${classificationScores.firstLayer.min}&firstLayerMax=${classificationScores.firstLayer.max}&secondLayerMin=${classificationScores.secondLayer.min}&secondLayerMax=${classificationScores.secondLayer.max}&forceGeneIDs=true&taxonID=5794`
+        )}`
+      );
+    } else if (example === 'vaccine') {
+      router.push(
+        `/papers?${encodeURIComponent(
+          `firstLayerMin=80&firstLayerMax=${classificationScores.firstLayer.max}&secondLayerMin=80&secondLayerMax=${classificationScores.secondLayer.max}&forceGeneIDs=true&excludeHosts=true&terms=vaccine`
+        )}`
+      );
+    }
   }
 
   return (
@@ -458,17 +466,40 @@ function Home({
               color="protBlack.800"
             >
               Use the filters below to find a set of papers (or click{' '}
-              <Link
-                color="protBlue.400"
-                onClick={handleExampleSearch}
-                _hover={{
-                  textDecoration: 'none',
-                  color: 'protBlue.lightHover',
-                }}
+              <Tooltip
+                label="This search filters for articles that have associated Gene IDs from the phylum Apicomplexa (Taxon ID 5794)."
+                aria-label="This search filters for articles that have associated Gene IDs from the phylum Apicomplexa (Taxon ID 5794)."
+                placement="top-end"
               >
-                here
-              </Link>{' '}
-              for a search example):
+                <Link
+                  color="protBlue.400"
+                  onClick={() => handleExampleSearch('apicomplexa')}
+                  _hover={{
+                    textDecoration: 'none',
+                    color: 'protBlue.lightHover',
+                  }}
+                >
+                  here
+                </Link>
+              </Tooltip>{' '}
+              or{' '}
+              <Tooltip
+                label="This search filters for articles that have >= 80% probability for both layers, that include the term 'vaccine', only including articles that have at least one associated Gene ID and excluding papers that have associated Gene IDs from the clade Vertebrata."
+                aria-label="This search filters for articles that have >= 80% probability for both layers, that include the term 'vaccine', only including articles that have at least one associated Gene ID and excluding papers that have associated Gene IDs from the clade Vertebrata."
+                placement="top-end"
+              >
+                <Link
+                  color="protBlue.400"
+                  onClick={() => handleExampleSearch('vaccine')}
+                  _hover={{
+                    textDecoration: 'none',
+                    color: 'protBlue.lightHover',
+                  }}
+                >
+                  here
+                </Link>
+              </Tooltip>{' '}
+              for some search examples):
             </Text>
 
             <form onSubmit={handleSubmit(onSubmitMultiFieldForm)}>
