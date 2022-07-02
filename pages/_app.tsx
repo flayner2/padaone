@@ -38,15 +38,32 @@ const theme = extendTheme({
 function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
-      <Head>
-        <title>PADA-ONE</title>
-	<link rel="shortcut icon" href="/images/logo.png" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/images/logo.png" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/images/logo.png"/>
-        <link rel="icon" type="image/png" sizes="16x16" href="/images/logo.png"/>
-      </Head>
       <SSRProvider>
         <ChakraProvider theme={theme}>
+          <Head>
+            <title>PADA-ONE</title>
+            <link
+              rel="shortcut icon"
+              href="/image/logo.png"
+            />
+            <link
+              rel="apple-touch-icon"
+              sizes="180x180"
+              href="/image/logo.png"
+            />
+            <link
+              rel="icon"
+              type="image/png"
+              sizes="32x32"
+              href="/image/logo.png"
+            />
+            <link
+              rel="icon"
+              type="image/png"
+              sizes="16x16"
+              href="/image/logo.png"
+            />
+          </Head>
           <WithSubnavigation></WithSubnavigation>
           <Component {...pageProps} />
         </ChakraProvider>
