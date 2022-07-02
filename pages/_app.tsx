@@ -6,6 +6,7 @@ import WithSubnavigation from '../components/Navbar';
 import '../styles/globals.css';
 import React from 'react';
 import Head from 'next/head';
+import Footer from '../components/Footer';
 
 const theme = extendTheme({
   colors: {
@@ -66,6 +67,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           </Head>
           <WithSubnavigation></WithSubnavigation>
           <Component {...pageProps} />
+          <Footer />
         </ChakraProvider>
       </SSRProvider>
     </>
